@@ -266,7 +266,7 @@ class RationalTest {
         assertEquals(1 over 6, a % b)
         assertSame(Rational.ZERO, a % c)
         assertEquals(Rational.ONE, Rational.valueOf(5) % Rational.valueOf(2))
-        assertEquals(Rational.ONE, Rational.valueOf(5) % 2)
+        assertEquals(2 over 3, (8 over 3) % 2)
         assertEquals(Rational.ONE, Rational.valueOf(5) % 2L)
         assertSame(Rational.ONE, Rational.valueOf(5) % BigInteger.valueOf(2L))
     }
@@ -337,5 +337,15 @@ class RationalTest {
         assertEquals(BigDecimal.valueOf(1.5), (3 over 2).toBigDecimal())
         assertEquals(BigDecimal.valueOf(150, 2), (3 over 2).toBigDecimal(2, RoundingMode.UNNECESSARY))
         assertEquals(BigDecimal.valueOf(2), (3 over 2).toBigDecimal(RoundingMode.UP))
+    }
+
+    @Test
+    fun divideAndRemainderTest() {
+        assertEquals(Pair(BigInteger.ONE, 1 over 6), (1 over 2).divideAndRemainder(1 over 3))
+        assertEquals(Pair(BigInteger.ONE, Rational.ZERO), Rational.TEN.divideAndRemainder(10))
+        assertEquals(Pair(BigInteger.ONE, Rational.ZERO), Rational.TEN.divideAndRemainder(10L))
+        assertEquals(Pair(BigInteger.ONE, Rational.ZERO), Rational.TEN.divideAndRemainder(BigInteger.valueOf(10L)))
+        assertEquals(Pair(BigInteger.ONE, Rational.ZERO), Rational.TEN.divideAndRemainder((10).toShort()))
+        assertEquals(Pair(BigInteger.ONE, Rational.ZERO), Rational.TEN.divideAndRemainder((10).toByte()))
     }
 }

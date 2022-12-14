@@ -6,87 +6,51 @@ import java.math.BigInteger
 import java.math.MathContext
 import java.math.RoundingMode
 
-operator fun Int.plus(other: Rational): Rational {
-    return other.plus(this)
-}
+operator fun Int.plus(other: Rational) = other.plus(this)
+operator fun Long.plus(other: Rational) = other.plus(this)
+operator fun BigInteger.plus(other: Rational) = other.plus(this)
+operator fun Short.plus(other: Rational) = other.plus(this)
+operator fun Byte.plus(other: Rational) = other.plus(this)
 
-operator fun Long.plus(other: Rational): Rational {
-    return other.plus(this)
-}
+operator fun Int.minus(other: Rational) = Rational.valueOf(this) - other
+operator fun Long.minus(other: Rational) = Rational.valueOf(this) - other
+operator fun BigInteger.minus(other: Rational) = Rational.valueOf(this) - other
+operator fun Short.minus(other: Rational) = Rational.valueOf(this) - other
+operator fun Byte.minus(other: Rational) = Rational.valueOf(this) - other
 
-operator fun BigInteger.plus(other: Rational): Rational {
-    return other.plus(this)
-}
+operator fun Int.times(other: Rational) = other * this
+operator fun Long.times(other: Rational) = other * this
+operator fun BigInteger.times(other: Rational) = other * this
+operator fun Short.times(other: Rational) = other * this
+operator fun Byte.times(other: Rational) = other * this
 
-operator fun Int.minus(other: Rational): Rational {
-    return Rational.valueOf(this) - other
-}
+operator fun Int.div(other: Rational) = Rational.valueOf(this) / other
+operator fun Long.div(other: Rational) = Rational.valueOf(this) / other
+operator fun BigInteger.div(other: Rational) = Rational.valueOf(this) / other
+operator fun Short.div(other: Rational) = Rational.valueOf(this) / other
+operator fun Byte.div(other: Rational) = Rational.valueOf(this) / other
 
-operator fun Long.minus(other: Rational): Rational {
-    return Rational.valueOf(this) - other
-}
+operator fun Int.rem(other: Rational) = Rational.valueOf(this) % other
+operator fun Long.rem(other: Rational) = Rational.valueOf(this) % other
+operator fun BigInteger.rem(other: Rational) = Rational.valueOf(this) % other
+operator fun Short.rem(other: Rational) = Rational.valueOf(this) % other
+operator fun Byte.rem(other: Rational) = Rational.valueOf(this) % other
 
-operator fun BigInteger.minus(other: Rational): Rational {
-    return Rational.valueOf(this) - other
-}
-
-operator fun Int.times(other: Rational): Rational {
-    return Rational.valueOf(this) * other
-}
-
-operator fun Long.times(other: Rational): Rational {
-    return Rational.valueOf(this) * other
-}
-
-operator fun BigInteger.times(other: Rational): Rational {
-    return Rational.valueOf(this) * other
-}
-
-operator fun Int.div(other: Rational): Rational {
-    return Rational.valueOf(this) / other
-}
-
-operator fun Long.div(other: Rational): Rational {
-    return Rational.valueOf(this) / other
-}
-
-operator fun BigInteger.div(other: Rational): Rational {
-    return Rational.valueOf(this) / other
-}
-
-operator fun Int.rem(other: Rational): Rational {
-    return Rational.valueOf(this) % other
-}
-
-operator fun Long.rem(other: Rational): Rational {
-    return Rational.valueOf(this) % other
-}
-
-operator fun BigInteger.rem(other: Rational): Rational {
-    return Rational.valueOf(this) % other
-}
-
-operator fun Int.compareTo(other: Rational): Int {
-    return Rational.valueOf(this).compareTo(other)
-}
-
-operator fun BigInteger.compareTo(other: Rational): Int {
-    return Rational.valueOf(this).compareTo(other)
-}
-
-operator fun Long.compareTo(other: Rational): Int {
-    return Rational.valueOf(this).compareTo(other)
-}
+operator fun Int.compareTo(other: Rational) = Rational.valueOf(this).compareTo(other)
+operator fun Long.compareTo(other: Rational) = Rational.valueOf(this).compareTo(other)
+operator fun BigInteger.compareTo(other: Rational) = Rational.valueOf(this).compareTo(other)
+operator fun Short.compareTo(other: Rational) = Rational.valueOf(this).compareTo(other)
+operator fun Byte.compareTo(other: Rational) = Rational.valueOf(this).compareTo(other)
 
 class Rational private constructor(
     val num: BigInteger,
     val den: BigInteger = BigInteger.ONE
 ) : Number(), Comparable<Rational> {
 
-    private constructor(num: Long): this(BigInteger.valueOf(num))
-    private constructor(num: Int): this(num.toLong())
-    private constructor(num: Long, den: Long): this(BigInteger.valueOf(num), BigInteger.valueOf(den))
-    private constructor(num: Int, den: Int): this(num.toLong(), den.toLong())
+    private constructor(num: Long) : this(BigInteger.valueOf(num))
+    private constructor(num: Int) : this(num.toLong())
+    private constructor(num: Long, den: Long) : this(BigInteger.valueOf(num), BigInteger.valueOf(den))
+    private constructor(num: Int, den: Int) : this(num.toLong(), den.toLong())
 
     sealed interface Format
     data class Precision(val precision: Int = 10) : Format
@@ -97,109 +61,93 @@ class Rational private constructor(
         return this.num.signum()
     }
 
-    operator fun plus(other: Long): Rational {
-        if (other == 0L) return this
-        return valueOf(this.num + BigInteger.valueOf(other) * this.den, this.den)
+    operator fun plus(other: Long) = when (other) {
+        0L -> this
+        else -> valueOf(this.num + BigInteger.valueOf(other) * this.den, this.den)
     }
 
-    operator fun plus(other: Int): Rational {
-        if (other == 0) return this
-        return valueOf(this.num + BigInteger.valueOf(other.toLong()) * this.den, this.den)
+    operator fun plus(other: Int) = plus(other.toLong())
+    operator fun plus(other: Short) = plus(other.toLong())
+    operator fun plus(other: Byte) = plus(other.toLong())
+
+    operator fun plus(other: BigInteger) = when {
+        other.signum() == 0 -> this
+        else -> valueOf(this.num + other * this.den, this.den)
     }
 
-    operator fun plus(other: BigInteger): Rational {
-        if (other.signum() == 0) return this
-        return valueOf(this.num + other * this.den, this.den)
+    operator fun plus(other: Rational) = when {
+        other.signum() == 0 -> this
+        else -> valueOf(this.num * other.den + this.den * other.num, this.den * other.den)
     }
 
-    operator fun plus(other: Rational): Rational {
-        if (other.signum() == 0) return this
-        return valueOf(this.num * other.den + this.den * other.num, this.den * other.den)
+    operator fun minus(other: Long) = when (other) {
+        0L -> this
+        else -> valueOf(this.num - BigInteger.valueOf(other) * this.den, this.den)
     }
 
-    operator fun minus(other: Long): Rational {
-        if (other == 0L) return this
-        return valueOf(this.num - BigInteger.valueOf(other) * this.den, this.den)
+    operator fun minus(other: Int) = minus(other.toLong())
+    operator fun minus(other: Short) = minus(other.toLong())
+    operator fun minus(other: Byte) = minus(other.toLong())
+
+    operator fun minus(other: BigInteger) = when {
+        other.signum() == 0 -> this
+        else -> valueOf(this.num - other * this.den, this.den)
     }
 
-    operator fun minus(other: Int): Rational {
-        if (other == 0) return this
-        return valueOf(this.num - BigInteger.valueOf(other.toLong()) * this.den, this.den)
+    operator fun minus(other: Rational) = when {
+        other.signum() == 0 -> this
+        else -> valueOf(this.num * other.den - this.den * other.num, this.den * other.den)
     }
 
-    operator fun minus(other: BigInteger): Rational {
-        if (other.signum() == 0) return this
-        return valueOf(this.num - other * this.den, this.den)
+    operator fun times(other: Long) = when (other) {
+        0L -> ZERO
+        1L -> this
+        else -> valueOf(this.num * BigInteger.valueOf(other), this.den)
     }
 
-    operator fun minus(other: Rational): Rational {
-        if (other.signum() == 0) return this
-        return valueOf(this.num * other.den - this.den * other.num, this.den * other.den)
+    operator fun times(other: Int) = times(other.toLong())
+    operator fun times(other: Short) = times(other.toLong())
+    operator fun times(other: Byte) = times(other.toLong())
+
+    operator fun times(other: BigInteger) = when {
+        other.signum() == 0 -> ZERO
+        other == BigInteger.ONE -> this
+        else -> valueOf(this.num * other, this.den)
     }
 
-    operator fun times(other: Long): Rational {
-        return when (other) {
-            0L -> ZERO
-            1L -> this
-            else -> valueOf(this.num * BigInteger.valueOf(other), this.den)
-        }
+    operator fun times(other: Rational) = when {
+        other.signum() == 0 -> ZERO
+        other == ONE -> this
+        else -> valueOf(this.num * other.num, this.den * other.den)
     }
 
-    operator fun times(other: Int): Rational {
-        return when (other) {
-            0 -> ZERO
-            1 -> this
-            else -> valueOf(this.num * BigInteger.valueOf(other.toLong()), this.den)
-        }
+    operator fun div(other: Long) = when (other) {
+        0L -> throw ArithmeticException("Division by 0")
+        1L -> this
+        else -> valueOf(this.num, this.den * BigInteger.valueOf(other))
     }
 
-    operator fun times(other: BigInteger): Rational {
-        if (other.signum() == 0) return ZERO
-        if (other == BigInteger.ONE) return this
-        return valueOf(this.num * other, this.den)
+    operator fun div(other: Int) = div(other.toLong())
+    operator fun div(other: Short) = div(other.toLong())
+    operator fun div(other: Byte) = div(other.toLong())
+
+    operator fun div(other: BigInteger) = when {
+        other.signum() == 0 -> throw ArithmeticException("Division by 0")
+        other == BigInteger.ONE -> this
+        else -> valueOf(this.num, this.den * other)
     }
 
-    operator fun times(other: Rational): Rational {
-        if (other.signum() == 0) return ZERO
-        if (other == ONE) return this
-        return valueOf(this.num * other.num, this.den * other.den)
+    operator fun div(other: Rational) = when {
+        other.signum() == 0 -> throw ArithmeticException("Division by 0")
+        other == ONE -> this
+        else -> valueOf(this.num * other.den, this.den * other.num)
     }
 
-    operator fun div(other: Long): Rational {
-        return when (other) {
-            0L -> throw ArithmeticException("Division by 0")
-            1L -> this
-            else -> valueOf(this.num, this.den * BigInteger.valueOf(other))
-        }
-    }
+    operator fun unaryPlus() = this
 
-    operator fun div(other: Int): Rational {
-        return when (other) {
-            0 -> throw ArithmeticException("Division by 0")
-            1 -> this
-            else -> valueOf(this.num, this.den * BigInteger.valueOf(other.toLong()))
-        }
-    }
-
-    operator fun div(other: BigInteger): Rational {
-        if (other.signum() == 0) throw ArithmeticException("Division by 0")
-        if (other == BigInteger.ONE) return this
-        return valueOf(this.num, this.den * other)
-    }
-
-    operator fun div(other: Rational): Rational {
-        if (other.signum() == 0) throw ArithmeticException("Division by 0")
-        if (other == ONE) return this
-        return valueOf(this.num * other.den, this.den * other.num)
-    }
-
-    operator fun unaryPlus(): Rational {
-        return this
-    }
-
-    operator fun unaryMinus(): Rational {
-        if (signum() == 0) return this
-        return Rational(-this.num, this.den)
+    operator fun unaryMinus() = when (signum()) {
+        0 -> this
+        else -> Rational(-this.num, this.den)
     }
 
     fun isZero() = signum() == 0
@@ -208,49 +156,62 @@ class Rational private constructor(
     fun isInteger() = den == BigInteger.ONE
 
     fun reciprocal() = valueOf(den, num)
-    operator fun rem(other: Rational): Rational {
-        if (other.signum() == 0) throw ArithmeticException("Division by 0")
-        if (this.signum() == 0) return ZERO
-        val n = (this.num * other.den) / (other.num * this.den)
-        return this - other * n
-    }
 
-    operator fun rem(other: Int): Rational {
-        if (other == 0) throw ArithmeticException("Division by 0")
-        if (this.signum() == 0) return ZERO
-        val otherBigInt = BigInteger.valueOf(other.toLong())
-        val n = this.num / (this.den * otherBigInt)
-        return this - n * otherBigInt
-    }
-
-    operator fun rem(other: Long): Rational {
-        if (other == 0L) throw ArithmeticException("Division by 0")
-        if (this.signum() == 0) return ZERO
-        val otherBigInt = BigInteger.valueOf(other)
-        val n = this.num / (this.den * otherBigInt)
-        return this - n * otherBigInt
-    }
-
-    operator fun rem(other: BigInteger): Rational {
-        if (other.signum() == 0) throw ArithmeticException("Division by 0")
-        if (this.signum() == 0) return ZERO
-        val n = this.num / (this.den * other)
-        return this - n * other
-    }
-
-    fun pow(exponent: Int): Rational {
-        if (exponent == 0 || this == ONE) return ONE
-        if (exponent < 0) {
-            if (this.signum() == 0) throw ArithmeticException("Invalid 0 raised with negative exponent")
-            return valueOf(this.den.pow(-exponent), this.num.pow(-exponent))
+    operator fun rem(other: Long) = divideAndRemainder(other).second
+    fun divideAndRemainder(other: Long) = when {
+        other == 0L -> throw ArithmeticException("Division by 0")
+        this.signum() == 0 -> Pair(BigInteger.ZERO, this)
+        else -> {
+            val lcm = this.den * BigInteger.valueOf(other)
+            val x = this.num.divideAndRemainder(lcm)
+            Pair(x[0], if (x[0] == BigInteger.ZERO) this else valueOf(x[1], this.den))
         }
-        return valueOf(this.num.pow(exponent), this.den.pow(exponent))
     }
 
-    fun abs(): Rational {
-        if (this.signum() >= 0) return this
-        return Rational(-this.num, this.den)
+    operator fun rem(other: Int) = divideAndRemainder(other).second
+    fun divideAndRemainder(other: Int) = divideAndRemainder(other.toLong())
+
+    operator fun rem(other: Short) = divideAndRemainder(other).second
+    fun divideAndRemainder(other: Short) = divideAndRemainder(other.toLong())
+
+    operator fun rem(other: Byte) = divideAndRemainder(other).second
+    fun divideAndRemainder(other: Byte) = divideAndRemainder(other.toLong())
+
+    operator fun rem(other: BigInteger) = divideAndRemainder(other).second
+    fun divideAndRemainder(other: BigInteger) = when {
+        other.signum() == 0 -> throw ArithmeticException("Division by 0")
+        this.signum() == 0 -> Pair(ZERO, this)
+        else -> {
+            val lcm = this.den * other
+            val x = this.num.divideAndRemainder(lcm)
+            Pair(x[0], if (x[0] == BigInteger.ZERO) this else valueOf(x[1], this.den))
+        }
     }
+
+    operator fun rem(other: Rational) = divideAndRemainder(other).second
+
+    fun divideAndRemainder(other: Rational): Pair<BigInteger, Rational> = when {
+        other.signum() == 0 -> throw ArithmeticException("Division by 0")
+        this.signum() == 0 -> Pair(BigInteger.ZERO, this)
+        else -> {
+            val lcm = this.den * other.den
+            val x = (this.num * other.den).divideAndRemainder(other.num * this.den)
+            Pair(x[0], if (x[0] == BigInteger.ZERO) this else valueOf(x[1], lcm))
+        }
+    }
+
+
+    fun pow(exponent: Int) = when {
+        exponent == 0 || this == ONE -> ONE
+        exponent < 0 -> {
+            if (this.signum() == 0) throw ArithmeticException("Invalid 0 raised with negative exponent")
+            valueOf(this.den.pow(-exponent), this.num.pow(-exponent))
+        }
+
+        else -> valueOf(this.num.pow(exponent), this.den.pow(exponent))
+    }
+
+    fun abs() = if (this.signum() >= 0) this else Rational(-this.num, this.den)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -294,9 +255,9 @@ class Rational private constructor(
 
     override fun toString() = toString(Fraction)
 
-    fun toString(format: Format): String {
-        if (den == BigInteger.ONE) return num.toString()
-        return when (format) {
+    fun toString(format: Format) = when (den) {
+        BigInteger.ONE -> num.toString()
+        else -> when (format) {
             is Fraction -> "$num/$den"
             is Period, is Precision -> toFormattedString(format)
         }
