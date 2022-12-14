@@ -84,7 +84,7 @@ class Rational private constructor(
 ) : Number(), Comparable<Rational> {
 
     sealed interface Format
-    data class Precision(val precision: Int) : Format
+    data class Precision(val precision: Int = 10) : Format
     object Period : Format
     object Fraction : Format
 
@@ -273,7 +273,13 @@ class Rational private constructor(
         num.toBigDecimal().divide(den.toBigDecimal(), mc)!!
 
 
-    fun toBigInteger() = num / den
+    fun toBigInteger(): BigInteger = when (this) {
+        ONE -> BigInteger.ONE
+        TEN -> BigInteger.TEN
+        ZERO -> BigInteger.ZERO
+        TWO -> BigInteger.TWO
+        else -> num / den
+    }
 
     override fun toString() = toString(Fraction)
 
@@ -289,7 +295,7 @@ class Rational private constructor(
         val num = this.num.abs()
         val buffer = StringBuilder()
         if (num.signum() != this.num.signum()) buffer.append('-')
-        var (r0,r1) = num.divideAndRemainder(den)
+        var (r0, r1) = num.divideAndRemainder(den)
         var pair = listOf(r0, r1)
         buffer.append(r0)
         val periodic = when (format) {
@@ -320,7 +326,7 @@ class Rational private constructor(
         }
 
         if (!cycle) {
-            cache.forEach { p -> buffer.append(p[0])  }
+            cache.forEach { p -> buffer.append(p[0]) }
             return buffer.toString()
         }
 
@@ -357,8 +363,8 @@ class Rational private constructor(
 
 
     override operator fun compareTo(other: Rational): Int {
-        val sigdiff = signum() - other.signum()
-        if (sigdiff != 0) return sigdiff
+        val c = signum() - other.signum()
+        if (c != 0) return c
         val product1 = num * other.den
         val product2 = den * other.num
         return product1.compareTo(product2)
