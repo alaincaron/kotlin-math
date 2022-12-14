@@ -83,6 +83,11 @@ class Rational private constructor(
     val den: BigInteger = BigInteger.ONE
 ) : Number(), Comparable<Rational> {
 
+    private constructor(num: Long): this(BigInteger.valueOf(num))
+    private constructor(num: Int): this(num.toLong())
+    private constructor(num: Long, den: Long): this(BigInteger.valueOf(num), BigInteger.valueOf(den))
+    private constructor(num: Int, den: Int): this(num.toLong(), den.toLong())
+
     sealed interface Format
     data class Precision(val precision: Int = 10) : Format
     object Period : Format
@@ -197,6 +202,12 @@ class Rational private constructor(
         return Rational(-this.num, this.den)
     }
 
+    fun isZero() = signum() == 0
+    fun isPositive() = signum() > 0
+    fun isNegative() = signum() < 0
+    fun isInteger() = den == BigInteger.ONE
+
+    fun reciprocal() = valueOf(den, num)
     operator fun rem(other: Rational): Rational {
         if (other.signum() == 0) throw ArithmeticException("Division by 0")
         if (this.signum() == 0) return ZERO
@@ -386,8 +397,23 @@ class Rational private constructor(
 
         val ZERO = Rational(BigInteger.ZERO)
         val ONE = Rational(BigInteger.ONE)
+        val MINUS_ONE = Rational(-1)
         val TWO = Rational(BigInteger.TWO)
+        val ONE_HALF = Rational(BigInteger.ONE, BigInteger.TWO)
+        val ONE_THIRD = Rational(BigInteger.ONE, BigInteger.valueOf(3))
+        val TWO_THIRDS = Rational(2, 3)
         val TEN = Rational(BigInteger.TEN)
+
+        private val instanceCache = buildMap {
+            put(ZERO, ZERO)
+            put(ONE, ONE)
+            put(MINUS_ONE, MINUS_ONE)
+            put(TWO, TWO)
+            put(ONE_HALF, ONE_HALF)
+            put(ONE_THIRD, ONE_THIRD)
+            put(TWO_THIRDS, TWO_THIRDS)
+            put(TEN, TEN)
+        }
 
         fun valueOf(num: Byte, den: Byte = 1) =
             valueOf(BigInteger.valueOf(num.toLong()), BigInteger.valueOf(den.toLong()))
@@ -409,31 +435,29 @@ class Rational private constructor(
             return valueOf(unscaledValue * BigInteger.TEN.pow(-scale))
         }
 
-        private fun handleInteger(num: BigInteger) =
-            when (num) {
-                BigInteger.ONE -> ONE
-                BigInteger.TWO -> TWO
-                BigInteger.TEN -> TEN
-                BigInteger.ZERO -> ZERO
-                else -> Rational(num)
-            }
+        private fun canonicalValue(num: BigInteger, den: BigInteger): Rational {
+            val r = Rational(num, den)
+            val cached = instanceCache[r]
+            return cached ?: r
+        }
 
         fun valueOf(numerator: BigInteger, denominator: BigInteger = BigInteger.ONE): Rational {
             if (denominator.signum() == 0) throw ArithmeticException("Invalid 0 denominator")
             if (numerator.signum() == 0) return ZERO
-            if (denominator == BigInteger.ONE) {
-                return handleInteger(numerator)
-            }
             var num = numerator
             var den = denominator
+
+            val gcd = num.gcd(den)
+            if (gcd > BigInteger.ONE) {
+                num /= gcd
+                den /= gcd
+            }
+
             if (den.signum() < 0) {
                 num = -num
                 den = -den
             }
-            val gcd = num.abs().gcd(den)
-            num /= gcd
-            den /= gcd
-            return if (den == BigInteger.ONE) handleInteger(num) else Rational(num, den)
+            return canonicalValue(num, den)
         }
     }
 }

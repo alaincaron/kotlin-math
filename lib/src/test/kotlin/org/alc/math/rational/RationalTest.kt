@@ -5,21 +5,71 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertSame
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 class RationalTest {
+
+    @Test
+    fun cachedValue() {
+        assertSame(Rational.ZERO, 0 over 1000)
+        assertSame(Rational.ONE, 2 over 2)
+        assertSame(Rational.TEN, 100 over 10)
+        assertSame(Rational.MINUS_ONE, -1 over 1)
+        assertSame(Rational.ONE_HALF, 1 over 2)
+        assertSame(Rational.TWO, 6 over 3)
+        assertSame(Rational.ONE_THIRD, 1 over 3)
+        assertSame(Rational.TWO_THIRDS, 4 over 6)
+    }
+
+    @Test
+    fun isZero() {
+        assertTrue(Rational.ZERO.isZero())
+        assertFalse(Rational.ONE.isZero())
+    }
+
+    @Test
+    fun isPositive() {
+        assertTrue(Rational.ONE.isPositive())
+        assertFalse(Rational.MINUS_ONE.isPositive())
+        assertFalse(Rational.ZERO.isPositive())
+    }
+
+    @Test
+    fun isNegative() {
+        assertTrue(Rational.MINUS_ONE.isNegative())
+        assertFalse(Rational.ONE.isNegative())
+        assertFalse(Rational.ZERO.isNegative())
+    }
+
+    @Test
+    fun isInteger() {
+        assertTrue(Rational.MINUS_ONE.isInteger())
+        assertTrue(Rational.ONE.isInteger())
+        assertTrue(Rational.ZERO.isInteger())
+        assertFalse(Rational.ONE_HALF.isInteger())
+        assertFalse((-1 over 2).isInteger())
+
+    }
+
+    @Test
+    fun reciprocal() {
+        assertThrows<ArithmeticException> { Rational.ZERO.reciprocal() }
+        assertSame(Rational.ONE, Rational.ONE.reciprocal())
+        assertSame(Rational.ONE_HALF, Rational.TWO.reciprocal())
+        assertSame(Rational.TWO, Rational.ONE_HALF.reciprocal())
+        assertEquals((5 over 2), (2 over 5).reciprocal())
+
+    }
     @Test
     fun addRational() {
-        val a = 1 over 2
+        val a = Rational.ONE_HALF
         val b = 1 over 3
         assertEquals(5 over 6, a + b)
     }
 
     @Test
     fun addBigInteger() {
-        val a = 1 over 2
+        val a = Rational.ONE_HALF
         val b = BigInteger.valueOf(2)
         assertEquals(5 over 2, a + b)
     }
@@ -281,10 +331,11 @@ class RationalTest {
         assertSame(BigInteger.TWO, Rational.TWO.toBigInteger())
         assertEquals(BigInteger.ONE, (3 over 2).toBigInteger())
     }
+
     @Test
     fun toBigDecimalTest() {
         assertEquals(BigDecimal.valueOf(1.5), (3 over 2).toBigDecimal())
-        assertEquals(BigDecimal.valueOf(150,2), (3 over 2).toBigDecimal(2, RoundingMode.UNNECESSARY))
+        assertEquals(BigDecimal.valueOf(150, 2), (3 over 2).toBigDecimal(2, RoundingMode.UNNECESSARY))
         assertEquals(BigDecimal.valueOf(2), (3 over 2).toBigDecimal(RoundingMode.UP))
     }
 }
