@@ -1,7 +1,6 @@
 package org.alc.math.rational
 
 import org.junit.jupiter.api.assertThrows
-import java.math.BigDecimal
 import java.math.BigInteger
 import kotlin.test.Test
 import kotlin.test.*
@@ -168,7 +167,7 @@ class RationalTest {
     @Test fun remainder() {
         val a = 1L over 2L
         val b = BigInteger.valueOf(1) over BigInteger.valueOf(3)
-        val c = BigDecimal.valueOf(1) over BigDecimal.valueOf(4)
+        val c = 1 over 4
         assertEquals(1 over 6, a % b)
         assertSame(Rational.ZERO, a % c)
         assertEquals(Rational.ONE, Rational.valueOf(5) % Rational.valueOf(2))
