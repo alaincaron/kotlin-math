@@ -348,4 +348,33 @@ class RationalTest {
         assertEquals(Pair(BigInteger.ONE, Rational.ZERO), Rational.TEN.divideAndRemainder((10).toShort()))
         assertEquals(Pair(BigInteger.ONE, Rational.ZERO), Rational.TEN.divideAndRemainder((10).toByte()))
     }
+
+    @Test
+    fun ceilTest() {
+        val pi = Math.PI.toRational()
+        assertEquals(4 over 1, pi.ceil())
+        assertEquals(-3 over 1, (-pi).ceil())
+        assertSame(Rational.ONE, Rational.ONE.ceil())
+        assertSame(Rational.MINUS_ONE, Rational.MINUS_ONE.ceil())
+    }
+    @Test
+    fun floorTest() {
+        val pi = Math.PI.toRational()
+        assertEquals(3 over 1, pi.floor())
+        assertEquals(-4 over 1, (-pi).floor())
+        assertSame(Rational.ONE, Rational.ONE.floor())
+        assertSame(Rational.MINUS_ONE, Rational.MINUS_ONE.floor())
+    }
+    @Test
+    fun roundTest() {
+        val pi = Math.PI.toRational()
+        assertEquals(3 over 1, pi.round())
+        assertEquals(-3 over 1, (-pi).round())
+        assertSame(Rational.ONE, Rational.ONE.round())
+        assertSame(Rational.MINUS_ONE, Rational.MINUS_ONE.round())
+        assertSame(Rational.ONE, Rational.ONE_HALF.round())
+        assertSame(Rational.MINUS_ONE, (-3 over 2).round())
+        assertSame(Rational.ZERO, (1 over -3).round())
+        assertSame(Rational.MINUS_ONE, (2 over -3).round())
+    }
 }

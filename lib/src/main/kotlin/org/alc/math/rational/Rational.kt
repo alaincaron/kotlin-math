@@ -1,10 +1,10 @@
 package org.alc.math.rational
 
-import java.lang.StringBuilder
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.MathContext
 import java.math.RoundingMode
+import java.lang.StringBuilder
 
 operator fun Int.plus(other: Rational) = other.plus(this)
 operator fun Long.plus(other: Rational) = other.plus(this)
@@ -47,15 +47,12 @@ class Rational private constructor(
     val den: BigInteger = BigInteger.ONE
 ) : Number(), Comparable<Rational> {
 
-    private constructor(num: Long) : this(BigInteger.valueOf(num))
-    private constructor(num: Int) : this(num.toLong())
-    private constructor(num: Long, den: Long) : this(BigInteger.valueOf(num), BigInteger.valueOf(den))
-    private constructor(num: Int, den: Int) : this(num.toLong(), den.toLong())
-
     sealed interface Format
     data class Precision(val precision: Int = 10) : Format
     object Period : Format
     object Fraction : Format
+    object MixedFraction: Format
+
 
     fun signum(): Int {
         return this.num.signum()
@@ -147,8 +144,10 @@ class Rational private constructor(
 
     operator fun unaryMinus() = when (signum()) {
         0 -> this
-        else -> Rational(-this.num, this.den)
+        else -> canonicalValue(-this.num, this.den)
     }
+
+    fun negate() = unaryMinus()
 
     fun isZero() = signum() == 0
     fun isPositive() = signum() > 0
@@ -211,7 +210,32 @@ class Rational private constructor(
         else -> valueOf(this.num.pow(exponent), this.den.pow(exponent))
     }
 
-    fun abs() = if (this.signum() >= 0) this else Rational(-this.num, this.den)
+    fun abs() = if (this.signum() >= 0) this else canonicalValue(-this.num, this.den)
+
+    fun ceil() = when {
+        this.den == BigInteger.ONE -> this
+        this.isPositive() -> canonicalValue((this.num / this.den) + BigInteger.ONE)
+        else -> canonicalValue(this.num / this.den)
+    }
+
+    fun floor() = when {
+        this.den == BigInteger.ONE -> this
+        this.isPositive() -> canonicalValue((this.num / this.den))
+        else -> canonicalValue(this.num / this.den - BigInteger.ONE)
+    }
+
+    private fun roundPositive(num: BigInteger, den: BigInteger) = (num + den / BigInteger.TWO) / den
+
+    fun round() = when {
+        this.den == BigInteger.ONE -> this
+        this.isPositive() -> canonicalValue(roundPositive(this.num, this.den))
+        this.den.mod(BigInteger.TWO) == BigInteger.ZERO ->
+            canonicalValue(roundPositive(
+                -this.num - BigInteger.ONE, this.den
+            ).negate())
+        else ->
+            canonicalValue(roundPositive(-this.num, this.den).negate())
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -253,23 +277,38 @@ class Rational private constructor(
         else -> num / den
     }
 
-    override fun toString() = toString(Fraction)
+    override fun toString() = toStringBuilder().toString()
 
-    fun toString(format: Format) = when (den) {
-        BigInteger.ONE -> num.toString()
-        else -> when (format) {
-            is Fraction -> "$num/$den"
-            is Period, is Precision -> toFormattedString(format)
+    fun toString(format: Format) = toStringBuilder(format).toString()
+
+    fun toStringBuilder(format: Format, builder: StringBuilder? = null): StringBuilder {
+        val b = builder ?: StringBuilder()
+        return when (den) {
+            BigInteger.ONE -> b.append(num.toString())
+            else -> when (format) {
+                is Fraction -> b.append("$num/$den")
+                is MixedFraction -> formatMixedFraction(b)
+                is Period, is Precision -> toStringBuilder1(format, b)
+            }
         }
     }
 
-    private fun toFormattedString(format: Format): String {
+    fun toStringBuilder(builder: StringBuilder? = null) = toStringBuilder(Fraction, builder)
+
+    private fun formatMixedFraction(builder: StringBuilder): StringBuilder {
+        val intPart = num / den
+        if (intPart.signum() == 0) return builder.append("$num/$den")
+        builder.append(intPart).append(" ")
+        val residual = (num - intPart * den).abs()
+        return builder.append(residual).append('/').append(den)
+    }
+
+    private fun toStringBuilder1(format: Format, builder: StringBuilder): StringBuilder {
         val num = this.num.abs()
-        val buffer = StringBuilder()
-        if (num.signum() != this.num.signum()) buffer.append('-')
+        if (num.signum() != this.num.signum()) builder.append('-')
         var (r0, r1) = num.divideAndRemainder(den)
         var pair = listOf(r0, r1)
-        buffer.append(r0)
+        builder.append(r0)
         val periodic = when (format) {
             is Period -> true
             else -> false
@@ -278,8 +317,8 @@ class Rational private constructor(
             is Precision -> format.precision
             else -> 1000
         }
-        if (n == 0 || r1.signum() == 0) return buffer.toString()
-        buffer.append('.')
+        if (n == 0 || r1.signum() == 0) return builder
+        builder.append('.')
 
         val cache = mutableSetOf<List<BigInteger>>()
         var cycle = false
@@ -298,8 +337,8 @@ class Rational private constructor(
         }
 
         if (!cycle) {
-            cache.forEach { p -> buffer.append(p[0]) }
-            return buffer.toString()
+            cache.forEach { p -> builder.append(p[0]) }
+            return builder
         }
 
         var iterator = cache.iterator()
@@ -309,28 +348,28 @@ class Rational private constructor(
 
             if (p == pair) break
 
-            buffer.append(p[0])
+            builder.append(p[0])
             iterator.remove()
             ++count
         }
 
         if (periodic) {
-            buffer.append('[')
-            cache.forEach { p -> buffer.append(p[0]) }
-            buffer.append(']')
+            builder.append('[')
+            cache.forEach { p -> builder.append(p[0]) }
+            builder.append(']')
         } else {
-            buffer.append(r0)
+            builder.append(r0)
             ++count
             while (count < n) {
                 if (!iterator.hasNext()) iterator = cache.iterator()
                 while (iterator.hasNext() && count < n) {
                     val k = iterator.next()[0]
-                    buffer.append(k)
+                    builder.append(k)
                     ++count
                 }
             }
         }
-        return buffer.toString()
+        return builder
     }
 
 
@@ -358,11 +397,11 @@ class Rational private constructor(
 
         val ZERO = Rational(BigInteger.ZERO)
         val ONE = Rational(BigInteger.ONE)
-        val MINUS_ONE = Rational(-1)
+        val MINUS_ONE = Rational(BigInteger.valueOf(-1))
         val TWO = Rational(BigInteger.TWO)
         val ONE_HALF = Rational(BigInteger.ONE, BigInteger.TWO)
         val ONE_THIRD = Rational(BigInteger.ONE, BigInteger.valueOf(3))
-        val TWO_THIRDS = Rational(2, 3)
+        val TWO_THIRDS = Rational(BigInteger.TWO, BigInteger.valueOf(3))
         val TEN = Rational(BigInteger.TEN)
 
         private val instanceCache = buildMap {
@@ -396,7 +435,7 @@ class Rational private constructor(
             return valueOf(unscaledValue * BigInteger.TEN.pow(-scale))
         }
 
-        private fun canonicalValue(num: BigInteger, den: BigInteger): Rational {
+        private fun canonicalValue(num: BigInteger, den: BigInteger = BigInteger.ONE): Rational {
             val r = Rational(num, den)
             val cached = instanceCache[r]
             return cached ?: r
