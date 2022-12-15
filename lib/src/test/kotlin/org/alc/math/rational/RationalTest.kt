@@ -305,24 +305,24 @@ class RationalTest {
 
     @Test
     fun toStringPrecisionTest() {
-        assertEquals("0.3333333333", (1 over 3).toString(Rational.Precision()))
+        assertEquals("0.3333333333", (1 over 3).toString(Rational.PRECISION))
         assertEquals("0.011", (1 over 90).toString(Rational.Precision(3)))
         assertEquals("0", (1 over 5).toString(Rational.Precision(0)))
-        assertEquals("0.1428571428", (1 over 7).toString(Rational.Precision()))
-        assertEquals("0.5", (1 over 2).toString(Rational.Precision(10)))
-        assertEquals("10", Rational.TEN.toString(Rational.Precision()))
+        assertEquals("0.1428571428", (1 over 7).toString(Rational.PRECISION))
+        assertEquals("0.5", (1 over 2).toString(Rational.PRECISION))
+        assertEquals("10", Rational.TEN.toString(Rational.PRECISION))
         assertEquals(Math.PI.toString(), Math.PI.toRational().toString(Rational.Precision(15)))
     }
 
     @Test
     fun toStringPeriodTest() {
-        assertEquals("0.[3]", (1 over 3).toString(Rational.Period))
-        assertEquals("0.0[1]", (1 over 90).toString(Rational.Period))
-        assertEquals("0.[142857]", (1 over 7).toString(Rational.Period))
-        assertEquals("0.000[142857]", (1 over 7000).toString(Rational.Period))
-        assertEquals("0.5", (1 over 2).toString(Rational.Period))
-        assertEquals("10", Rational.TEN.toString(Rational.Period))
-        assertEquals(Math.PI.toString(), Math.PI.toRational().toString(Rational.Period))
+        assertEquals("0.[3]", (1 over 3).toString(Rational.PERIODIC))
+        assertEquals("0.0[1]", (1 over 90).toString(Rational.PERIODIC))
+        assertEquals("0.[142857]", (1 over 7).toString(Rational.PERIODIC))
+        assertEquals("0.000[142857]", (1 over 7000).toString(Rational.PERIODIC))
+        assertEquals("0.5", (1 over 2).toString(Rational.PERIODIC))
+        assertEquals("10", Rational.TEN.toString(Rational.PERIODIC))
+        assertEquals(Math.PI.toString(), Math.PI.toRational().toString(Rational.Periodic(15)))
     }
 
     @Test

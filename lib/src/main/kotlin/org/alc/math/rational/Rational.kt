@@ -48,10 +48,27 @@ class Rational private constructor(
 ) : Number(), Comparable<Rational> {
 
     sealed interface Format
-    data class Precision(val precision: Int = 10) : Format
-    object Period : Format
-    object Fraction : Format
-    object MixedFraction: Format
+
+    sealed class Radix(val precision: Int = 10, _radix: Int = 10): Format {
+        init {
+            if (_radix < 2 || _radix > 36)  throw IllegalArgumentException("Invalid base must be between 2 and 36")
+        }
+        val radix: BigInteger = when(_radix) {
+             10 -> BigInteger.TEN
+             2 -> BigInteger.TWO
+             else -> BigInteger.valueOf(_radix.toLong())
+         }
+    }
+     open class Precision(precision: Int = 10, radix: Int = 10) : Radix(precision, radix)
+    class Periodic(precision: Int = 10, radix: Int = 10) : Radix(precision, radix)
+
+    class Binary(precision: Int = 20): Precision(precision, 2)
+    class Octal(precision: Int = 20): Precision(precision, 8)
+
+    class Hexadecimal(precision: Int = 10): Precision(precision, 16)
+     object Fraction : Format
+     object MixedFraction: Format
+
 
 
     fun signum(): Int {
@@ -283,51 +300,54 @@ class Rational private constructor(
 
     fun toStringBuilder(format: Format, builder: StringBuilder? = null): StringBuilder {
         val b = builder ?: StringBuilder()
-        return when (den) {
-            BigInteger.ONE -> b.append(num.toString())
-            else -> when (format) {
-                is Fraction -> b.append("$num/$den")
-                is MixedFraction -> formatMixedFraction(b)
-                is Period, is Precision -> toStringBuilder1(format, b)
-            }
+        return when (format) {
+            is Radix -> toStringBuilder1(format, b)
+            is Fraction -> formatFraction(b)
+            is MixedFraction -> formatMixedFraction(b)
         }
     }
 
-    fun toStringBuilder(builder: StringBuilder? = null) = toStringBuilder(Fraction, builder)
+    fun toStringBuilder(builder: StringBuilder? = null) = toStringBuilder(FRACTION, builder)
+
+    private fun formatFraction(builder: StringBuilder) = when {
+        isInteger() -> builder.append(num)
+        else -> builder.append(num).append('/').append(den)
+    }
 
     private fun formatMixedFraction(builder: StringBuilder): StringBuilder {
+        if (isInteger()) return builder.append(num)
         val intPart = num / den
-        if (intPart.signum() == 0) return builder.append("$num/$den")
+        if (intPart.signum() == 0) return builder.append(num).append('/').append(den)
         builder.append(intPart).append(" ")
         val residual = (num - intPart * den).abs()
         return builder.append(residual).append('/').append(den)
     }
 
-    private fun toStringBuilder1(format: Format, builder: StringBuilder): StringBuilder {
+    private fun toRadix(x: BigInteger) = when (val v = x.toInt()) {
+        in 0..9 -> (v + '0'.code).toChar()
+        else -> (v - 10 +'A'.code).toChar()
+    }
+
+    private fun toStringBuilder1(format: Radix, builder: StringBuilder): StringBuilder {
+        if (isInteger()) {
+            return builder.append(this.num.toString(format.radix.toInt()))
+        }
         val num = this.num.abs()
         if (num.signum() != this.num.signum()) builder.append('-')
         var (r0, r1) = num.divideAndRemainder(den)
-        var pair = listOf(r0, r1)
-        builder.append(r0)
-        val periodic = when (format) {
-            is Period -> true
-            else -> false
-        }
-        val n = when (format) {
-            is Precision -> format.precision
-            else -> 1000
-        }
+        builder.append(r0.toString(format.radix.toInt()))
+        val n = format.precision
         if (n == 0 || r1.signum() == 0) return builder
         builder.append('.')
 
-        val cache = mutableSetOf<List<BigInteger>>()
+        val cache = mutableSetOf<Pair<Char,BigInteger>>()
         var cycle = false
+        var pair: Pair<Char,BigInteger>? = null
         for (i in 1..n) {
-            r1 *= BigInteger.TEN
+            r1 *= format.radix
             val divideResult = r1.divideAndRemainder(den)
-            r0 = divideResult[0]
             r1 = divideResult[1]
-            pair = listOf(r0, r1)
+            pair = Pair(toRadix(divideResult[0]), r1)
             if (cache.contains(pair)) {
                 cycle = true
                 break
@@ -337,7 +357,7 @@ class Rational private constructor(
         }
 
         if (!cycle) {
-            cache.forEach { p -> builder.append(p[0]) }
+            cache.forEach { p -> builder.append(p.first) }
             return builder
         }
 
@@ -348,23 +368,22 @@ class Rational private constructor(
 
             if (p == pair) break
 
-            builder.append(p[0])
+            builder.append(p.first)
             iterator.remove()
             ++count
         }
 
-        if (periodic) {
+        if (format is Periodic) {
             builder.append('[')
-            cache.forEach { p -> builder.append(p[0]) }
+            cache.forEach { p -> builder.append(p.first) }
             builder.append(']')
         } else {
-            builder.append(r0)
+            builder.append(pair!!.first)
             ++count
             while (count < n) {
                 if (!iterator.hasNext()) iterator = cache.iterator()
                 while (iterator.hasNext() && count < n) {
-                    val k = iterator.next()[0]
-                    builder.append(k)
+                    builder.append(iterator.next().first)
                     ++count
                 }
             }
@@ -394,6 +413,14 @@ class Rational private constructor(
     }
 
     companion object {
+
+        val FRACTION = Fraction
+        val PERIODIC = Periodic()
+        val PRECISION = Precision()
+        val MIXED = MixedFraction
+        val HEXADECIMAL = Hexadecimal()
+        val OCTAL = Octal()
+        val BINARY = Binary()
 
         val ZERO = Rational(BigInteger.ZERO)
         val ONE = Rational(BigInteger.ONE)
