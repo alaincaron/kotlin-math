@@ -69,8 +69,6 @@ class Rational private constructor(
      object Fraction : Format
      object MixedFraction: Format
 
-
-
     fun signum(): Int {
         return this.num.signum()
     }
@@ -412,6 +410,9 @@ class Rational private constructor(
         return (this.num - (this.den * other)).signum()
     }
 
+    fun min(other: Rational) = if (compareTo(other) > 0) other else this
+    fun max(other: Rational) = if (compareTo(other) < 0) other else this
+
     companion object {
 
         val FRACTION = Fraction
@@ -422,25 +423,20 @@ class Rational private constructor(
         val OCTAL = Octal()
         val BINARY = Binary()
 
-        val ZERO = Rational(BigInteger.ZERO)
-        val ONE = Rational(BigInteger.ONE)
-        val MINUS_ONE = Rational(BigInteger.valueOf(-1))
-        val TWO = Rational(BigInteger.TWO)
-        val ONE_HALF = Rational(BigInteger.ONE, BigInteger.TWO)
-        val ONE_THIRD = Rational(BigInteger.ONE, BigInteger.valueOf(3))
-        val TWO_THIRDS = Rational(BigInteger.TWO, BigInteger.valueOf(3))
-        val TEN = Rational(BigInteger.TEN)
+        private val instanceCache = mutableMapOf<Rational,Rational>()
 
-        private val instanceCache = buildMap {
-            put(ZERO, ZERO)
-            put(ONE, ONE)
-            put(MINUS_ONE, MINUS_ONE)
-            put(TWO, TWO)
-            put(ONE_HALF, ONE_HALF)
-            put(ONE_THIRD, ONE_THIRD)
-            put(TWO_THIRDS, TWO_THIRDS)
-            put(TEN, TEN)
+        private fun store(x: Rational): Rational {
+            instanceCache[x] = x
+            return x
         }
+        val ZERO = store(Rational(BigInteger.ZERO))
+        val ONE = store(Rational(BigInteger.ONE))
+        val MINUS_ONE = store(Rational(BigInteger.valueOf(-1)))
+        val TWO = store(Rational(BigInteger.TWO))
+        val ONE_HALF = store(Rational(BigInteger.ONE, BigInteger.TWO))
+        val ONE_THIRD = store(Rational(BigInteger.ONE, BigInteger.valueOf(3)))
+        val TWO_THIRDS = store(Rational(BigInteger.TWO, BigInteger.valueOf(3)))
+        val TEN = store(Rational(BigInteger.TEN))
 
         fun valueOf(num: Byte, den: Byte = 1) =
             valueOf(BigInteger.valueOf(num.toLong()), BigInteger.valueOf(den.toLong()))
@@ -486,5 +482,8 @@ class Rational private constructor(
             }
             return canonicalValue(num, den)
         }
+
+        fun max(value: Rational, vararg values: Rational) = values.fold(value) {acc, i -> acc.max(i) }
+        fun min(value: Rational, vararg values: Rational) = values.fold(value) {acc, i -> acc.min(i) }
     }
 }
