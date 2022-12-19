@@ -37,5 +37,21 @@ fun Double.toRational(): Rational {
 
 fun BigDecimal.toRational() = Rational.valueOf(this)
 
-fun String.toRational() = BigDecimal(this).toRational()
+fun String.toRational(): Rational {
+    val dividePos = indexOf('/')
+    if (dividePos < 0) return BigDecimal(this).toRational()
+    val numString = substring(0, dividePos)
+    val spacePos = numString.indexOf(' ')
+    if (spacePos < 0) {
+        val num = BigInteger(numString)
+        val den = BigInteger(substring(dividePos + 1))
+        return Rational.valueOf(num, den)
+    }
+    val integerPart = BigInteger(substring(0, spacePos))
+    val num = BigInteger(substring(spacePos + 1, dividePos))
+    val den = BigInteger(substring(dividePos + 1))
+    val fraction = Rational.valueOf(num, den)
+    return if (integerPart.signum() < 0) integerPart - fraction else integerPart + fraction
+}
+
 
