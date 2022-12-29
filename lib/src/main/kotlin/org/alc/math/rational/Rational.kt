@@ -59,7 +59,7 @@ class Rational private constructor(
              else -> BigInteger.valueOf(_radix.toLong())
          }
     }
-     open class Precision(precision: Int = 10, radix: Int = 10) : Radix(precision, radix)
+    open class Precision(precision: Int = 10, radix: Int = 10) : Radix(precision, radix)
     class Periodic(precision: Int = 10, radix: Int = 10) : Radix(precision, radix)
 
     class Binary(precision: Int = 20): Precision(precision, 2)
