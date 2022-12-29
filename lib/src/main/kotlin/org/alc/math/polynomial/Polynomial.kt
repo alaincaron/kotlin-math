@@ -5,7 +5,6 @@ import java.util.function.Function
 import kotlin.math.abs
 import kotlin.math.round
 
-operator fun Double.times(other: Polynomial) = other.times(this)
 
 class Polynomial private constructor(_coefficients: List<Double>) : Function<Double, Double> {
     val coefficients = _coefficients
@@ -67,7 +66,7 @@ class Polynomial private constructor(_coefficients: List<Double>) : Function<Dou
     operator fun times(other: Double) = when (other) {
         0.0 -> ZERO
         1.0 -> this
-        else -> fromDoubles(coefficients.map { it * other })
+        else -> canonicalValue(coefficients.map { it * other })
     }
 
     fun divideAndRemainder(den: Polynomial): Pair<Polynomial, Polynomial> {
@@ -86,12 +85,16 @@ class Polynomial private constructor(_coefficients: List<Double>) : Function<Dou
         return Pair(fromDoubles(q), fromDoubles(r))
     }
 
+    operator fun div(den: Polynomial) = divideAndRemainder(den).first
+    operator fun rem(den: Polynomial) = divideAndRemainder(den).second
+
+    operator fun div(den: Double) = canonicalValue(coefficients.map { it / den})
 
     operator fun unaryPlus() = this
 
     operator fun unaryMinus() = when (this) {
         ZERO -> this
-        else -> fromDoubles(coefficients.map { -it })
+        else -> canonicalValue(coefficients.map { -it })
     }
 
     fun negate() = unaryMinus()
@@ -181,9 +184,9 @@ class Polynomial private constructor(_coefficients: List<Double>) : Function<Dou
 
     companion object {
 
-        fun fromDoubles(vararg coefficients: Double) = fromDoubles(coefficients.asList())
+        fun createFrom(vararg coefficients: Double) = fromDoubles(coefficients.asList())
 
-        fun fromInts(vararg coefficients: Int) = fromInts(coefficients.asList())
+        fun createFrom(vararg coefficients: Int) = fromInts(coefficients.asList())
 
         fun fromInts(coefficients: List<Int>) = when (coefficients.size) {
             0 -> ZERO
