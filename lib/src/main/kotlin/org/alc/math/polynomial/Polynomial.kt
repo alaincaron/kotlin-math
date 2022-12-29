@@ -66,7 +66,7 @@ class Polynomial private constructor(_coefficients: List<Double>) : Function<Dou
     operator fun times(other: Double) = when (other) {
         0.0 -> ZERO
         1.0 -> this
-        else -> canonicalValue(coefficients.map { it * other })
+        else -> canonicalValue(coefficients.asSequence().map { it * other })
     }
 
     fun divideAndRemainder(den: Polynomial): Pair<Polynomial, Polynomial> {
@@ -88,13 +88,13 @@ class Polynomial private constructor(_coefficients: List<Double>) : Function<Dou
     operator fun div(den: Polynomial) = divideAndRemainder(den).first
     operator fun rem(den: Polynomial) = divideAndRemainder(den).second
 
-    operator fun div(den: Double) = canonicalValue(coefficients.map { it / den})
+    operator fun div(den: Double) = canonicalValue(coefficients.asSequence().map { it / den})
 
     operator fun unaryPlus() = this
 
     operator fun unaryMinus() = when (this) {
         ZERO -> this
-        else -> canonicalValue(coefficients.map { -it })
+        else -> canonicalValue(coefficients.asSequence().map { -it })
     }
 
     fun negate() = unaryMinus()
@@ -184,6 +184,7 @@ class Polynomial private constructor(_coefficients: List<Double>) : Function<Dou
 
     companion object {
 
+
         fun createFrom(vararg coefficients: Double) = fromDoubles(coefficients.asList())
 
         fun createFrom(vararg coefficients: Int) = fromInts(coefficients.asList())
@@ -193,7 +194,7 @@ class Polynomial private constructor(_coefficients: List<Double>) : Function<Dou
             1 -> when (coefficients[0]) {
                 0 -> ZERO
                 1 -> ONE
-                else -> canonicalValue(coefficients.map { it.toDouble() })
+                else -> canonicalValue(coefficients.asSequence().map { it.toDouble() })
             }
 
             else -> nonTrivialList(coefficients.map { it.toDouble() })
@@ -204,15 +205,15 @@ class Polynomial private constructor(_coefficients: List<Double>) : Function<Dou
             1 -> when (coefficients[0]) {
                 0.0 -> ZERO
                 1.0 -> ONE
-                else -> canonicalValue(coefficients)
+                else -> canonicalValue(coefficients.asSequence())
             }
 
             else -> nonTrivialList(coefficients)
         }
 
         private fun nonTrivialList(coefficients: List<Double>): Polynomial {
-            val c = coefficients.dropWhile { x -> x == 0.0 }
-            return if (c.isEmpty()) ZERO else canonicalValue(c)
+            val c = coefficients.asSequence().dropWhile { x -> x == 0.0 }
+            return canonicalValue(c)
         }
 
         private val instanceCache = mutableMapOf<List<Double>, Polynomial>()
@@ -223,8 +224,8 @@ class Polynomial private constructor(_coefficients: List<Double>) : Function<Dou
             return p
         }
 
-        private fun canonicalValue(coefficients: List<Double>): Polynomial {
-            val c = coefficients.map { if (abs(it) == 0.0) 0.0 else it }
+        private fun canonicalValue(coefficients: Sequence<Double>): Polynomial {
+            val c = coefficients.map { if (abs(it) == 0.0) 0.0 else it }.toList()
             return instanceCache[c] ?: Polynomial(c)
         }
 
@@ -233,6 +234,9 @@ class Polynomial private constructor(_coefficients: List<Double>) : Function<Dou
         val IDENTITY = store(listOf(1.0, 0.0))
         val SQUARE = store(listOf(1.0, 0.0, 0.0))
         val CUBE = store(listOf(1.0, 0.0, 0.0, 0.0))
+        init {
+            instanceCache[listOf()] = ZERO
+        }
     }
 
 }
