@@ -274,14 +274,17 @@ class Rational private constructor(
     override fun toLong() = toBigInteger().toLong()
     override fun toShort() = toBigInteger().toShort()
 
-    fun toBigDecimal(scale: Int, roundingMode: RoundingMode) =
-        num.toBigDecimal().divide(den.toBigDecimal(), scale, roundingMode)!!
+    fun toBigDecimal(scale: Int, roundingMode: RoundingMode): BigDecimal {
+        return num.toBigDecimal().divide(den.toBigDecimal(), scale, roundingMode)
+    }
 
-    fun toBigDecimal(roundingMode: RoundingMode) =
-        num.toBigDecimal().divide(den.toBigDecimal(), roundingMode)!!
+    fun toBigDecimal(roundingMode: RoundingMode): BigDecimal {
+        return num.toBigDecimal().divide(den.toBigDecimal(), roundingMode)
+    }
 
-    fun toBigDecimal(mc: MathContext = MathContext.DECIMAL128) =
-        num.toBigDecimal().divide(den.toBigDecimal(), mc)!!
+    fun toBigDecimal(mc: MathContext = MathContext.DECIMAL128): BigDecimal {
+        return num.toBigDecimal().divide(den.toBigDecimal(), mc)
+    }
 
 
     fun toBigInteger(): BigInteger = when (this) {

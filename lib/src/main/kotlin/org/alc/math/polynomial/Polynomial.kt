@@ -6,8 +6,7 @@ import kotlin.math.abs
 import kotlin.math.round
 
 
-class Polynomial private constructor(_coefficients: List<Double>) : Function<Double, Double> {
-    val coefficients = _coefficients
+class Polynomial private constructor(val coefficients: List<Double>) : Function<Double, Double> {
 
     override fun apply(x: Double) = coefficients.fold(0.0) { sum, v -> sum * x + v }
     fun degree() = coefficients.size - 1
