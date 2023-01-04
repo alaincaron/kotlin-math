@@ -4,9 +4,43 @@ import java.lang.Integer.max
 import java.util.function.Function
 import kotlin.math.abs
 import kotlin.math.round
+import kotlin.math.sqrt
 
+class ConstantPolynomial internal constructor(coefficients: List<Double>): Polynomial(coefficients) {
 
-class Polynomial private constructor(val coefficients: List<Double>) : Function<Double, Double> {
+    val value get() = coefficients[0]
+
+    internal constructor(coefficient: Double): this(listOf(coefficient))
+
+    override fun root(initial_guess: Double, epsilon: Double, max_iterations: Int) = Double.NaN
+    override fun derivative(): ConstantPolynomial = ZERO
+}
+
+class LinearPolynomial internal constructor(coefficients: List<Double>): Polynomial(coefficients) {
+    val slope
+        get() = coefficients[0]
+
+    override fun root(initial_guess: Double, epsilon: Double, max_iterations: Int) = - coefficients[0] / coefficients[1]
+    override fun derivative() = createFrom(slope) as ConstantPolynomial
+}
+
+class QuadraticPolynomial internal constructor(coefficients: List<Double>): Polynomial(coefficients) {
+
+    val a get() = coefficients[0]
+    val b get() = coefficients[1]
+    val c get() = coefficients[2]
+
+    val extremum get() = - b / 2 / a
+    override fun derivative() = createFrom(2.0 * a, b) as LinearPolynomial
+
+    override fun root(initial_guess: Double, epsilon: Double, max_iterations: Int): Double {
+        val x = b * b - 4.0 * a * c
+        if (x < 0.0) return Double.NaN
+        return (-b + sqrt(x)) / ( 2.0 * a)
+    }
+}
+
+open class Polynomial internal constructor(val coefficients: List<Double>) : Function<Double, Double> {
 
     override fun apply(x: Double) = coefficients.fold(0.0) { sum, v -> sum * x + v }
     fun degree() = coefficients.size - 1
@@ -98,7 +132,7 @@ class Polynomial private constructor(val coefficients: List<Double>) : Function<
 
     fun negate() = unaryMinus()
 
-    fun derivative(): Polynomial {
+    open fun derivative(): Polynomial {
         val n = this.degree()
         if (n == 0) return ZERO
         val d = mutableListOf<Double>()
@@ -111,7 +145,7 @@ class Polynomial private constructor(val coefficients: List<Double>) : Function<
     }
 
 
-    fun root(initial_guess: Double = 1.0, epsilon: Double = 1e-6, max_iterations: Int = 1000): Double {
+    open fun root(initial_guess: Double = 1.0, epsilon: Double = 1e-6, max_iterations: Int = 1000): Double {
         var x0 = initial_guess
         for (iter in 1..max_iterations) {
             var f = coefficients[0]
@@ -183,7 +217,6 @@ class Polynomial private constructor(val coefficients: List<Double>) : Function<
 
     companion object {
 
-
         fun createFrom(vararg coefficients: Double) = fromDoubles(coefficients.asList())
 
         fun createFrom(vararg coefficients: Int) = fromInts(coefficients.asList())
@@ -217,22 +250,29 @@ class Polynomial private constructor(val coefficients: List<Double>) : Function<
 
         private val instanceCache = mutableMapOf<List<Double>, Polynomial>()
 
-        private fun store(coefficients: List<Double>): Polynomial {
-            val p = Polynomial(coefficients)
-            instanceCache[coefficients] = p
-            return p
+        private fun <T: Polynomial>store(t: T): T {
+            instanceCache[t.coefficients] = t
+            return t
         }
 
         private fun canonicalValue(coefficients: Sequence<Double>): Polynomial {
             val c = coefficients.map { if (abs(it) == 0.0) 0.0 else it }.toList()
-            return instanceCache[c] ?: Polynomial(c)
+            val cachedValue = instanceCache[c]
+            if (cachedValue != null) return cachedValue
+            return when (c.size) {
+                0 -> ZERO
+                1 -> ConstantPolynomial(c)
+                2 -> LinearPolynomial(c)
+                3 -> QuadraticPolynomial(c)
+                else -> Polynomial(c)
+            }
         }
 
-        val ZERO = store(listOf(0.0))
-        val ONE = store(listOf(1.0))
-        val IDENTITY = store(listOf(1.0, 0.0))
-        val SQUARE = store(listOf(1.0, 0.0, 0.0))
-        val CUBE = store(listOf(1.0, 0.0, 0.0, 0.0))
+        val ZERO = store(ConstantPolynomial(0.0))
+        val ONE = store(ConstantPolynomial(1.0))
+        val IDENTITY = store(LinearPolynomial(listOf(1.0, 0.0)))
+        val SQUARE = store(QuadraticPolynomial(listOf(1.0, 0.0, 0.0)))
+        val CUBE = store(Polynomial(listOf(1.0, 0.0, 0.0, 0.0)))
         init {
             instanceCache[listOf()] = ZERO
         }

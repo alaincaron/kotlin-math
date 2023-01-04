@@ -3,6 +3,7 @@ package org.alc.math.polynomial
 import kotlin.math.sqrt
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertSame
 
 class PolynomialTest {
@@ -10,18 +11,27 @@ class PolynomialTest {
     fun apply() {
         val p = Polynomial.createFrom(0, 2, 1)
         assertEquals(3.0, p.apply(1.0))
+        assertIs<LinearPolynomial>(p)
 
-        val q = Polynomial.createFrom(1, -1, -1)
-        assertEquals(5.0, q.apply(3.0))
+        val q = Polynomial.createFrom(1, -1, -2)
+        assertEquals(4.0, q.apply(3.0))
+        assertIs<QuadraticPolynomial>(q)
     }
 
     @Test
     fun degree() {
         val p = Polynomial.createFrom(0, 2, 1)
         assertEquals(1, p.degree())
+        assertIs<LinearPolynomial>(p)
+        assertEquals(2.0, p.slope)
 
-        val q = Polynomial.createFrom(0, 1, -1, -1)
+        val q = Polynomial.createFrom(0, 1, -1, -2)
         assertEquals(2, q.degree())
+        assertIs<QuadraticPolynomial>(q)
+        assertEquals(1.0, q.a)
+        assertEquals(-1.0, q.b)
+        assertEquals(-2.0, q.c)
+        assertEquals(0.5, q.extremum)
     }
 
     @Test
@@ -30,6 +40,7 @@ class PolynomialTest {
         assertEquals(3, p.degree())
         val q = p.derivative()
         assertEquals(2, q.degree())
+        assertIs<QuadraticPolynomial>(q)
         val q1 = Polynomial.createFrom(9,4,5)
         assertEquals(q1, q)
     }
@@ -49,6 +60,12 @@ class PolynomialTest {
     }
 
     @Test
+    fun fourthRootOf25() {
+        val p = Polynomial.createFrom(1, 0, 0, 0, -25)
+        assertEquals(sqrt(5.0), p.root())
+    }
+
+    @Test
     fun toStringTest() {
         val p = Polynomial.createFrom(1.0, -1.0, 3.5, -2.0)
         assertEquals("x^3 - x^2 + 3.5x - 2", p.toString())
@@ -63,6 +80,7 @@ class PolynomialTest {
     fun zero() {
         val p = Polynomial.createFrom(0)
         assertSame(Polynomial.ZERO, p)
+        assertIs<ConstantPolynomial>(p)
     }
 
     @Test
