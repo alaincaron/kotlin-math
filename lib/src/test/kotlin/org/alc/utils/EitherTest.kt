@@ -8,10 +8,10 @@ class EitherTest {
     fun right() {
         val a = Right(2)
         assertTrue(a.isRight())
-        assertEquals(2, a.get() as Int)
+        assertEquals(2, a.get())
         assertFalse(a.isLeft())
         assertEquals(2, a.getOrElse { 5 })
-        assertEquals(Right(2), a.orElse { Right(5)})
+        assertEquals(Right(2), a.orElse { Right(5) })
     }
 
     @Test
@@ -20,7 +20,7 @@ class EitherTest {
         assertFalse(a.isRight())
         assertTrue(a.isLeft())
         assertThrows<NoSuchElementException> { a.get() }
-        assertEquals(2, a.swap().get() as Int)
+        assertEquals(2, a.swap().get())
         assertEquals(5, a.getOrElse { 5 })
         assertEquals(Right(5), a.orElse { Right(5) })
     }
@@ -113,6 +113,7 @@ class EitherTest {
         val left: Either<Int, Int> = Left(12)
         assertFalse(left.exists { it > 10 })
     }
+
     @Test
     fun all() {
         assertTrue(Right(12).all { it > 10 })
@@ -131,26 +132,31 @@ class EitherTest {
         Left(2).forEach(f)
         assertEquals(1, counter)
     }
-    @Test fun flatten() {
+
+    @Test
+    fun flatten() {
         assertEquals(Right(5), Right(Right(5)).flatten())
         assertEquals(Left(5), Right(Left(5)).flatten())
 
-        val a: Either<Int, Either<Int,Int>> = Left(5)
+        val a: Either<Int, Either<Int, Int>> = Left(5)
         val b: Either<Int, Int> = Left(5)
-       assertEquals(b, a.flatten())
+        assertEquals(b, a.flatten())
     }
 
-        @Test fun merge() {
+    @Test
+    fun merge() {
         assertEquals(12, Right(12).merge())
         assertEquals(12, Left(12).merge())
     }
+
     @Test
     fun filterOrElse() {
-        assertEquals(Right(12), Right(12).filterOrElse({it > 10}, {0}))
-        assertEquals(Left(0), Right(5).filterOrElse({it > 10}, {0}))
-        val c: Either<Int,Int> = Left(23)
-        assertEquals(Left(23), c.filterOrElse({it > 10}, {0}))
+        assertEquals(Right(12), Right(12).filterOrElse({ it > 10 }, { 0 }))
+        assertEquals(Left(0), Right(5).filterOrElse({ it > 10 }, { 0 }))
+        val c: Either<Int, Int> = Left(23)
+        assertEquals(Left(23), c.filterOrElse({ it > 10 }, { 0 }))
     }
+
     @Test
     fun widen() {
         val a: Either<Int, Int> = Right(5)
@@ -179,6 +185,16 @@ class EitherTest {
         val exc = RuntimeException()
         val left: Either<RuntimeException, Int> = exc.left()
         assertEquals(Failure(exc), left.toTry())
+    }
+
+    @Test
+    fun toSequence() {
+        var counter = 0
+        val f = { _: Int -> counter += 1 }
+        Right(2).toSequence().forEach(f)
+        assertEquals(1, counter)
+        Left(2).toSequence().forEach(f)
+        assertEquals(1, counter)
     }
 
 }
