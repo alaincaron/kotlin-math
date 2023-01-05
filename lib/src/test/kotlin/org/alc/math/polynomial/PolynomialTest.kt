@@ -41,7 +41,7 @@ class PolynomialTest {
         val q = p.derivative()
         assertEquals(2, q.degree())
         assertIs<QuadraticPolynomial>(q)
-        val q1 = Polynomial.createFrom(9,4,5)
+        val q1 = Polynomial.createFrom(9, 4, 5)
         assertEquals(q1, q)
     }
 
@@ -115,7 +115,7 @@ class PolynomialTest {
     @Test
     fun unaryMinus() {
         val p1 = Polynomial.createFrom(1, 0, -2)
-        assertEquals(Polynomial.createFrom(-1,0,2), -p1)
+        assertEquals(Polynomial.createFrom(-1, 0, 2), -p1)
         assertSame(Polynomial.ZERO, p1 + (-p1))
         assertSame(Polynomial.ZERO, -Polynomial.ZERO)
     }
@@ -123,16 +123,18 @@ class PolynomialTest {
     @Test
     fun negate() {
         val p1 = Polynomial.createFrom(1, 0, -2)
-        assertEquals(Polynomial.createFrom(-1,0,2), p1.negate())
+        assertEquals(Polynomial.createFrom(-1, 0, 2), p1.negate())
         //assertSame(Polynomial.ZERO, p1 + p1.negate())
         //assertSame(Polynomial.ZERO, Polynomial.ZERO.negate())
     }
 
-    @Test fun multiplyByZero() {
+    @Test
+    fun multiplyByZero() {
         val p1 = Polynomial.createFrom(1, 0, -2)
         assertSame(Polynomial.ZERO, p1 * Polynomial.ZERO)
         assertSame(Polynomial.ZERO, Polynomial.ZERO * p1)
     }
+
     @Test
     fun multiplyByOne() {
         val p1 = Polynomial.createFrom(1, 0, -2)
@@ -143,8 +145,8 @@ class PolynomialTest {
     fun multiplyZeroDegree() {
         val p1 = Polynomial.createFrom(1, 0, -2)
         val p2 = Polynomial.createFrom(2)
-        assertEquals(Polynomial.createFrom(2,0,-4), p1 * p2)
-        assertEquals(Polynomial.createFrom(2,0,-4), p2 * p1)
+        assertEquals(Polynomial.createFrom(2, 0, -4), p1 * p2)
+        assertEquals(Polynomial.createFrom(2, 0, -4), p2 * p1)
 
         val p3 = Polynomial.createFrom(-3)
         assertEquals(Polynomial.createFrom(-6), p2 * p3)
@@ -157,23 +159,23 @@ class PolynomialTest {
         assertEquals(Polynomial.CUBE, Polynomial.IDENTITY * Polynomial.SQUARE)
 
         // (x+1) * (x - 1) = x^2 - 1
-        val p1 = Polynomial.createFrom(1,1)
-        val q = Polynomial.createFrom(1,-1)
-        val pq = Polynomial.createFrom(1,0,-1)
+        val p1 = Polynomial.createFrom(1, 1)
+        val q = Polynomial.createFrom(1, -1)
+        val pq = Polynomial.createFrom(1, 0, -1)
         assertEquals(pq, p1 * q)
         assertEquals(pq, q * p1)
 
         // (x+1)^2 = x^2 + 2x + 1
-        val p2 = Polynomial.createFrom(1,2,1)
+        val p2 = Polynomial.createFrom(1, 2, 1)
         assertEquals(p2, p1 * p1)
 
         // (x + 1)^3 = x^3 + 3x^2 + 3x + 1
-        val p3 = Polynomial.createFrom(1,3,3,1)
+        val p3 = Polynomial.createFrom(1, 3, 3, 1)
         assertEquals(p3, p1 * p2)
         assertEquals(p3, p2 * p1)
 
         // (x + 1)^4 = x^4 + 4x^3 + 6x^2 + 4x + 1
-        val p4 = Polynomial.createFrom(1,4,6,4,1)
+        val p4 = Polynomial.createFrom(1, 4, 6, 4, 1)
         assertEquals(p4, p1 * p3)
         assertEquals(p4, p2 * p2)
         assertEquals(p4, p3 * p1)
@@ -181,7 +183,7 @@ class PolynomialTest {
 
     @Test
     fun divideAndRemainder1() {
-        val num = Polynomial.createFrom(2,1)
+        val num = Polynomial.createFrom(2, 1)
         val den = Polynomial.createFrom(1, 2)
         val pair = num.divideAndRemainder(den)
         assertEquals(Polynomial.createFrom(2), pair.first)
@@ -190,12 +192,13 @@ class PolynomialTest {
 
     @Test
     fun divideAndRemainder2() {
-        val num = Polynomial.createFrom(1,0,-1)
-        val den = Polynomial.createFrom(1,-1)
+        val num = Polynomial.createFrom(1, 0, -1)
+        val den = Polynomial.createFrom(1, -1)
         val pair = num.divideAndRemainder(den)
-        assertEquals(Polynomial.createFrom(1,1), pair.first)
+        assertEquals(Polynomial.createFrom(1, 1), pair.first)
         assertEquals(Polynomial.ZERO, pair.second)
     }
+
     @Test
     fun divideAndRemainder3() {
         val num = Polynomial.CUBE * Polynomial.createFrom(0.5)

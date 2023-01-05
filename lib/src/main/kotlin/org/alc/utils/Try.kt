@@ -27,7 +27,7 @@ sealed interface Try<T> {
 
     fun <U> transform(s: (t: T) -> Try<U>, f: (t: Throwable) -> Try<U>): Try<U>
 
-    fun <U> fold(s: (t: T) -> U, f:(t: Throwable) -> U): U
+    fun <U> fold(s: (t: T) -> U, f: (t: Throwable) -> U): U
 }
 
 data class Success<T>(val value: T) : Try<T> {
@@ -45,7 +45,7 @@ data class Success<T>(val value: T) : Try<T> {
         f(e)
     }
 
-    override fun <U> transform(s: (t: T) -> Try<U>, f: (t:Throwable) -> Try<U>) = flatMap(s)
+    override fun <U> transform(s: (t: T) -> Try<U>, f: (t: Throwable) -> Try<U>) = flatMap(s)
 
     override fun filter(predicate: (t: T) -> Boolean) = try {
         if (predicate(value)) this
@@ -60,7 +60,7 @@ data class Success<T>(val value: T) : Try<T> {
         Failure(e)
     }
 
-    override fun <U> map(f: (t: T) ->  U) = Try { f(value) }
+    override fun <U> map(f: (t: T) -> U) = Try { f(value) }
 }
 
 data class Failure<T>(val exception: Exception) : Try<T> {

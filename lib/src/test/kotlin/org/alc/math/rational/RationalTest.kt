@@ -4,7 +4,6 @@ import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
-import kotlin.test.Test
 import kotlin.test.*
 
 class RationalTest {
@@ -60,6 +59,7 @@ class RationalTest {
         assertEquals((5 over 2), (2 over 5).reciprocal())
 
     }
+
     @Test
     fun addRational() {
         val a = Rational.ONE_HALF
@@ -357,6 +357,7 @@ class RationalTest {
         assertSame(Rational.ONE, Rational.ONE.ceil())
         assertSame(Rational.MINUS_ONE, Rational.MINUS_ONE.ceil())
     }
+
     @Test
     fun floorTest() {
         val pi = Math.PI.toRational()
@@ -365,6 +366,7 @@ class RationalTest {
         assertSame(Rational.ONE, Rational.ONE.floor())
         assertSame(Rational.MINUS_ONE, Rational.MINUS_ONE.floor())
     }
+
     @Test
     fun roundTest() {
         val pi = Math.PI.toRational()

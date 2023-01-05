@@ -126,3 +126,14 @@ fun <A> Either<A, A>.merge(): A = when (this) {
 fun <A, B> Either<A, Either<A, B>>.flatten(): Either<A, B> = flatMap { it }
 fun <B> Either<*, B>.getOrElse(default: () -> B): B = fold({ default() }, { it })
 
+@Suppress("UNCHECKED_CAST")
+fun <A, B, A1 : A> Either<A, Either<A1, B>>.joinRight() = when (this) {
+    is Right -> this.value
+    else -> this as Either<A, B>
+}
+
+@Suppress("UNCHECKED_CAST")
+fun <A, B, A1 : A, B1 : B> Either<Either<A1, B1>, B>.joinLeft() = when (this) {
+    is Left -> this.value
+    else -> this as Either<A, B>
+}

@@ -6,37 +6,37 @@ import kotlin.math.abs
 import kotlin.math.round
 import kotlin.math.sqrt
 
-class ConstantPolynomial internal constructor(coefficients: List<Double>): Polynomial(coefficients) {
+class ConstantPolynomial internal constructor(coefficients: List<Double>) : Polynomial(coefficients) {
 
     val value get() = coefficients[0]
 
-    internal constructor(coefficient: Double): this(listOf(coefficient))
+    internal constructor(coefficient: Double) : this(listOf(coefficient))
 
     override fun root(initial_guess: Double, epsilon: Double, max_iterations: Int) = Double.NaN
     override fun derivative(): ConstantPolynomial = ZERO
 }
 
-class LinearPolynomial internal constructor(coefficients: List<Double>): Polynomial(coefficients) {
+class LinearPolynomial internal constructor(coefficients: List<Double>) : Polynomial(coefficients) {
     val slope
         get() = coefficients[0]
 
-    override fun root(initial_guess: Double, epsilon: Double, max_iterations: Int) = - coefficients[0] / coefficients[1]
+    override fun root(initial_guess: Double, epsilon: Double, max_iterations: Int) = -coefficients[0] / coefficients[1]
     override fun derivative() = createFrom(slope) as ConstantPolynomial
 }
 
-class QuadraticPolynomial internal constructor(coefficients: List<Double>): Polynomial(coefficients) {
+class QuadraticPolynomial internal constructor(coefficients: List<Double>) : Polynomial(coefficients) {
 
     val a get() = coefficients[0]
     val b get() = coefficients[1]
     val c get() = coefficients[2]
 
-    val extremum get() = - b / 2 / a
+    val extremum get() = -b / 2 / a
     override fun derivative() = createFrom(2.0 * a, b) as LinearPolynomial
 
     override fun root(initial_guess: Double, epsilon: Double, max_iterations: Int): Double {
         val x = b * b - 4.0 * a * c
         if (x < 0.0) return Double.NaN
-        return (-b + sqrt(x)) / ( 2.0 * a)
+        return (-b + sqrt(x)) / (2.0 * a)
     }
 }
 
@@ -121,7 +121,7 @@ open class Polynomial internal constructor(val coefficients: List<Double>) : Fun
     operator fun div(den: Polynomial) = divideAndRemainder(den).first
     operator fun rem(den: Polynomial) = divideAndRemainder(den).second
 
-    operator fun div(den: Double) = canonicalValue(coefficients.asSequence().map { it / den})
+    operator fun div(den: Double) = canonicalValue(coefficients.asSequence().map { it / den })
 
     operator fun unaryPlus() = this
 
@@ -250,7 +250,7 @@ open class Polynomial internal constructor(val coefficients: List<Double>) : Fun
 
         private val instanceCache = mutableMapOf<List<Double>, Polynomial>()
 
-        private fun <T: Polynomial>store(t: T): T {
+        private fun <T : Polynomial> store(t: T): T {
             instanceCache[t.coefficients] = t
             return t
         }
@@ -273,6 +273,7 @@ open class Polynomial internal constructor(val coefficients: List<Double>) : Fun
         val IDENTITY = store(LinearPolynomial(listOf(1.0, 0.0)))
         val SQUARE = store(QuadraticPolynomial(listOf(1.0, 0.0, 0.0)))
         val CUBE = store(Polynomial(listOf(1.0, 0.0, 0.0, 0.0)))
+
         init {
             instanceCache[listOf()] = ZERO
         }

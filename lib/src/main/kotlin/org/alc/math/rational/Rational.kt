@@ -4,7 +4,6 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.MathContext
 import java.math.RoundingMode
-import java.lang.StringBuilder
 
 operator fun Int.plus(other: Rational) = other.plus(this)
 operator fun Long.plus(other: Rational) = other.plus(this)
@@ -49,25 +48,27 @@ class Rational private constructor(
 
     sealed interface Format
 
-    sealed class Radix(val precision: Int = 10, _radix: Int = 10): Format {
+    sealed class Radix(val precision: Int = 10, _radix: Int = 10) : Format {
         init {
-            if (_radix < 2 || _radix > 36)  throw IllegalArgumentException("Invalid base must be between 2 and 36")
+            if (_radix < 2 || _radix > 36) throw IllegalArgumentException("Invalid base must be between 2 and 36")
         }
-        val radix: BigInteger = when(_radix) {
-             10 -> BigInteger.TEN
-             2 -> BigInteger.TWO
-             else -> BigInteger.valueOf(_radix.toLong())
-         }
+
+        val radix: BigInteger = when (_radix) {
+            10 -> BigInteger.TEN
+            2 -> BigInteger.TWO
+            else -> BigInteger.valueOf(_radix.toLong())
+        }
     }
+
     open class Precision(precision: Int = 10, radix: Int = 10) : Radix(precision, radix)
     class Periodic(precision: Int = 10, radix: Int = 10) : Radix(precision, radix)
 
-    class Binary(precision: Int = 20): Precision(precision, 2)
-    class Octal(precision: Int = 20): Precision(precision, 8)
+    class Binary(precision: Int = 20) : Precision(precision, 2)
+    class Octal(precision: Int = 20) : Precision(precision, 8)
 
-    class Hexadecimal(precision: Int = 10): Precision(precision, 16)
-     object Fraction : Format
-     object MixedFraction: Format
+    class Hexadecimal(precision: Int = 10) : Precision(precision, 16)
+    object Fraction : Format
+    object MixedFraction : Format
 
     fun signum(): Int {
         return this.num.signum()
@@ -245,9 +246,12 @@ class Rational private constructor(
         this.den == BigInteger.ONE -> this
         this.isPositive() -> canonicalValue(roundPositive(this.num, this.den))
         this.den.mod(BigInteger.TWO) == BigInteger.ZERO ->
-            canonicalValue(roundPositive(
-                -this.num - BigInteger.ONE, this.den
-            ).negate())
+            canonicalValue(
+                roundPositive(
+                    -this.num - BigInteger.ONE, this.den
+                ).negate()
+            )
+
         else ->
             canonicalValue(roundPositive(-this.num, this.den).negate())
     }
@@ -326,7 +330,7 @@ class Rational private constructor(
 
     private fun toRadix(x: BigInteger) = when (val v = x.toInt()) {
         in 0..9 -> (v + '0'.code).toChar()
-        else -> (v - 10 +'A'.code).toChar()
+        else -> (v - 10 + 'A'.code).toChar()
     }
 
     private fun toStringBuilder1(format: Radix, builder: StringBuilder): StringBuilder {
@@ -341,9 +345,9 @@ class Rational private constructor(
         if (n == 0 || r1.signum() == 0) return builder
         builder.append('.')
 
-        val cache = mutableSetOf<Pair<Char,BigInteger>>()
+        val cache = mutableSetOf<Pair<Char, BigInteger>>()
         var cycle = false
-        var pair: Pair<Char,BigInteger>? = null
+        var pair: Pair<Char, BigInteger>? = null
         for (i in 1..n) {
             r1 *= format.radix
             val divideResult = r1.divideAndRemainder(den)
@@ -426,12 +430,13 @@ class Rational private constructor(
         val OCTAL = Octal()
         val BINARY = Binary()
 
-        private val instanceCache = mutableMapOf<Rational,Rational>()
+        private val instanceCache = mutableMapOf<Rational, Rational>()
 
         private fun store(x: Rational): Rational {
             instanceCache[x] = x
             return x
         }
+
         val ZERO = store(Rational(BigInteger.ZERO))
         val ONE = store(Rational(BigInteger.ONE))
         val MINUS_ONE = store(Rational(BigInteger.valueOf(-1)))
@@ -486,7 +491,7 @@ class Rational private constructor(
             return canonicalValue(num, den)
         }
 
-        fun max(value: Rational, vararg values: Rational) = values.fold(value) {acc, i -> acc.max(i) }
-        fun min(value: Rational, vararg values: Rational) = values.fold(value) {acc, i -> acc.min(i) }
+        fun max(value: Rational, vararg values: Rational) = values.fold(value) { acc, i -> acc.max(i) }
+        fun min(value: Rational, vararg values: Rational) = values.fold(value) { acc, i -> acc.min(i) }
     }
 }

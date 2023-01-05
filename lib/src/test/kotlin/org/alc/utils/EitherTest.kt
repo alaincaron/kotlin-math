@@ -1,7 +1,10 @@
 package org.alc.utils
 
 import org.junit.jupiter.api.assertThrows
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class EitherTest {
     @Test
@@ -197,4 +200,35 @@ class EitherTest {
         assertEquals(1, counter)
     }
 
+    @Test
+    fun joinRight() {
+        val expectedRight = Right(12)
+        val expectedLeft = Left("flower")
+
+        assertEquals(
+            expectedRight,
+            Right(expectedRight).joinRight()
+        )
+        assertEquals(
+            expectedLeft,
+            Right(expectedLeft).joinRight()
+        )
+
+        assertEquals(
+            expectedLeft,
+            expectedLeft.joinRight()
+        )
+    }
+
+    @Test
+    fun joinLeft() {
+        val v1: Either<Either<Int, String>, String> = Left(Right("flower"))
+        val v2: Either<Either<Int, String>, String> = Left(Left(12))
+        val v3: Either<Either<Int, String>, String> = Right("daisy")
+
+        assertEquals(Right("flower"), v1.joinLeft())
+        assertEquals(Left(12), v2.joinLeft())
+        assertEquals(Right("daisy"), v3.joinLeft())
+
+    }
 }
