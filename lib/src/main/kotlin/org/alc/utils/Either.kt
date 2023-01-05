@@ -28,7 +28,7 @@ sealed class Either<out A, out B> {
     fun <C> foldLeft(c: C, rightFunction: (c: C, b: B) -> C) =
         fold({ c }, { rightFunction(c, it) })
 
-    fun swap(): Either<B,A> = when (this) {
+    fun swap(): Either<B, A> = when (this) {
         is Left -> Right(value)
         is Right -> Left(value)
     }
@@ -47,9 +47,9 @@ sealed class Either<out A, out B> {
     }
 
 
-    fun all(p: (b: B) -> Boolean) = fold({true}, p)
+    fun all(p: (b: B) -> Boolean) = fold({ true }, p)
 
-    fun exists(p: (b: B) -> Boolean) = fold({false}, p)
+    fun exists(p: (b: B) -> Boolean) = fold({ false }, p)
 
 
     fun toList() = when (this) {
@@ -61,7 +61,6 @@ sealed class Either<out A, out B> {
         is Right -> setOf(value)
         else -> emptySet()
     }
-
 
 
     fun <U> onLeft(f: (a: A) -> U) = also { if (it.isLeft()) f(it.value) }
@@ -93,7 +92,7 @@ fun <A, B> Either<A, B>.orElse(default: () -> Either<A, B>) = when (this) {
     else -> default()
 }
 
-fun <A, B> Either<A, B>.contains(b: B) = when(this) {
+fun <A, B> Either<A, B>.contains(b: B) = when (this) {
     is Right -> value == b
     else -> false
 }
@@ -104,13 +103,14 @@ fun <A, B, C> Either<A, B>.flatMap(f: (right: B) -> Either<A, C>): Either<A, C> 
         is Left -> this
     }
 
-fun <A,B> Either<A,B>.filterOrElse(p: (b: B) -> Boolean, default: () -> A) =
+fun <A, B> Either<A, B>.filterOrElse(p: (b: B) -> Boolean, default: () -> A) =
     flatMap { b -> b.takeIf(p)?.right() ?: default().left() }
 
-fun <E: Exception, B>Either<E, B>.toTry(): Try<B> = when (this) {
+fun <E : Exception, B> Either<E, B>.toTry(): Try<B> = when (this) {
     is Right -> Success(value)
     is Left -> Failure(value)
 }
+
 fun <A, C, B : C> Either<A, B>.widen(): Either<A, C> = this
 
 fun <AA, A : AA, B> Either<A, B>.leftWiden(): Either<AA, B> = this
@@ -124,3 +124,12 @@ fun <A> Either<A, A>.merge(): A = when (this) {
 fun <A, B> Either<A, Either<A, B>>.flatten(): Either<A, B> = flatMap { it }
 fun <B> Either<*, B>.getOrElse(default: () -> B): B = fold({ default() }, { it })
 
+fun <A, B, A1 : A> Either<A, Either<A1, B>>.joinRight() = when (this) {
+    is Right -> this.value
+    else -> this as Either<A, B>
+}
+
+fun <A, B, A1: A, B1: B> Either<Either<A1,B1>, B>.joinLeft() = when(this) {
+    is Left -> this.value
+    else -> this as Either<A,B>
+}
