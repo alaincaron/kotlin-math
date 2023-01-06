@@ -93,4 +93,25 @@ class OptionTest {
         assertFalse(Some(2).all {it != 2 })
     }
 
+    @Test
+    fun filter() {
+        assertEquals(None, None.filter { true })
+        assertEquals(Some(2), Some(2).filter { it == 2})
+        assertEquals(None, Some(2).filter {it != 2 })
+    }
+
+    @Test
+    fun filterNot() {
+        assertEquals(None, None.filterNot { true })
+        assertEquals(None, Some(2).filterNot { it == 2})
+        assertEquals(Some(2), Some(2).filterNot {it != 2 })
+    }
+
+    @Test
+    fun exists() {
+        assertFalse(None.exists { true })
+        assertTrue(Some(2).exists { it == 2})
+        assertFalse(Some(2).exists {it != 2 })
+    }
+
 }
