@@ -5,10 +5,13 @@ sealed class Option<out A> {
     companion object {
 
         @JvmStatic
-        operator fun <A> invoke(a: A?): Option<A> = if (a != null) Some(a) else None
+        operator fun <A> invoke(a: A) = Some(a)
 
         @JvmStatic
         fun <A> empty(): Option<A> = None
+
+        @JvmStatic
+        fun <A> ofNullable(a: A?): Option<A> = if (a != null) Some(a) else None
 
         @JvmStatic
         fun <A> unless(cond: Boolean, block: () -> A) =
@@ -16,7 +19,7 @@ sealed class Option<out A> {
 
         @JvmStatic
         fun <A> createIf(cond: Boolean, block: () -> A) =
-            if (cond) Some(block) else None
+            if (cond) Some(block()) else None
     }
 
     fun <U> onNone(block: () -> U): Option<A> {
@@ -37,14 +40,14 @@ sealed class Option<out A> {
 
     fun get(): A = fold({ throw NoSuchElementException() }) { it }
 
-    fun orNull(): A? = fold({ null }, { it })
+    fun getOrNull(): A? = fold({ null }, { it })
 
     fun <B> fold(ifEmpty: () -> B, ifSome: (A) -> B): B = when (this) {
         is None -> ifEmpty()
         is Some -> ifSome(value)
     }
 
-    fun <B> map(f: (A) -> B?): Option<B> = fold({ None }) { Option(f(it)) }
+    fun <B> map(f: (A) -> B?): Option<B> = fold({ None }) { ofNullable(f(it)) }
 
     fun <B> flatMap(f: (A) -> Option<B>): Option<B> = fold({ None }) { f(it) }
 
@@ -85,18 +88,18 @@ fun <A> Option<A>.orElse(default: () -> Option<A>): Option<A> =
 
 fun <T> T?.toOption(): Option<T> = this?.let { Some(it) } ?: None
 
-inline fun <A> Boolean.maybe(f: () -> A): Option<A> =
+fun <A> Boolean.maybe(f: () -> A): Option<A> =
     if (this) {
         Some(f())
     } else {
         None
     }
 
-public fun <A> A.some(): Option<A> = Some(this)
-public fun <A> A.none(): Option<A> = None
+fun <A> A.some(): Option<A> = Some(this)
+fun <A> A.none(): Option<A> = None
 
-public fun <A> Option<Option<A>>.flatten(): Option<A> = flatMap { it }
+fun <A> Option<Option<A>>.flatten(): Option<A> = flatMap { it }
 
 
-public fun <B, A : B> Option<A>.widen(): Option<B> = this
+fun <B, A : B> Option<A>.widen(): Option<B> = this
 
