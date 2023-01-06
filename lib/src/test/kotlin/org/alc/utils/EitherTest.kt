@@ -241,6 +241,5 @@ class EitherTest {
         assertEquals(Right("flower"), v1.joinLeft())
         assertEquals(Left(12), v2.joinLeft())
         assertEquals(Right("daisy"), v3.joinLeft())
-
     }
 }

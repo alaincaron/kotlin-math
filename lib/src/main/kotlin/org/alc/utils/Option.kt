@@ -83,7 +83,6 @@ fun <A> Option<A>.getOrElse(default: () -> A): A = fold({ default() }) { it }
 fun <A> Option<A>.orElse(default: () -> Option<A>): Option<A> =
     if (isEmpty()) default() else this
 
-
 fun <T> T?.toOption(): Option<T> = this?.let { Some(it) } ?: None
 
 inline fun <A> Boolean.maybe(f: () -> A): Option<A> =

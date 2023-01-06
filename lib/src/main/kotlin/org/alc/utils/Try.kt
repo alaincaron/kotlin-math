@@ -2,7 +2,7 @@ package org.alc.utils
 
 import java.util.*
 
-sealed interface Try<T> {
+sealed class Try<out T> {
     companion object {
         operator fun <T> invoke(f: () -> T): Try<T> = try {
             Success(f())
@@ -14,32 +14,47 @@ sealed interface Try<T> {
     val isSuccess get() = this is Success
     val isFailure get() = !isSuccess
 
-    fun <U : T> getOrElse(default: () -> U): T
+    fun get(): T = when (this) {
+        is Success -> value
+        is Failure -> throw exception
+    }
 
-    fun <U : T> orElse(default: () -> Try<U>): Try<T>
+    abstract fun <U> map(f: (T) -> U): Try<U>
+    abstract fun <U> flatMap(f: (T) -> Try<U>): Try<U>
 
-    fun get(): T
+    abstract fun filter(predicate: (T) -> Boolean): Try<T>
 
-    fun <U> map(f: (T) -> U): Try<U>
-    fun <U> flatMap(f: (T) -> Try<U>): Try<U>
+    abstract fun <U> transform(s: (T) -> Try<U>, f: (Throwable) -> Try<U>): Try<U>
 
-    fun filter(predicate: (T) -> Boolean): Try<T>
+    abstract fun <U> fold(s: (T) -> U, f: (Throwable) -> U): U
 
-    fun <U> transform(s: (T) -> Try<U>, f: (Throwable) -> Try<U>): Try<U>
+    fun toEither(): Either<Exception, T> = when (this) {
+        is Success -> Right(value)
+        is Failure -> Left(exception)
+    }
 
-    fun <U> fold(s: (T) -> U, f: (Throwable) -> U): U
-
-    fun toEither(): Either<Exception,T>
-    fun toOption(): Option<T>
+    fun toOption(): Option<T> = when (this) {
+        is Success -> Some(value)
+        else -> None
+    }
 }
 
-data class Success<T>(val value: T) : Try<T> {
+fun <T, U : T> Try<T>.getOrElse(default: () -> U): T = when (this) {
+    is Success -> value
+    else -> default()
+}
 
-    override fun <U : T> getOrElse(default: () -> U) = value
+fun <T, U : T> Try<T>.orElse(default: () -> Try<U>): Try<T> = when (this) {
+    is Success -> this
+    else -> try {
+        default()
+    } catch (e: Exception) {
+        Failure(e)
+    }
+}
 
-    override fun <U : T> orElse(default: () -> Try<U>) = this
 
-    override fun get() = value
+data class Success<out T>(val value: T) : Try<T>() {
 
     override fun <U> fold(s: (T) -> U, f: (Throwable) -> U) = try {
         s(value)
@@ -63,13 +78,9 @@ data class Success<T>(val value: T) : Try<T> {
     }
 
     override fun <U> map(f: (T) -> U) = Try { f(value) }
-
-    override fun toEither(): Either<Exception, T> = Right(value)
-    override fun toOption(): Option<T> = Some(value)
 }
 
-data class Failure<T>(val exception: Exception) : Try<T> {
-    override fun get() = throw exception
+data class Failure<T>(val exception: Exception) : Try<T>() {
 
     override fun <U> fold(s: (T) -> U, f: (Throwable) -> U) = f(exception)
 
@@ -86,16 +97,5 @@ data class Failure<T>(val exception: Exception) : Try<T> {
 
     @Suppress("UNCHECKED_CAST")
     override fun <U> map(f: (T) -> U) = this as Failure<U>
-
-    @Suppress("UNCHECKED_CAST")
-    override fun <U : T> orElse(default: () -> Try<U>) = try {
-        default() as Try<T>
-    } catch (e: Exception) {
-        Failure(e)
-    }
-
-    override fun <U : T> getOrElse(default: () -> U) = default()
-    override fun toEither(): Either<Exception, T> = Left(exception)
-    override fun toOption(): Option<T> = None
 }
 
