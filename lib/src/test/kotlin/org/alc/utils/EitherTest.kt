@@ -191,6 +191,18 @@ class EitherTest {
     }
 
     @Test
+    fun toList() {
+        assertEquals(emptyList(), Left(1).toList())
+        assertEquals(listOf(1), Right(1).toList())
+    }
+
+    @Test
+    fun toSet() {
+        assertEquals(emptySet(), Left(1).toSet())
+        assertEquals(setOf(1), Right(1).toSet())
+    }
+
+    @Test
     fun toSequence() {
         var counter = 0
         val f = { _: Int -> counter += 1 }
