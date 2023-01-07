@@ -10,9 +10,7 @@ class EitherTest {
     @Test
     fun right() {
         val a = Right(2)
-        assertTrue(a.isRight())
         assertEquals(2, a.get())
-        assertFalse(a.isLeft())
         assertEquals(2, a.getOrElse { 5 })
         assertEquals(Right(2), a.orElse { Right(5) })
     }
@@ -20,8 +18,6 @@ class EitherTest {
     @Test
     fun left() {
         val a = Left(2)
-        assertFalse(a.isRight())
-        assertTrue(a.isLeft())
         assertThrows<NoSuchElementException> { a.get() }
         assertEquals(2, a.swap().get())
         assertEquals(5, a.getOrElse { 5 })

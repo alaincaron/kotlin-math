@@ -1,23 +1,8 @@
 package org.alc.utils
 
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.contract
 
 
 sealed class Either<out A, out B> {
-
-    @OptIn(ExperimentalContracts::class)
-    fun isLeft(): Boolean {
-        contract { returns(true) implies (this is Left<A>) }
-        return this is Left<A>
-    }
-
-    @OptIn(ExperimentalContracts::class)
-    fun isRight(): Boolean {
-        contract { returns(true) implies (this is Right<B>) }
-        return this is Right<B>
-    }
-
     fun <C> fold(leftFunction: (A) -> C, rightFunction: (B) -> C) = when (this) {
         is Right -> rightFunction(value)
         is Left -> leftFunction(value)
@@ -50,8 +35,8 @@ sealed class Either<out A, out B> {
 
     fun toOption(): Option<B> = fold({ None }, { Option(it) })
 
-    fun <U> onLeft(f: (A) -> U) = also { if (it.isLeft()) f(it.value) }
-    fun <U> onRight(f: (B) -> U) = also { if (it.isRight()) f(it.value) }
+    fun <U> onLeft(f: (A) -> U) = also { if (it is Left) f(it.value) }
+    fun <U> onRight(f: (B) -> U) = also { if (it is Right) f(it.value) }
 
     fun getOrNull(): B? = fold({ null }) { it }
 }
@@ -60,7 +45,6 @@ sealed class Either<out A, out B> {
  * The left side of the disjoint union, as opposed to the [Right] side.
  */
 data class Left<A>(internal val value: A) : Either<A, Nothing>()
-
 
 /**
  * The right side of the disjoint union, as opposed to the [Left] side.
