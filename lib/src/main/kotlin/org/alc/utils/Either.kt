@@ -8,14 +8,14 @@ sealed class Either<out A, out B> {
 
     @OptIn(ExperimentalContracts::class)
     fun isLeft(): Boolean {
-        contract { returns(true) implies (this@Either is Left<A>) }
-        return this@Either is Left<A>
+        contract { returns(true) implies (this is Left<A>) }
+        return this is Left<A>
     }
 
     @OptIn(ExperimentalContracts::class)
     fun isRight(): Boolean {
-        contract { returns(true) implies (this@Either is Right<B>) }
-        return this@Either is Right<B>
+        contract { returns(true) implies (this is Right<B>) }
+        return this is Right<B>
     }
 
     fun <C> fold(leftFunction: (A) -> C, rightFunction: (B) -> C) = when (this) {
