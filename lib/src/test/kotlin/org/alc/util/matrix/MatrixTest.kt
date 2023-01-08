@@ -1,4 +1,4 @@
-package org.alc.math.matrix
+package org.alc.util.matrix
 
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.Test

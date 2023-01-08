@@ -1,6 +1,6 @@
 package org.alc.math.rational
 
-import org.alc.ring.Ring
+import org.alc.math.ring.RingElement
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.MathContext
@@ -45,7 +45,7 @@ operator fun Byte.compareTo(other: Rational) = Rational.valueOf(this).compareTo(
 class Rational private constructor(
     val num: BigInteger,
     val den: BigInteger = BigInteger.ONE
-) : Number(), Ring<Rational>, Comparable<Rational> {
+) : Number(), RingElement<Rational>, Comparable<Rational> {
 
     sealed interface Format
 
@@ -204,7 +204,7 @@ class Rational private constructor(
         }
     }
 
-    operator fun rem(other: Rational) = divideAndRemainder(other).second
+    override operator fun rem(other: Rational) = divideAndRemainder(other).second
 
     fun divideAndRemainder(other: Rational): Pair<BigInteger, Rational> = when {
         other.signum() == 0 -> throw ArithmeticException("Division by 0")

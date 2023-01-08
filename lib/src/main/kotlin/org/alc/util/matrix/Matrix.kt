@@ -1,4 +1,4 @@
-package org.alc.math.matrix
+package org.alc.util.matrix
 
 sealed class AbstractMatrix<T> constructor(protected val data: Array<Array<Any?>>) {
 
