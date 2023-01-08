@@ -1,11 +1,11 @@
 package org.alc.utils
 
-sealed class Option<out A> {
+sealed interface Option<out A> {
 
     companion object {
 
         @JvmStatic
-        operator fun <A> invoke(a: A) = Some(a)
+        operator fun <A:Any> invoke(a: A) = Some(a)
 
         @JvmStatic
         fun <A> empty(): Option<A> = None
@@ -14,36 +14,36 @@ sealed class Option<out A> {
         fun <A> ofNullable(a: A?): Option<A> = if (a != null) Some(a) else None
 
         @JvmStatic
-        fun <A> unless(cond: Boolean, block: () -> A) =
+        fun <A:Any> unless(cond: Boolean, block: () -> A) =
             if (cond) None else Some(block())
 
         @JvmStatic
-        fun <A> createIf(cond: Boolean, block: () -> A) =
+        fun <A:Any> createIf(cond: Boolean, block: () -> A) =
             if (cond) Some(block()) else None
     }
 
-    abstract fun <U> onNone(block: () -> U): Option<A>
-    abstract fun <U> onSome(block: (A) -> U): Option<A>
-    abstract fun isEmpty(): Boolean
+    fun <U> onNone(block: () -> U): Option<A>
+    fun <U> onSome(block: (A) -> U): Option<A>
+    fun isEmpty(): Boolean
     fun isNotEmpty(): Boolean = !isEmpty()
     fun isDefined(): Boolean = !isEmpty()
-    abstract fun get(): A
-    abstract fun getOrNull(): A?
-    abstract fun <B> fold(ifEmpty: () -> B, ifSome: (A) -> B): B
-    abstract fun <B> map(f: (A) -> B?): Option<B>
-    abstract fun <B> flatMap(f: (A) -> Option<B>): Option<B>
-    abstract fun all(predicate: (A) -> Boolean): Boolean
-    abstract fun filter(predicate: (A) -> Boolean): Option<A>
-    abstract fun filterNot(predicate: (A) -> Boolean): Option<A>
-    abstract fun exists(predicate: (A) -> Boolean): Boolean
-    abstract fun <B> foldLeft(initial: B, operation: (B, A) -> B): B
-    abstract fun <L> toEither(ifEmpty: () -> L): Either<L, A>
-    abstract fun toList(): List<A>
-    abstract fun toSet(): Set<A>
-    abstract fun toSequence(): Sequence<A>
+    fun get(): A
+    fun getOrNull(): A?
+    fun <B> fold(ifEmpty: () -> B, ifSome: (A) -> B): B
+    fun <B> map(f: (A) -> B?): Option<B>
+    fun <B> flatMap(f: (A) -> Option<B>): Option<B>
+    fun all(predicate: (A) -> Boolean): Boolean
+    fun filter(predicate: (A) -> Boolean): Option<A>
+    fun filterNot(predicate: (A) -> Boolean): Option<A>
+    fun exists(predicate: (A) -> Boolean): Boolean
+    fun <B> foldLeft(initial: B, operation: (B, A) -> B): B
+    fun <L> toEither(ifEmpty: () -> L): Either<L, A>
+    fun toList(): List<A>
+    fun toSet(): Set<A>
+    fun toSequence(): Sequence<A>
 }
 
-object None : Option<Nothing>() {
+object None : Option<Nothing> {
     override fun isEmpty() = true
     override fun get() = throw NoSuchElementException()
     override fun getOrNull() = null
@@ -55,29 +55,21 @@ object None : Option<Nothing>() {
     override fun filterNot(predicate: (Nothing) -> Boolean) = this
     override fun exists(predicate: (Nothing) -> Boolean) = false
     override fun <B> foldLeft(initial: B, operation: (B, Nothing) -> B) = initial
-    override fun <L> toEither(ifEmpty: () -> L): Either<L, Nothing> = ifEmpty().left()
+    override fun <L> toEither(ifEmpty: () -> L): Either<L, Nothing> = ifEmpty().toLeft()
     override fun toList() = emptyList<Nothing>()
     override fun toSet() = emptySet<Nothing>()
     override fun toSequence() = emptySequence<Nothing>()
-
-    override fun <U> onNone(block: () -> U): Option<Nothing> {
-        block()
-        return this
-    }
-
-    override fun <U> onSome(block: (Nothing) -> U): Option<Nothing> {
-        return this
-    }
-
+    override fun <U> onNone(block: () -> U): Option<Nothing> = also { block() }
+    override fun <U> onSome(block: (Nothing) -> U): Option<Nothing> = this
     override fun toString(): String = "Option.None"
 }
 
-data class Some<out A>(val value: A) : Option<A>() {
+data class Some<out A>(val value: A) : Option<A> {
     override fun isEmpty() = false
     override fun get() = value
     override fun getOrNull() = value
     override fun <B> fold(ifEmpty: () -> B, ifSome: (A) -> B) = ifSome(value)
-    override fun <B> map(f: (A) -> B?) = ofNullable(f(value))
+    override fun <B> map(f: (A) -> B?) = Option.ofNullable(f(value))
     override fun <B> flatMap(f: (A) -> Option<B>) = f(value)
     override fun all(predicate: (A) -> Boolean) = predicate(value)
     override fun filter(predicate: (A) -> Boolean) = map { if (predicate(it)) it else null }
@@ -88,14 +80,8 @@ data class Some<out A>(val value: A) : Option<A>() {
     override fun toList() = listOf(value)
     override fun toSet() = setOf(value)
     override fun toSequence() = sequenceOf(value)
-
     override fun <U> onNone(block: () -> U) = this
-
-    override fun <U> onSome(block: (A) -> U): Option<A> {
-        block(value)
-        return this
-    }
-
+    override fun <U> onSome(block: (A) -> U) = also { block(value) }
     override fun toString(): String = "Option.Some($value)"
 }
 
@@ -108,16 +94,15 @@ fun <T> T?.toOption(): Option<T> = this?.let { Some(it) } ?: None
 
 fun <A> Boolean.maybe(f: () -> A): Option<A> =
     if (this) {
-        Some(f())
+        Option.ofNullable(f())
     } else {
         None
     }
 
-fun <A> A.asSome(): Option<A> = Some(this)
-fun <A> A.asNone(): Option<A> = None
+fun <A:Any> A.toSome(): Option<A> = Some(this)
+fun <A> A.toNone(): Option<A> = None
 
 fun <A> Option<Option<A>>.flatten(): Option<A> = flatMap { it }
-
 
 fun <B, A : B> Option<A>.widen(): Option<B> = this
 

@@ -1,6 +1,7 @@
 package org.alc.utils
 
 import org.junit.jupiter.api.assertThrows
+import java.lang.RuntimeException
 import kotlin.test.*
 
 class OptionTest {
@@ -14,6 +15,8 @@ class OptionTest {
         assertFalse(None.isNotEmpty())
         assertThrows<NoSuchElementException> { None.get() }
         assertNull(None.getOrNull())
+        assertEquals(5, None.getOrElse { 5 })
+        assertEquals(Some(5), None.orElse { Some(5) })
     }
 
     @Test
@@ -25,6 +28,8 @@ class OptionTest {
         assertTrue(a.isNotEmpty())
         assertEquals(2, a.get())
         assertEquals(2, a.getOrNull())
+        assertEquals(2, a.getOrElse { throw RuntimeException() })
+        assertSame(a, a.orElse { throw RuntimeException() })
     }
 
     @Test
@@ -112,6 +117,17 @@ class OptionTest {
         assertFalse(None.exists { true })
         assertTrue(Some(2).exists { it == 2})
         assertFalse(Some(2).exists {it != 2 })
+    }
+
+    @Test
+    fun toOption() {
+        val a = 2
+        val b = null
+        assertEquals(Some(a), a.toSome())
+        assertEquals(Some(a), a.toOption())
+        assertEquals(None, a.toNone())
+        assertEquals(None, b.toOption())
+        assertEquals(None, b.toNone())
     }
 
 }

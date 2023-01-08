@@ -182,7 +182,7 @@ class EitherTest {
     fun toTry() {
         assertEquals(Success(5), Right(5).toTry())
         val exc = RuntimeException()
-        val left: Either<RuntimeException, Int> = exc.left()
+        val left: Either<RuntimeException, Int> = exc.toLeft()
         assertEquals(Failure(exc), left.toTry())
     }
 
