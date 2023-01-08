@@ -26,7 +26,6 @@ lib/build
 
 # Misc files.
 .envrc
-*~
 \#*\#
 .\#*
 *.swp

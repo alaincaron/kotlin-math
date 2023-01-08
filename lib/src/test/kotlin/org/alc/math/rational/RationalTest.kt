@@ -1,6 +1,7 @@
 package org.alc.math.rational
 
 import org.junit.jupiter.api.assertThrows
+import java.lang.StringBuilder
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
@@ -285,7 +286,7 @@ class RationalTest {
         assertSame(Rational.ONE, Rational.ONE.abs())
         val a = 1 over 2
         assertSame(a, a.abs())
-        val b = -a
+        val b = a.negate()
         assertSame(Rational.ZERO, a + b)
         assertEquals(a, b.abs())
     }
@@ -353,7 +354,7 @@ class RationalTest {
     fun ceilTest() {
         val pi = Math.PI.toRational()
         assertEquals(4 over 1, pi.ceil())
-        assertEquals(-3 over 1, (-pi).ceil())
+        assertEquals(-3 over 1, pi.negate().ceil())
         assertSame(Rational.ONE, Rational.ONE.ceil())
         assertSame(Rational.MINUS_ONE, Rational.MINUS_ONE.ceil())
     }
@@ -378,5 +379,59 @@ class RationalTest {
         assertSame(Rational.MINUS_ONE, (-3 over 2).round())
         assertSame(Rational.ZERO, (1 over -3).round())
         assertSame(Rational.MINUS_ONE, (2 over -3).round())
+    }
+
+    @Test
+    fun min() {
+        assertSame(Rational.MINUS_ONE, min(Rational.ONE, Rational.MINUS_ONE, Rational.ZERO))
+        val b = Rational.valueOf(3)
+        assertSame(b, min(Rational.valueOf(12), b, Rational.TEN))
+    }
+    @Test
+    fun max() {
+        assertSame(Rational.ONE, max(Rational.ONE, Rational.MINUS_ONE, Rational.ZERO))
+        val b = Rational.valueOf(3)
+        assertSame(b, max(Rational.ZERO, Rational.ONE, b))
+    }
+
+    @Test
+    fun toStringBuilderDefaultFormat() {
+        val x = -1 over 3
+        val b = StringBuilder()
+        x.toStringBuilder(b)
+        assertEquals("-1/3", b.toString())
+    }
+
+    @Test
+    fun toStringBuilderMixedFormat() {
+        val x = -5 over 3
+        val b = x.toStringBuilder(Rational.MIXED)
+        assertEquals("-1 2/3", b.toString())
+    }
+
+    @Test
+    fun toStringBinary() {
+        val format = Rational.BINARY
+        assertEquals("11", (3 over 1).toString(format))
+        assertEquals("1.1", (3 over 2).toString(format))
+        assertEquals("-11", (-3 over 1).toString(format))
+        assertEquals("-1.1", (-3 over 2).toString(format))
+    }
+
+    @Test
+    fun toStringOctal() {
+        val format = Rational.OCTAL
+        assertEquals("11", (9 over 1).toString(format))
+        assertEquals("4.4", (9 over 2).toString(format))
+        assertEquals("-11", (-9 over 1).toString(format))
+        assertEquals("-4.4", (-9 over 2).toString(format))
+    }
+    @Test
+    fun toStringHexadecimal() {
+        val format = Rational.HEXADECIMAL
+        assertEquals("11", (17 over 1).toString(format))
+        assertEquals("4.8", (9 over 2).toString(format))
+        assertEquals("-11", (-17 over 1).toString(format))
+        assertEquals("-4.8", (-9 over 2).toString(format))
     }
 }

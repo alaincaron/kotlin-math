@@ -1,5 +1,6 @@
 package org.alc.math.rational
 
+import org.alc.ring.Ring
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.MathContext
@@ -44,7 +45,7 @@ operator fun Byte.compareTo(other: Rational) = Rational.valueOf(this).compareTo(
 class Rational private constructor(
     val num: BigInteger,
     val den: BigInteger = BigInteger.ONE
-) : Number(), Comparable<Rational> {
+) : Number(), Ring<Rational>, Comparable<Rational> {
 
     sealed interface Format
 
@@ -88,7 +89,7 @@ class Rational private constructor(
         else -> valueOf(this.num + other * this.den, this.den)
     }
 
-    operator fun plus(other: Rational) = when {
+    override operator fun plus(other: Rational) = when {
         other.signum() == 0 -> this
         else -> valueOf(this.num * other.den + this.den * other.num, this.den * other.den)
     }
@@ -107,7 +108,7 @@ class Rational private constructor(
         else -> valueOf(this.num - other * this.den, this.den)
     }
 
-    operator fun minus(other: Rational) = when {
+    override operator fun minus(other: Rational) = when {
         other.signum() == 0 -> this
         else -> valueOf(this.num * other.den - this.den * other.num, this.den * other.den)
     }
@@ -128,7 +129,7 @@ class Rational private constructor(
         else -> valueOf(this.num * other, this.den)
     }
 
-    operator fun times(other: Rational) = when {
+    override operator fun times(other: Rational) = when {
         other.signum() == 0 -> ZERO
         other == ONE -> this
         else -> valueOf(this.num * other.num, this.den * other.den)
@@ -150,7 +151,7 @@ class Rational private constructor(
         else -> valueOf(this.num, this.den * other)
     }
 
-    operator fun div(other: Rational) = when {
+    override operator fun div(other: Rational) = when {
         other.signum() == 0 -> throw ArithmeticException("Division by 0")
         other == ONE -> this
         else -> valueOf(this.num * other.den, this.den * other.num)
@@ -490,8 +491,8 @@ class Rational private constructor(
             }
             return canonicalValue(num, den)
         }
-
-        fun max(value: Rational, vararg values: Rational) = values.fold(value) { acc, i -> acc.max(i) }
-        fun min(value: Rational, vararg values: Rational) = values.fold(value) { acc, i -> acc.min(i) }
     }
 }
+fun max(value: Rational, vararg values: Rational) = values.fold(value) { acc, i -> acc.max(i) }
+fun min(value: Rational, vararg values: Rational) = values.fold(value) { acc, i -> acc.min(i) }
+
