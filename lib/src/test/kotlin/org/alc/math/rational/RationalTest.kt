@@ -19,12 +19,14 @@ class RationalTest {
         assertSame(Rational.TWO, 6 over 3)
         assertSame(Rational.ONE_THIRD, 1 over 3)
         assertSame(Rational.TWO_THIRDS, 4 over 6)
+        assertSame(Rational.NaN, Rational.ONE + Rational.NaN)
     }
 
     @Test
     fun isZero() {
         assertTrue(Rational.ZERO.isZero())
         assertFalse(Rational.ONE.isZero())
+        assertFalse(Rational.NaN.isZero())
     }
 
     @Test
@@ -32,6 +34,7 @@ class RationalTest {
         assertTrue(Rational.ONE.isPositive())
         assertFalse(Rational.MINUS_ONE.isPositive())
         assertFalse(Rational.ZERO.isPositive())
+        assertFalse(Rational.NaN.isPositive())
     }
 
     @Test
@@ -39,6 +42,12 @@ class RationalTest {
         assertTrue(Rational.MINUS_ONE.isNegative())
         assertFalse(Rational.ONE.isNegative())
         assertFalse(Rational.ZERO.isNegative())
+        assertFalse(Rational.NaN.isNegative())
+    }
+
+    @Test fun isNaN() {
+        assertFalse(Rational.ZERO.isNaN())
+        assertTrue(Rational.NaN.isNaN())
     }
 
     @Test
@@ -48,6 +57,7 @@ class RationalTest {
         assertTrue(Rational.ZERO.isInteger())
         assertFalse(Rational.ONE_HALF.isInteger())
         assertFalse((-1 over 2).isInteger())
+        assertFalse(Rational.NaN.isInteger())
 
     }
 
@@ -58,7 +68,7 @@ class RationalTest {
         assertSame(Rational.ONE_HALF, Rational.TWO.reciprocal())
         assertSame(Rational.TWO, Rational.ONE_HALF.reciprocal())
         assertEquals((5 over 2), (2 over 5).reciprocal())
-
+        assertSame(Rational.NaN, Rational.NaN.reciprocal())
     }
 
     @Test
@@ -66,6 +76,8 @@ class RationalTest {
         val a = Rational.ONE_HALF
         val b = 1 over 3
         assertEquals(5 over 6, a + b)
+        assertSame(Rational.NaN, Rational.NaN + a)
+        assertSame(Rational.NaN, a + Rational.NaN)
     }
 
     @Test
@@ -73,6 +85,8 @@ class RationalTest {
         val a = Rational.ONE_HALF
         val b = BigInteger.valueOf(2)
         assertEquals(5 over 2, a + b)
+        assertSame(Rational.NaN, Rational.NaN + b)
+        assertSame(Rational.NaN, b + Rational.NaN)
     }
 
     @Test
@@ -80,6 +94,8 @@ class RationalTest {
         val a = 1 over 2
         val b = 2L
         assertEquals(5 over 2, a + b)
+        assertSame(Rational.NaN, Rational.NaN + b)
+        assertSame(Rational.NaN, b + Rational.NaN)
     }
 
     @Test
@@ -87,6 +103,8 @@ class RationalTest {
         val a = 1 over 2
         val b = 2
         assertEquals(5 over 2, a + b)
+        assertSame(Rational.NaN, Rational.NaN + b)
+        assertSame(Rational.NaN, b + Rational.NaN)
     }
 
     @Test
@@ -96,6 +114,8 @@ class RationalTest {
         assertSame(a, a + 0L)
         assertSame(a, a + BigInteger.ZERO)
         assertSame(a, a + Rational.ZERO)
+        assertSame(Rational.NaN, Rational.NaN + Rational.ZERO)
+        assertSame(Rational.NaN, BigInteger.ZERO + Rational.NaN)
     }
 
     @Test
@@ -103,6 +123,8 @@ class RationalTest {
         val a = 1 over 2
         val b = 1 over 3
         assertEquals(1 over 6, a - b)
+        assertSame(Rational.NaN, Rational.NaN - b)
+        assertSame(Rational.NaN, b - Rational.NaN)
     }
 
     @Test
@@ -110,6 +132,8 @@ class RationalTest {
         val a = 1 over 2
         val b = BigInteger.valueOf(2L)
         assertEquals(-3 over 2, a - b)
+        assertSame(Rational.NaN, Rational.NaN - b)
+        assertSame(Rational.NaN, b - Rational.NaN)
     }
 
     @Test
@@ -117,6 +141,8 @@ class RationalTest {
         val a = 1 over 2
         val b = 2L
         assertEquals(-3 over 2, a - b)
+        assertSame(Rational.NaN, Rational.NaN - b)
+        assertSame(Rational.NaN, b - Rational.NaN)
     }
 
     @Test
@@ -124,6 +150,8 @@ class RationalTest {
         val a = 1 over 2
         val b = 2
         assertEquals(-3 over 2, a - b)
+        assertSame(Rational.NaN, Rational.NaN - b)
+        assertSame(Rational.NaN, b - Rational.NaN)
     }
 
     @Test
@@ -133,6 +161,9 @@ class RationalTest {
         assertSame(a, a - 0L)
         assertSame(a, a - BigInteger.ZERO)
         assertSame(a, a - Rational.ZERO)
+        assertEquals(a.negate(), Rational.ZERO - a)
+        assertSame(Rational.NaN, Rational.NaN - Rational.ZERO)
+        assertSame(Rational.NaN, Rational.ZERO - Rational.NaN)
     }
 
     @Test
@@ -140,6 +171,8 @@ class RationalTest {
         val a = 1 over 2
         val b = 1 over 3
         assertEquals(1 over 6, a * b)
+        assertSame(Rational.NaN, Rational.NaN * b)
+        assertSame(Rational.NaN, b * Rational.NaN)
     }
 
     @Test
@@ -147,6 +180,8 @@ class RationalTest {
         val a = 1 over 2
         val b = BigInteger.valueOf(2L)
         assertSame(Rational.ONE, a * b)
+        assertSame(Rational.NaN, Rational.NaN * b)
+        assertSame(Rational.NaN, b * Rational.NaN)
     }
 
     @Test
@@ -154,6 +189,8 @@ class RationalTest {
         val a = 3 over 2
         val b = 2L
         assertEquals(Rational.ONE * 3, a * b)
+        assertSame(Rational.NaN, Rational.NaN * b)
+        assertSame(Rational.NaN, b * Rational.NaN)
     }
 
     @Test
@@ -161,6 +198,8 @@ class RationalTest {
         val a = 1 over 2
         val b = 2
         assertSame(Rational.ONE, a * b)
+        assertSame(Rational.NaN, Rational.NaN * b)
+        assertSame(Rational.NaN, b * Rational.NaN)
     }
 
     @Test
@@ -170,6 +209,7 @@ class RationalTest {
         assertSame(Rational.ZERO, a * 0L)
         assertSame(Rational.ZERO, a * BigInteger.ZERO)
         assertSame(Rational.ZERO, a * Rational.ZERO)
+        assertSame(Rational.NaN, Rational.NaN * Rational.ZERO)
     }
 
     @Test
@@ -186,6 +226,8 @@ class RationalTest {
         val a = 1 over 2
         val b = 1 over 3
         assertEquals(3 over 2, a / b)
+        assertSame(Rational.NaN, Rational.NaN / b)
+        assertSame(Rational.NaN, b / Rational.NaN)
     }
 
     @Test
@@ -193,6 +235,8 @@ class RationalTest {
         val a = Rational.valueOf(2)
         val b = BigInteger.valueOf(2L)
         assertSame(Rational.ONE, a / b)
+        assertSame(Rational.NaN, Rational.NaN / b)
+        assertSame(Rational.NaN, b / Rational.NaN)
     }
 
     @Test
@@ -200,6 +244,8 @@ class RationalTest {
         val a = 3 over 2
         val b = 2L
         assertEquals(3 over 4, a / b)
+        assertSame(Rational.NaN, Rational.NaN / b)
+        assertSame(Rational.NaN, b / Rational.NaN)
     }
 
     @Test
@@ -207,6 +253,8 @@ class RationalTest {
         val a = 1 over 2
         val b = 2
         assertEquals(1 over 4, a / b)
+        assertSame(Rational.NaN, Rational.NaN / b)
+        assertSame(Rational.NaN, b / Rational.NaN)
     }
 
     @Test
@@ -216,6 +264,7 @@ class RationalTest {
         assertThrows<ArithmeticException> { a / 0L }
         assertThrows<ArithmeticException> { a / BigInteger.ZERO }
         assertThrows<ArithmeticException> { a / Rational.ZERO }
+        assertThrows<ArithmeticException> { Rational.NaN / Rational.ZERO}
     }
 
     @Test
@@ -225,6 +274,8 @@ class RationalTest {
         assertSame(a, a / 1L)
         assertSame(a, a / BigInteger.ONE)
         assertSame(a, a / Rational.ONE)
+        assertSame(Rational.NaN, Rational.NaN / 1)
+        assertSame(Rational.NaN, 1 / Rational.NaN)
     }
 
     @Test
@@ -257,6 +308,23 @@ class RationalTest {
         assertTrue(d < 1L)
         assertTrue(d < BigInteger.ONE)
         assertTrue(d < Rational.ONE)
+
+        assertTrue(d < Rational.NaN)
+        assertTrue(Rational.NaN > d)
+
+        assertFalse(Rational.NaN < Rational.NaN)
+        assertTrue(Rational.NaN <= Rational.NaN)
+        assertFalse(Rational.NaN > Rational.NaN)
+        assertTrue(Rational.NaN >= Rational.NaN)
+    }
+
+    @Test
+    fun testEquals() {
+        assertTrue(Rational.valueOf(1,3).equals(1 over 3))
+        assertFalse((1 over 2).equals(1 over 3))
+        assertFalse(Rational.NaN.equals(Rational.NaN))
+        assertFalse(Rational.ONE.equals(Rational.NaN))
+        assertFalse(Rational.NaN.equals(Rational.ONE))
     }
 
     @Test
@@ -270,6 +338,8 @@ class RationalTest {
         assertEquals(2 over 3, (8 over 3) % 2)
         assertEquals(Rational.ONE, Rational.valueOf(5) % 2L)
         assertSame(Rational.ONE, Rational.valueOf(5) % BigInteger.valueOf(2L))
+        assertSame(Rational.NaN, a % Rational.NaN)
+        assertSame(Rational.NaN, Rational.NaN % a)
     }
 
     @Test
@@ -278,6 +348,7 @@ class RationalTest {
         assertSame(Rational.ONE, a.pow(0))
         assertEquals(4 over 9, a.pow(2))
         assertEquals(3 over 2, a.pow(-1))
+        assertSame(Rational.NaN, Rational.NaN.pow(2))
     }
 
     @Test
@@ -289,19 +360,15 @@ class RationalTest {
         val b = a.negate()
         assertSame(Rational.ZERO, a + b)
         assertEquals(a, b.abs())
-    }
 
-    @Test
-    fun signum() {
-        assertEquals(0, Rational.ZERO.signum())
-        assertEquals(1, Rational.TEN.signum())
-        assertEquals(-1, (-1 over 10).signum())
+        assertSame(Rational.NaN, Rational.NaN.abs())
     }
 
     @Test
     fun toStringTest() {
         assertEquals("0", Rational.ZERO.toString())
         assertEquals("10", Rational.TEN.toString())
+        assertEquals("NaN", Rational.NaN.toString())
     }
 
     @Test
@@ -313,6 +380,7 @@ class RationalTest {
         assertEquals("0.5", (1 over 2).toString(Rational.PRECISION))
         assertEquals("10", Rational.TEN.toString(Rational.PRECISION))
         assertEquals(Math.PI.toString(), Math.PI.toRational().toString(Rational.Precision(15)))
+        assertEquals("NaN", Rational.NaN.toString(Rational.PRECISION))
     }
 
     @Test
@@ -324,6 +392,7 @@ class RationalTest {
         assertEquals("0.5", (1 over 2).toString(Rational.PERIODIC))
         assertEquals("10", Rational.TEN.toString(Rational.PERIODIC))
         assertEquals(Math.PI.toString(), Math.PI.toRational().toString(Rational.Periodic(15)))
+        assertEquals("NaN", Rational.NaN.toString(Rational.PERIODIC))
     }
 
     @Test
@@ -331,6 +400,7 @@ class RationalTest {
         assertSame(BigInteger.ONE, Rational.ONE.toBigInteger())
         assertSame(BigInteger.TWO, Rational.TWO.toBigInteger())
         assertEquals(BigInteger.ONE, (3 over 2).toBigInteger())
+        assertThrows<ArithmeticException> { Rational.NaN.toBigInteger()  }
     }
 
     @Test
@@ -338,6 +408,7 @@ class RationalTest {
         assertEquals(BigDecimal.valueOf(1.5), (3 over 2).toBigDecimal())
         assertEquals(BigDecimal.valueOf(150, 2), (3 over 2).toBigDecimal(2, RoundingMode.UNNECESSARY))
         assertEquals(BigDecimal.valueOf(2), (3 over 2).toBigDecimal(RoundingMode.UP))
+        assertThrows<ArithmeticException> { Rational.NaN.toBigDecimal()  }
     }
 
     @Test
@@ -348,6 +419,9 @@ class RationalTest {
         assertEquals(Pair(BigInteger.ONE, Rational.ZERO), Rational.TEN.divideAndRemainder(BigInteger.valueOf(10L)))
         assertEquals(Pair(BigInteger.ONE, Rational.ZERO), Rational.TEN.divideAndRemainder((10).toShort()))
         assertEquals(Pair(BigInteger.ONE, Rational.ZERO), Rational.TEN.divideAndRemainder((10).toByte()))
+        val pair = Rational.NaN.divideAndRemainder(10)
+        assertEquals(BigInteger.ZERO, pair.first)
+        assertTrue(pair.second.isNaN())
     }
 
     @Test
@@ -357,6 +431,7 @@ class RationalTest {
         assertEquals(-3 over 1, pi.negate().ceil())
         assertSame(Rational.ONE, Rational.ONE.ceil())
         assertSame(Rational.MINUS_ONE, Rational.MINUS_ONE.ceil())
+        assertSame(Rational.NaN, Rational.NaN.ceil())
     }
 
     @Test
@@ -366,6 +441,7 @@ class RationalTest {
         assertEquals(-4 over 1, (-pi).floor())
         assertSame(Rational.ONE, Rational.ONE.floor())
         assertSame(Rational.MINUS_ONE, Rational.MINUS_ONE.floor())
+        assertSame(Rational.NaN, Rational.NaN.floor())
     }
 
     @Test
@@ -379,6 +455,7 @@ class RationalTest {
         assertSame(Rational.MINUS_ONE, (-3 over 2).round())
         assertSame(Rational.ZERO, (1 over -3).round())
         assertSame(Rational.MINUS_ONE, (2 over -3).round())
+        assertSame(Rational.NaN, Rational.NaN.round())
     }
 
     @Test
@@ -386,12 +463,14 @@ class RationalTest {
         assertSame(Rational.MINUS_ONE, min(Rational.ONE, Rational.MINUS_ONE, Rational.ZERO))
         val b = Rational.valueOf(3)
         assertSame(b, min(Rational.valueOf(12), b, Rational.TEN))
+        assertSame(Rational.NaN, min(b, Rational.TEN, Rational.NaN, Rational.ZERO))
     }
     @Test
     fun max() {
         assertSame(Rational.ONE, max(Rational.ONE, Rational.MINUS_ONE, Rational.ZERO))
         val b = Rational.valueOf(3)
         assertSame(b, max(Rational.ZERO, Rational.ONE, b))
+        assertSame(Rational.NaN, max(b, Rational.TEN, Rational.NaN, Rational.ZERO))
     }
 
     @Test

@@ -71,12 +71,9 @@ class Rational private constructor(
     object Fraction : Format
     object MixedFraction : Format
 
-    fun signum(): Int {
-        return this.num.signum()
-    }
-
-    operator fun plus(other: Long) = when (other) {
-        0L -> this
+    operator fun plus(other: Long) = when {
+        isNaN() -> NaN
+        other == 0L -> this
         else -> valueOf(this.num + BigInteger.valueOf(other) * this.den, this.den)
     }
 
@@ -85,17 +82,21 @@ class Rational private constructor(
     operator fun plus(other: Byte) = plus(other.toLong())
 
     operator fun plus(other: BigInteger) = when {
+        isNaN() -> this
         other.signum() == 0 -> this
         else -> valueOf(this.num + other * this.den, this.den)
     }
 
     override operator fun plus(other: Rational) = when {
-        other.signum() == 0 -> this
+        other.isNaN() || isNaN() -> NaN
+        other == ZERO -> this
+        this == ZERO -> other
         else -> valueOf(this.num * other.den + this.den * other.num, this.den * other.den)
     }
 
-    operator fun minus(other: Long) = when (other) {
-        0L -> this
+    operator fun minus(other: Long) = when {
+        isNaN() -> this
+        other == 0L -> this
         else -> valueOf(this.num - BigInteger.valueOf(other) * this.den, this.den)
     }
 
@@ -104,18 +105,22 @@ class Rational private constructor(
     operator fun minus(other: Byte) = minus(other.toLong())
 
     operator fun minus(other: BigInteger) = when {
+        isNaN() -> this
         other.signum() == 0 -> this
         else -> valueOf(this.num - other * this.den, this.den)
     }
 
     override operator fun minus(other: Rational) = when {
-        other.signum() == 0 -> this
+        isNaN() || other.isNaN() -> NaN
+        other.isZero() -> this
+        this.isZero() -> other.negate()
         else -> valueOf(this.num * other.den - this.den * other.num, this.den * other.den)
     }
 
-    operator fun times(other: Long) = when (other) {
-        0L -> ZERO
-        1L -> this
+    operator fun times(other: Long) = when {
+        isNaN() || isZero() -> this
+        other == 0L -> ZERO
+        other == 1L -> this
         else -> valueOf(this.num * BigInteger.valueOf(other), this.den)
     }
 
@@ -124,20 +129,23 @@ class Rational private constructor(
     operator fun times(other: Byte) = times(other.toLong())
 
     operator fun times(other: BigInteger) = when {
+        isNaN() -> this
         other.signum() == 0 -> ZERO
         other == BigInteger.ONE -> this
         else -> valueOf(this.num * other, this.den)
     }
 
     override operator fun times(other: Rational) = when {
-        other.signum() == 0 -> ZERO
+        isNaN() || other.isNaN() -> NaN
+        isZero() || other.isZero() -> ZERO
         other == ONE -> this
         else -> valueOf(this.num * other.num, this.den * other.den)
     }
 
-    operator fun div(other: Long) = when (other) {
-        0L -> throw ArithmeticException("Division by 0")
-        1L -> this
+    operator fun div(other: Long) = when {
+        other == 0L -> throw ArithmeticException("Division by 0")
+        isNaN() -> this
+        other == 1L -> this
         else -> valueOf(this.num, this.den * BigInteger.valueOf(other))
     }
 
@@ -147,36 +155,41 @@ class Rational private constructor(
 
     operator fun div(other: BigInteger) = when {
         other.signum() == 0 -> throw ArithmeticException("Division by 0")
+        isNaN() -> this
+        isZero() -> this
         other == BigInteger.ONE -> this
         else -> valueOf(this.num, this.den * other)
     }
 
     override operator fun div(other: Rational) = when {
-        other.signum() == 0 -> throw ArithmeticException("Division by 0")
+        other.isZero() -> throw ArithmeticException("Division by 0")
+        isNaN() || other.isNaN() -> NaN
         other == ONE -> this
         else -> valueOf(this.num * other.den, this.den * other.num)
     }
 
     operator fun unaryPlus() = this
 
-    operator fun unaryMinus() = when (signum()) {
-        0 -> this
+    operator fun unaryMinus() = when (num.signum()) {
+        0 -> this // covers both 0 and NaN
         else -> canonicalValue(-this.num, this.den)
     }
 
     fun negate() = unaryMinus()
 
-    fun isZero() = signum() == 0
-    fun isPositive() = signum() > 0
-    fun isNegative() = signum() < 0
+    fun isNaN() = num.signum() == 0 && den.signum() == 0
+    fun isZero() = num.signum() == 0 && den.signum() != 0
+    fun isPositive() = num.signum() > 0
+    fun isNegative() = num.signum() < 0
     fun isInteger() = den == BigInteger.ONE
 
-    fun reciprocal() = valueOf(den, num)
+    fun reciprocal() = if (isNaN()) this else valueOf(den, num)
 
     operator fun rem(other: Long) = divideAndRemainder(other).second
     fun divideAndRemainder(other: Long) = when {
+        isNaN() -> Pair(BigInteger.ZERO, this)
         other == 0L -> throw ArithmeticException("Division by 0")
-        this.signum() == 0 -> Pair(BigInteger.ZERO, this)
+        isZero() -> Pair(BigInteger.ZERO, this)
         else -> {
             val lcm = this.den * BigInteger.valueOf(other)
             val x = this.num.divideAndRemainder(lcm)
@@ -195,8 +208,9 @@ class Rational private constructor(
 
     operator fun rem(other: BigInteger) = divideAndRemainder(other).second
     fun divideAndRemainder(other: BigInteger) = when {
+        isNaN() -> Pair(this, this)
         other.signum() == 0 -> throw ArithmeticException("Division by 0")
-        this.signum() == 0 -> Pair(ZERO, this)
+        isZero() -> Pair(ZERO, this)
         else -> {
             val lcm = this.den * other
             val x = this.num.divideAndRemainder(lcm)
@@ -207,8 +221,9 @@ class Rational private constructor(
     override operator fun rem(other: Rational) = divideAndRemainder(other).second
 
     fun divideAndRemainder(other: Rational): Pair<BigInteger, Rational> = when {
-        other.signum() == 0 -> throw ArithmeticException("Division by 0")
-        this.signum() == 0 -> Pair(BigInteger.ZERO, this)
+        isNaN() || other.isNaN() -> Pair(BigInteger.ZERO, NaN)
+        other.isZero() -> throw ArithmeticException("Division by 0")
+        isZero() -> Pair(BigInteger.ZERO, this)
         else -> {
             val lcm = this.den * other.den
             val x = (this.num * other.den).divideAndRemainder(other.num * this.den)
@@ -218,51 +233,60 @@ class Rational private constructor(
 
 
     fun pow(exponent: Int) = when {
+        isNaN() -> this
         exponent == 0 || this == ONE -> ONE
         exponent < 0 -> {
-            if (this.signum() == 0) throw ArithmeticException("Invalid 0 raised with negative exponent")
+            if (isZero()) throw ArithmeticException("Invalid 0 raised with negative exponent")
             valueOf(this.den.pow(-exponent), this.num.pow(-exponent))
         }
 
         else -> valueOf(this.num.pow(exponent), this.den.pow(exponent))
     }
 
-    fun abs() = if (this.signum() >= 0) this else canonicalValue(-this.num, this.den)
+    fun abs() = when {
+        num.signum() >= 0 -> this // covers both 0 and NaN
+        else -> canonicalValue(-this.num, this.den)
+    }
 
     fun ceil() = when {
-        this.den == BigInteger.ONE -> this
-        this.isPositive() -> canonicalValue((this.num / this.den) + BigInteger.ONE)
+        isNaN() -> this
+        den == BigInteger.ONE -> this
+        isPositive() -> canonicalValue((num / den) + BigInteger.ONE)
         else -> canonicalValue(this.num / this.den)
     }
 
     fun floor() = when {
-        this.den == BigInteger.ONE -> this
-        this.isPositive() -> canonicalValue((this.num / this.den))
-        else -> canonicalValue(this.num / this.den - BigInteger.ONE)
+        isNaN() -> this
+        den == BigInteger.ONE -> this
+        isPositive() -> canonicalValue((num / den))
+        else -> canonicalValue(num / den - BigInteger.ONE)
     }
 
     private fun roundPositive(num: BigInteger, den: BigInteger) = (num + den / BigInteger.TWO) / den
 
     fun round() = when {
-        this.den == BigInteger.ONE -> this
-        this.isPositive() -> canonicalValue(roundPositive(this.num, this.den))
-        this.den.mod(BigInteger.TWO) == BigInteger.ZERO ->
+        isNaN() -> this
+        den == BigInteger.ONE -> this
+        isPositive() -> canonicalValue(roundPositive(num, den))
+        den.mod(BigInteger.TWO) == BigInteger.ZERO ->
             canonicalValue(
                 roundPositive(
-                    -this.num - BigInteger.ONE, this.den
+                    -num - BigInteger.ONE, den
                 ).negate()
             )
 
         else ->
-            canonicalValue(roundPositive(-this.num, this.den).negate())
+            canonicalValue(roundPositive(-num, den).negate())
     }
 
     override fun equals(other: Any?): Boolean {
+        if (isNaN()) return false
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
         other as Rational
 
+        if (other.isNaN()) return false
         if (num != other.num) return false
         if (den != other.den) return false
 
@@ -273,31 +297,36 @@ class Rational private constructor(
 
     override fun toByte() = toBigInteger().toByte()
     override fun toChar() = toBigInteger().toChar()
-    override fun toDouble() = num.toDouble() / den.toDouble()
+    override fun toDouble() = if (isNaN()) Double.NaN else num.toDouble() / den.toDouble()
     override fun toFloat() = toDouble().toFloat()
     override fun toInt() = toBigInteger().toInt()
     override fun toLong() = toBigInteger().toLong()
     override fun toShort() = toBigInteger().toShort()
 
     fun toBigDecimal(scale: Int, roundingMode: RoundingMode): BigDecimal {
+        if (isNaN()) throw ArithmeticException("NaN conversion")
         return num.toBigDecimal().divide(den.toBigDecimal(), scale, roundingMode)
     }
 
     fun toBigDecimal(roundingMode: RoundingMode): BigDecimal {
+        if (isNaN()) throw ArithmeticException("NaN conversion")
         return num.toBigDecimal().divide(den.toBigDecimal(), roundingMode)
     }
 
     fun toBigDecimal(mc: MathContext = MathContext.DECIMAL128): BigDecimal {
+        if (isNaN()) throw ArithmeticException("NaN conversion")
         return num.toBigDecimal().divide(den.toBigDecimal(), mc)
     }
 
-
-    fun toBigInteger(): BigInteger = when (this) {
-        ONE -> BigInteger.ONE
-        TEN -> BigInteger.TEN
-        ZERO -> BigInteger.ZERO
-        TWO -> BigInteger.TWO
-        else -> num / den
+    fun toBigInteger(): BigInteger {
+        if (isNaN()) throw ArithmeticException("NaN conversion")
+        return when (this) {
+            ONE -> BigInteger.ONE
+            TEN -> BigInteger.TEN
+            ZERO -> BigInteger.ZERO
+            TWO -> BigInteger.TWO
+            else -> num / den
+        }
     }
 
     override fun toString() = toStringBuilder().toString()
@@ -306,6 +335,7 @@ class Rational private constructor(
 
     fun toStringBuilder(format: Format, builder: StringBuilder? = null): StringBuilder {
         val b = builder ?: StringBuilder()
+        if (isNaN()) return b.append("NaN")
         return when (format) {
             is Radix -> toStringBuilder1(format, b)
             is Fraction -> formatFraction(b)
@@ -399,27 +429,39 @@ class Rational private constructor(
 
 
     override operator fun compareTo(other: Rational): Int {
-        val c = signum() - other.signum()
-        if (c != 0) return c
+        if (isNaN()) return if (other.isNaN()) 0 else 1
+        if (other.isNaN()) return -1
+        val c = num.signum() - other.num.signum()
+        if (c != 0) return if (c > 0) 1 else -1
         val product1 = num * other.den
         val product2 = den * other.num
         return product1.compareTo(product2)
     }
 
     operator fun compareTo(other: Int): Int {
+        if (isNaN()) return 1
         return (this.num - (this.den * BigInteger.valueOf(other.toLong()))).signum()
     }
 
     operator fun compareTo(other: Long): Int {
+        if (isNaN()) return 1
         return (this.num - (this.den * BigInteger.valueOf(other))).signum()
     }
 
     operator fun compareTo(other: BigInteger): Int {
+        if (isNaN()) return 1
         return (this.num - (this.den * other)).signum()
     }
 
-    fun min(other: Rational) = if (compareTo(other) > 0) other else this
-    fun max(other: Rational) = if (compareTo(other) < 0) other else this
+    fun min(other: Rational) = when {
+        isNaN() || other.isNaN() -> NaN
+        else -> if (compareTo(other) < 0) this else other
+    }
+
+    fun max(other: Rational) = when {
+        isNaN() || other.isNaN() -> NaN
+        else -> if (compareTo(other) > 0) this else other
+    }
 
     companion object {
 
@@ -438,6 +480,7 @@ class Rational private constructor(
             return x
         }
 
+        val NaN = store(Rational(BigInteger.ZERO, BigInteger.ZERO))
         val ZERO = store(Rational(BigInteger.ZERO))
         val ONE = store(Rational(BigInteger.ONE))
         val MINUS_ONE = store(Rational(BigInteger.valueOf(-1)))
@@ -493,6 +536,7 @@ class Rational private constructor(
         }
     }
 }
+
 fun max(value: Rational, vararg values: Rational) = values.fold(value) { acc, i -> acc.max(i) }
 fun min(value: Rational, vararg values: Rational) = values.fold(value) { acc, i -> acc.min(i) }
 

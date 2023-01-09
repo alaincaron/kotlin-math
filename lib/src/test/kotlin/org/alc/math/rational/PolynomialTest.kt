@@ -1,4 +1,4 @@
-package org.alc.math.polynomial
+package org.alc.math.rational
 
 import kotlin.math.sqrt
 import kotlin.test.Test
@@ -10,11 +10,11 @@ class PolynomialTest {
     @Test
     fun apply() {
         val p = Polynomial.withCoefficients(0, 2, 1)
-        assertEquals(3.0, p.apply(1.0))
+        assertEquals(3 over 1, p.apply(Rational.ONE))
         assertIs<LinearPolynomial>(p)
 
         val q = Polynomial.withCoefficients(1, -1, -2)
-        assertEquals(4.0, q.apply(3.0))
+        assertEquals(4 over 1, q.apply(3 over 1))
         assertIs<QuadraticPolynomial>(q)
     }
 
@@ -23,15 +23,15 @@ class PolynomialTest {
         val p = Polynomial.withCoefficients(0, 2, 1)
         assertEquals(1, p.degree())
         assertIs<LinearPolynomial>(p)
-        assertEquals(2.0, p.slope)
+        assertEquals(Rational.TWO, p.m)
 
         val q = Polynomial.withCoefficients(0, 1, -1, -2)
         assertEquals(2, q.degree())
         assertIs<QuadraticPolynomial>(q)
-        assertEquals(1.0, q.a)
-        assertEquals(-1.0, q.b)
-        assertEquals(-2.0, q.c)
-        assertEquals(0.5, q.extremum)
+        assertEquals(1 over 1, q.a)
+        assertEquals(-1 over 1, q.b)
+        assertEquals(-2 over 1, q.c)
+        assertEquals(1 over 2, q.extremum)
     }
 
     @Test
@@ -76,8 +76,8 @@ class PolynomialTest {
     @Test
     fun toStringTest() {
         val p = Polynomial.withCoefficients(1.0, -1.0, 3.5, -2.0)
-        assertEquals("x^3 - x^2 + 3.5x - 2", p.toString())
-        assertEquals("-x^3 + x^2 - 3.5x + 2", (-p).toString())
+        assertEquals("x^3 - x^2 + 7/2x - 2", p.toString())
+        assertEquals("-x^3 + x^2 - 7/2x + 2", (-p).toString())
         assertEquals("0", Polynomial.ZERO.toString())
         assertEquals("1", Polynomial.ONE.toString())
         assertEquals("x^3", Polynomial.CUBE.toString())
