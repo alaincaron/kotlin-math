@@ -23,5 +23,4 @@ class MatrixTest {
         assertThrows<ArrayIndexOutOfBoundsException> {  a[0, 5] }
         assertThrows<ArrayIndexOutOfBoundsException> {  a[5, 0] }
     }
-
 }
