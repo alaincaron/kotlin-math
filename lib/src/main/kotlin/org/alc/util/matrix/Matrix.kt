@@ -22,7 +22,7 @@ abstract class AbstractMatrix<T>  {
             }
         }
 
-        fun <X> transposeFunction(matrix: AbstractMatrix<X>): (Int,Int) -> X {
+        internal fun <X> transposeFunction(matrix: AbstractMatrix<X>): (Int,Int) -> X {
             return {i: Int, j: Int -> matrix[j, i]}
         }
     }
