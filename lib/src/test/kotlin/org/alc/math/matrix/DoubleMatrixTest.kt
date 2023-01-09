@@ -16,7 +16,6 @@ class DoubleMatrixTest {
         m[1,0] = 4.0
         m[1,1] = -1.0
         m[1,2] = 3.0
-        println("m = $m")
         val x = m.solve().toList()
         println("x = $x")
     }
@@ -47,6 +46,22 @@ class DoubleMatrixTest {
         m[1,1] = 4.0
         assertEquals(0.0, m.determinant())
         assertThrows<ArithmeticException> { m.solve()}
+    }
 
+    @Test
+    fun invert() {
+        val m = MutableDoubleMatrix(2,4)
+        m[0,0] = 3.0
+        m[0,1] = 4.0
+        m[1,0] = 2.0
+        m[1,1] = 3.0
+
+        m[0,2] = 1.0
+        m[0,3] = 0.0
+        m[1,2] = 0.0
+        m[1,3] = 1.0
+
+        m.invert()
+        println("m =\n$m")
     }
 }

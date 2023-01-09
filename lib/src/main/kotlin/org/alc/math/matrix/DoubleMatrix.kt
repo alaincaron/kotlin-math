@@ -70,22 +70,34 @@ class MutableDoubleMatrix : MutableMatrix<Double> {
     }
 
     fun solve(): DoubleArray {
+        invert()
+        return DoubleArray(nbRows) { i -> this[i,nbRows]}
+    }
+
+    fun invert() {
         val result = gaussianElimination()
         if (result == PivotResult.SINGULAR) {
             throw ArithmeticException("Matrix is singular")
         }
 
-        //backend substitution:
-        val xValues = DoubleArray(nbRows)
-        val size: Int = nbRows
-        for (secondLast in size - 1 downTo 0) {
-            xValues[secondLast] = this[secondLast, size]
-            for (last in secondLast + 1 until size) {
-                xValues[secondLast] -= this[secondLast, last] * xValues[last]
+        backSubstitution()
+    }
+
+    private fun backSubstitution() {
+        println("before backSubstitution:\n$this")
+        for (row in nbRows -1  downTo 0) {
+            val pivot = this[row,row]
+            for (row1 in 0 until row) {
+                val factor =  this[row1,row] / pivot
+                for (col in row until nbColumns) {
+                    this[row1, col] -= factor * this[row,col]
+                }
             }
-            xValues[secondLast] /= this[secondLast, secondLast]
+            this[row,row] = 1.0
+            for (col in nbRows until nbColumns) {
+                this[row,col] /= pivot
+            }
         }
-        return xValues
     }
 
 

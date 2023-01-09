@@ -1,5 +1,7 @@
 package org.alc.util.matrix
 
+import java.util.StringJoiner
+
 abstract class AbstractMatrix<T>  {
     internal val data: Array<Array<Any?>>
     val nbRows: Int
@@ -70,7 +72,13 @@ abstract class AbstractMatrix<T>  {
     }
 
     override fun toString(): String {
-        return "AbstractMatrix(data=${data.contentDeepToString()}, nbRows=$nbRows, nbColumns=$nbColumns)"
+        val joiner = StringJoiner("\n")
+        data.forEach {row ->
+            val innerJoiner = StringJoiner(", ")
+            row.forEach { innerJoiner.add(it.toString()) }
+            joiner.add(innerJoiner.toString())
+        }
+        return joiner.toString()
     }
 
 
