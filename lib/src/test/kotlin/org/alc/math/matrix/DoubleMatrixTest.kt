@@ -91,4 +91,28 @@ class DoubleMatrixTest {
         println("m =\n$m2")
     }
 
+    @Test fun polynomialInterpolation() {
+        // 3 points: (1,-1), (2,1), (3, 5)
+        // polynomial interpolation
+        // => x^2 - x - 1
+        val v = DoubleArray(3)
+        v[0] = -1.0
+        v[1] = 1.0
+        v[2] =  5.0
+        val m = MutableDoubleMatrix(3, 3)
+        m[0,0] = 1.0
+        m[0,1] = 1.0
+        m[0,2]  = 1.0
+        m[1,0] = 4.0
+        m[1,1] = 2.0
+        m[1,2] = 1.0
+        m[2,0] =  9.0
+        m[2,1] = 3.0
+        m[2,2] = 1.0
+
+        val soln = GaussianResolver.resolve(m,v)
+        println("soln =${soln.toList()}")
+
+    }
+
 }
