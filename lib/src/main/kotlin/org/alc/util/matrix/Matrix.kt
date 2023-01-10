@@ -1,8 +1,8 @@
 package org.alc.util.matrix
 
-import java.util.StringJoiner
+import java.util.*
 
-abstract class AbstractMatrix<T>  {
+abstract class AbstractMatrix<T> {
     internal val data: Array<Array<Any?>>
     val nbRows: Int
     val nbColumns: Int
@@ -22,14 +22,21 @@ abstract class AbstractMatrix<T>  {
             }
         }
 
-        internal fun <X> transposeFunction(matrix: AbstractMatrix<X>): (Int,Int) -> X {
-            return {i: Int, j: Int -> matrix[j, i]}
+        internal fun <X> transposeFunction(matrix: AbstractMatrix<X>): (Int, Int) -> X {
+            return { i: Int, j: Int -> matrix[j, i] }
         }
     }
 
     abstract fun transpose(): AbstractMatrix<T>
 
-    fun <U> rowReduce(row: Int, initial: U, f: (U,T) -> U): U {
+    @Suppress("UNCHECKED_CAST")
+    fun <U> forEach(f: (T) -> U): Unit = data.forEach { row -> row.forEach { f(it as T) } }
+
+    @Suppress("UNCHECKED_CAST")
+    fun <U> forEachIndexed(f: (Int, Int, T) -> U): Unit =
+        data.forEachIndexed { i, row -> row.forEachIndexed { j, item -> f(i, j, item as T) } }
+
+    fun <U> rowReduce(row: Int, initial: U, f: (U, T) -> U): U {
         var acc = initial
         for (column in 0 until nbColumns) {
             acc = f(acc, get(row, column))
@@ -37,14 +44,13 @@ abstract class AbstractMatrix<T>  {
         return acc
     }
 
-    fun <U> columnReduce(column: Int, initial: U, f: (U,T) -> U): U {
+    fun <U> columnReduce(column: Int, initial: U, f: (U, T) -> U): U {
         var acc = initial
         for (row in 0 until nbRows) {
             acc = f(acc, get(row, column))
         }
         return acc
     }
-
 
 
     @Suppress("UNCHECKED_CAST")
@@ -73,7 +79,7 @@ abstract class AbstractMatrix<T>  {
 
     override fun toString(): String {
         val joiner = StringJoiner("\n")
-        data.forEach {row ->
+        data.forEach { row ->
             val innerJoiner = StringJoiner(", ")
             row.forEach { innerJoiner.add(it.toString()) }
             joiner.add(innerJoiner.toString())
@@ -85,9 +91,10 @@ abstract class AbstractMatrix<T>  {
 }
 
 open class MutableMatrix<T> : AbstractMatrix<T> {
-    constructor(nbRows: Int, nbColumns: Int, f: (Int, Int) -> T): super(nbRows, nbColumns, f)
+    constructor(nbRows: Int, nbColumns: Int, f: (Int, Int) -> T) : super(nbRows, nbColumns, f)
     constructor(nbRows: Int, nbColumns: Int, value: T) : this(nbRows, nbColumns, { _, _ -> value })
-    constructor(values: AbstractMatrix<T>): super(values)
+    constructor(values: AbstractMatrix<T>) : super(values)
+
     operator fun set(i: Int, j: Int, value: T) {
         data[i][j] = value
     }
@@ -102,13 +109,33 @@ open class MutableMatrix<T> : AbstractMatrix<T> {
     }
 
     override fun transpose(): MutableMatrix<T> {
-       return MutableMatrix(nbColumns, nbRows, transposeFunction(this))
+        return MutableMatrix(nbColumns, nbRows, transposeFunction(this))
+    }
+
+    fun <U : T> map(f: (T) -> U): MutableMatrix<U> {
+        for (i in 0 until data.size) {
+            for (j in 0 until data[i].size) {
+                set(i, j, f(get(i, j)))
+            }
+        }
+        @Suppress("UNCHECKED_CAST")
+        return this as MutableMatrix<U>
+    }
+
+    fun <U : T> mapIndexed(f: (Int, Int, T) -> U): MutableMatrix<U> {
+        for (i in 0 until data.size) {
+            for (j in 0 until data[i].size) {
+                set(i, j, f(i, j, get(i, j)))
+            }
+        }
+        @Suppress("UNCHECKED_CAST")
+        return this as MutableMatrix<U>
     }
 }
 
-open class Matrix<T>  : AbstractMatrix<T> {
-    constructor(nbRows: Int, nbColumns: Int, f: (Int, Int) -> T): super(nbRows, nbColumns, f)
-    constructor(values: AbstractMatrix<T>): super(values)
+open class Matrix<T> : AbstractMatrix<T> {
+    constructor(nbRows: Int, nbColumns: Int, f: (Int, Int) -> T) : super(nbRows, nbColumns, f)
+    constructor(values: AbstractMatrix<T>) : super(values)
 
     override fun transpose(): Matrix<T> {
         return Matrix(nbColumns, nbRows, transposeFunction(this))

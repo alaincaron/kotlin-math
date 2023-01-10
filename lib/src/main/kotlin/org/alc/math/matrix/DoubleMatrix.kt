@@ -12,6 +12,8 @@ object DoubleMatrix {
         Matrix(nbRows, nbColumns) { _, _ -> value }
 
     operator fun invoke(nbRows: Int, nbColumns: Int) = invoke(nbRows, nbColumns, 0.0)
+    operator fun invoke(matrix: AbstractMatrix<Double>) = Matrix(matrix)
+
     fun identity(size: Int) = Matrix(size, size) { i, j -> if (i == j) 1.0 else 0.0 }
 }
 
@@ -20,12 +22,21 @@ object MutableDoubleMatrix {
         MutableMatrix(nbRows, nbColumns) { _, _ -> value }
 
     operator fun invoke(nbRows: Int, nbColumns: Int) = invoke(nbRows, nbColumns, 0.0)
+    operator fun invoke(matrix: AbstractMatrix<Double>) = MutableMatrix(matrix)
 
     fun identity(size: Int) = MutableMatrix(size, size) { i, j -> if (i == j) 1.0 else 0.0 }
 }
 
-object GaussianResolver {
-    fun resolve(
+fun MutableMatrix<Double>.determinant() = GaussianResolver.determinant(this)
+fun Matrix<Double>.determinant() = GaussianResolver.determinant(this)
+
+fun MutableMatrix<Double>.invert() = GaussianResolver.invert(this)
+fun Matrix<Double>.invert() = GaussianResolver.invert(this)
+fun Matrix<Double>.solve(values: DoubleArray) = GaussianResolver.solve(this, values)
+fun MutableMatrix<Double>.solve(values: DoubleArray) = GaussianResolver.solve(this, values)
+
+private object GaussianResolver {
+    fun solve(
         matrix: AbstractMatrix<Double>,
         values: DoubleArray
     ): DoubleArray {
@@ -47,7 +58,18 @@ object GaussianResolver {
         return gauss.determinant()
     }
 
-    fun invert(matrix: AbstractMatrix<Double>): MutableMatrix<Double> {
+    fun invert(matrix: MutableMatrix<Double>): MutableMatrix<Double> {
+        val work = invertBase(matrix)
+        return matrix.mapIndexed { i, j, _ -> work[i, j + matrix.nbColumns] }
+    }
+
+    fun invert(matrix: Matrix<Double>): Matrix<Double> {
+        val work = invertBase(matrix)
+        return Matrix(matrix.nbRows, matrix.nbColumns) { i, j -> work[i, j + matrix.nbColumns] }
+    }
+
+
+    private fun invertBase(matrix: AbstractMatrix<Double>): MutableMatrix<Double> {
         require(matrix.nbRows == matrix.nbColumns && matrix.nbRows > 0)
         { "Matrix is not square with positive number of rows." }
         val boundary = matrix.nbColumns - 1
@@ -59,8 +81,7 @@ object GaussianResolver {
             }
         }
         GaussianElimination(work).invert()
-        return MutableMatrix(matrix.nbRows, matrix.nbColumns) { i, j ->
-            work[i, j + matrix.nbColumns] }
+        return work
     }
 }
 
