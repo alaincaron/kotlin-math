@@ -60,7 +60,7 @@ private object GaussianResolver {
 
     fun invert(matrix: MutableMatrix<Double>): MutableMatrix<Double> {
         val work = invertBase(matrix)
-        return matrix.mapIndexed { i, j, _ -> work[i, j + matrix.nbColumns] }
+        return matrix.transformIndexed { i, j, _ -> work[i, j + matrix.nbColumns] }
     }
 
     fun invert(matrix: Matrix<Double>): Matrix<Double> {

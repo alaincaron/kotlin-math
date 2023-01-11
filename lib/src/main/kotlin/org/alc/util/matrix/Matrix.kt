@@ -112,24 +112,22 @@ open class MutableMatrix<T> : AbstractMatrix<T> {
         return MutableMatrix(nbColumns, nbRows, transposeFunction(this))
     }
 
-    fun <U : T> map(f: (T) -> U): MutableMatrix<U> {
+    fun <U : T> transform(f: (T) -> U): MutableMatrix<T> {
         for (i in 0 until data.size) {
             for (j in 0 until data[i].size) {
                 set(i, j, f(get(i, j)))
             }
         }
-        @Suppress("UNCHECKED_CAST")
-        return this as MutableMatrix<U>
+        return this
     }
 
-    fun <U : T> mapIndexed(f: (Int, Int, T) -> U): MutableMatrix<U> {
+    fun <U : T> transformIndexed(f: (Int, Int, T) -> U): MutableMatrix<T> {
         for (i in 0 until data.size) {
             for (j in 0 until data[i].size) {
                 set(i, j, f(i, j, get(i, j)))
             }
         }
-        @Suppress("UNCHECKED_CAST")
-        return this as MutableMatrix<U>
+        return this
     }
 }
 
