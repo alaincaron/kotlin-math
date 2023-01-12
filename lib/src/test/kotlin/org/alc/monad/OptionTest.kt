@@ -1,4 +1,4 @@
-package org.alc.utils
+package org.alc.monad
 
 import org.junit.jupiter.api.assertThrows
 import java.lang.RuntimeException
@@ -77,9 +77,7 @@ class OptionTest {
 
     @Test
     fun map() {
-        val f = { i: Int -> if (i < 0) null else i + 1 }
-        assertEquals(None, Some(-1).map(f))
-        assertEquals(None, None.map(f))
+        val f = { i: Int ->  i + 1 }
         assertEquals(Some(3), Some(2).map(f))
     }
 
@@ -120,18 +118,17 @@ class OptionTest {
     }
 
     @Test
-    fun toOption() {
+    fun maybe() {
         val a = 2
         val b = null
-        assertEquals(Some(a), a.toSome())
-        assertEquals(Some(a), a.toOption())
+        assertEquals(Some(a), a.maybe())
         assertEquals(None, a.toNone())
-        assertEquals(None, b.toOption())
+        assertEquals(None, b.maybe())
         assertEquals(None, b.toNone())
     }
 
     @Test
-    fun maybe() {
+    fun maybeBool() {
         assertEquals(Some(2), true.maybe { 2 })
         assertEquals(None, false.maybe { 2 })
     }

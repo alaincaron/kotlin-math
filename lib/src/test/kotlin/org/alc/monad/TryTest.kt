@@ -1,4 +1,4 @@
-package org.alc.utils
+package org.alc.monad
 
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.*

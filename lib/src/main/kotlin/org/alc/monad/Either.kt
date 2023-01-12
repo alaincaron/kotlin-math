@@ -1,24 +1,20 @@
-package org.alc.utils
+package org.alc.monad
 
 
-sealed interface Either<out A : Any, out B : Any> {
+sealed interface EitherMonad<out A : Any, out B : Any> : Monad<A, B> {
+    fun filter(predicate: (B) -> Boolean): Option<EitherMonad<A, B>>
+    override fun <B1 : Any> map(f: (B) -> B1): EitherMonad<A, B1>
     fun <C> fold(leftFunction: (A) -> C, rightFunction: (B) -> C): C
-    fun <C> foldLeft(c: C, rightFunction: (C, B) -> C): C
+}
+
+sealed interface Either<out A : Any, out B : Any> : EitherMonad<A, B> {
     fun swap(): Either<B, A>
-    fun <B1 : Any> map(f: (B) -> B1): Either<A, B1>
-    fun <A1 : Any> mapLeft(f: (A) -> A1): Either<A1, B>
-    fun <U> forEach(f: (B) -> U)
-    fun get(): B
-    fun all(p: (B) -> Boolean): Boolean
-    fun exists(p: (B) -> Boolean): Boolean
-    fun toList(): List<B>
-    fun toSet(): Set<B>
-    fun toSequence(): Sequence<B>
-    fun toOption(): Option<B>
     fun <U> onLeft(f: (A) -> U): Either<A, B>
     fun <U> onRight(f: (B) -> U): Either<A, B>
-    fun getOrNull(): B?
+    fun <C> foldLeft(c: C, rightFunction: (C, B) -> C): C
+    fun <A1 : Any> mapLeft(f: (A) -> A1): Either<A1, B>
 }
+
 
 /**
  * The left side of the disjoint union, as opposed to the [Right] side.
@@ -30,9 +26,10 @@ data class Left<A : Any>(internal val value: A) : Either<A, Nothing> {
     override fun <B1 : Any> map(f: (Nothing) -> B1) = this
     override fun <A1 : Any> mapLeft(f: (A) -> A1) = Left(f(value))
     override fun <U> forEach(f: (Nothing) -> U) {}
+    override fun filter(predicate: (Nothing) -> Boolean) = None
     override fun get() = throw NoSuchElementException()
-    override fun all(p: (Nothing) -> Boolean) = true
-    override fun exists(p: (Nothing) -> Boolean) = false
+    override fun all(predicate: (Nothing) -> Boolean) = true
+    override fun exists(predicate: (Nothing) -> Boolean) = false
     override fun toList() = emptyList<Nothing>()
     override fun toSet() = emptySet<Nothing>()
     override fun toSequence() = emptySequence<Nothing>()
@@ -56,9 +53,11 @@ data class Right<B : Any>(internal val value: B) : Either<Nothing, B> {
         f(value)
     }
 
+    override fun filter(predicate: (B) -> Boolean) = predicate(value).maybe { this }
+
     override fun get() = value
-    override fun all(p: (B) -> Boolean) = p(value)
-    override fun exists(p: (B) -> Boolean) = p(value)
+    override fun all(predicate: (B) -> Boolean) = predicate(value)
+    override fun exists(predicate: (B) -> Boolean) = predicate(value)
     override fun toList() = listOf(value)
     override fun toSet() = setOf(value)
     override fun toSequence() = sequenceOf(value)
@@ -67,6 +66,37 @@ data class Right<B : Any>(internal val value: B) : Either<Nothing, B> {
     override fun <U> onRight(f: (B) -> U) = also { f(it.value) }
     override fun getOrNull() = value
 }
+
+class LeftProjection<A : Any, B : Any> internal constructor(e: Either<A, B>) : EitherMonad<B, A> {
+    private val entry = e.swap()
+    override fun filter(predicate: (A) -> Boolean): Option<LeftProjection<A,B>> =
+        if (entry.exists(predicate)) Some(this) else None
+
+    override fun <A1 : Any> map(f: (A) -> A1): EitherMonad<B, A1> = entry.map(f)
+
+    override fun <C> fold(leftFunction: (B) -> C, rightFunction: (A) -> C) =
+        entry.fold(leftFunction, rightFunction)
+
+    override fun exists(predicate: (A) -> Boolean) = entry.exists(predicate)
+
+    override fun <U> forEach(f: (A) -> U) = entry.forEach(f)
+
+    override fun all(predicate: (A) -> Boolean) = entry.all(predicate)
+
+    override fun get() = entry.get()
+
+    override fun toList() = entry.toList()
+
+    override fun toSet() = entry.toSet()
+
+    override fun toSequence() = entry.toSequence()
+
+    override fun toOption() = entry.toOption()
+
+    override fun getOrNull() = entry.getOrNull()
+}
+
+fun <A: Any, B: Any> Either<A,B>.leftProjection() = LeftProjection(this)
 
 fun <A : Any> A.toLeft(): Either<A, Nothing> = Left(this)
 fun <A : Any> A.toRight(): Either<Nothing, A> = Right(this)
