@@ -129,4 +129,20 @@ class TryTest {
         val y = e.toTry()
         assertEquals(Failure(e), y)
     }
+
+    @Test
+    fun recover() {
+        val x = Success(2)
+        assertSame(x, x.recover { throw RuntimeException()})
+        val y = Failure<Int>(RuntimeException())
+        assertEquals(x, y.recover { x.value })
+    }
+
+    @Test
+    fun flatRecover() {
+        val x = Success(2)
+        assertSame(x, x.flatRecover { throw RuntimeException()})
+        val y = Failure<Int>(RuntimeException())
+        assertSame(x, y.flatRecover { x })
+    }
 }
