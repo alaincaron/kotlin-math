@@ -1,5 +1,6 @@
 package org.alc.math.matrix
 
+import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -17,8 +18,7 @@ class DoubleMatrixTest {
         val v = DoubleArray(2)
         v[0] = 5.0
         v[1] = 3.0
-        val x = m.solve(v).toList()
-        println("x = $x")
+       assertEquals(listOf(1.0, 1.0), m.solve(v).toList())
     }
 
     @Test
@@ -30,7 +30,6 @@ class DoubleMatrixTest {
         m[1, 1] = -1.0
         val m1 = MutableDoubleMatrix(m)
         val d = m.determinant()
-        println("d = $d")
         assertEquals(-14.0, d)
         assertEquals(m, m1)
     }
@@ -44,7 +43,6 @@ class DoubleMatrixTest {
         m[1, 1] = -1.0
         val m1 = MutableDoubleMatrix(m)
         val d = m.determinant()
-        println("d = $d")
         assertEquals(-14.0, d)
         assertEquals(m, m1)
     }
@@ -85,7 +83,15 @@ class DoubleMatrixTest {
         m[1, 3] = 1.0
 
         GaussianElimination(m).invert()
-        println("m =\n$m")
+        assertEquals(1.0, m[0,0], 1e-15)
+        assertEquals(0.0, m[0,1], 1e-15)
+        assertEquals(0.0, m[1,0], 1e-15)
+        assertEquals(1.0, m[1,1], 1e-15)
+
+        assertEquals(3.0, m[0,2], 1e-14)
+        assertEquals(-4.0, m[0,3], 1e-14)
+        assertEquals(-2.0, m[1,2], 1e-14)
+        assertEquals(3.0, m[1,3], 1e-14)
     }
 
     @Test
@@ -97,7 +103,11 @@ class DoubleMatrixTest {
         m[1, 1] = 3.0
 
         val m2 = m.invert()
-        println("m =\n$m2")
+        assertEquals(3.0, m[0,0], 1e-14)
+        assertEquals(-4.0, m[0,1], 1e-14)
+        assertEquals(-2.0, m[1,0], 1e-14)
+        assertEquals(3.0, m[1,1], 1e-14)
+        assertSame(m2, m)
     }
 
     @Test

@@ -1,5 +1,8 @@
 package org.alc.math.polynomial
 
+import org.alc.math.Point2D
+import org.alc.math.matrix.GaussianElimination
+import org.alc.math.matrix.MutableDoubleMatrix
 import java.lang.Integer.max
 import java.util.function.Function
 import kotlin.math.abs
@@ -219,7 +222,7 @@ open class Polynomial internal constructor(val coefficients: List<Double>) : Fun
 
         fun withCoefficients(vararg coefficients: Double) = fromDoubles(coefficients.asList())
 
-        fun withCoefficients(vararg coefficients: Number) = fromDoubles(coefficients.asSequence().map { it.toDouble() }.toList())
+        fun withCoefficients(vararg coefficients: Number) = fromDoubles(coefficients.map { it.toDouble() })
 
         fun fromDoubles(coefficients: List<Double>) = when (coefficients.size) {
             0 -> ZERO
@@ -230,6 +233,33 @@ open class Polynomial internal constructor(val coefficients: List<Double>) : Fun
             }
 
             else -> nonTrivialList(coefficients)
+        }
+
+        fun interpolate(vararg points: Point2D) = interpolate(points.asList())
+
+        fun interpolate(points: List<Point2D>): Polynomial {
+            require(points.size >= 2) { "Interpolation requires at least 2 points" }
+            if (points.size == 2) return linearInterpolation(points[0], points[1])
+
+            val m = MutableDoubleMatrix(points.size, points.size + 1, 1.0)
+            for (i in points.indices) {
+                m[i, points.size] = points[i].y
+                val v = points[i].x
+                var c = v
+                for (j in points.size - 2 downTo 0) {
+                    m[i, j] = c
+                    c *= v
+                }
+            }
+            return fromDoubles(GaussianElimination(m).solve().asList())
+        }
+
+        private fun linearInterpolation(p1: Point2D, p2: Point2D): Polynomial {
+            val delta_x = p1.x - p2.x
+            if (delta_x == 0.0) throw ArithmeticException("Infinite slope")
+            val slope = (p1.y - p2.y) / delta_x
+            val b = p1.y - p1.x * slope
+            return fromDoubles(listOf(slope, b))
         }
 
         private fun nonTrivialList(coefficients: List<Double>): Polynomial {

@@ -136,7 +136,6 @@ class GaussianElimination(private val matrix: MutableMatrix<Double>) {
     }
 
     private fun backSubstitution() {
-        println("before backSubstitution:\n$this")
         for (row in matrix.nbRows - 1 downTo 0) {
             val pivot = matrix[row, row]
             for (row1 in 0 until row) {
