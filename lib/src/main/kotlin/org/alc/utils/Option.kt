@@ -100,6 +100,8 @@ fun <A:Any> Boolean.maybe(f: () -> A): Option<A> =
     }
 
 fun <A:Any> A.toSome(): Option<A> = Some(this)
+
+@Suppress("UnusedReceiverParameter")
 fun <A:Any> A?.toNone(): Option<A> = None
 
 fun <A:Any> Option<Option<A>>.flatten(): Option<A> = flatMap { it }

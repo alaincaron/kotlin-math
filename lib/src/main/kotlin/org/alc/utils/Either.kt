@@ -1,12 +1,12 @@
 package org.alc.utils
 
 
-sealed interface Either<out A: Any, out B:Any> {
+sealed interface Either<out A : Any, out B : Any> {
     fun <C> fold(leftFunction: (A) -> C, rightFunction: (B) -> C): C
     fun <C> foldLeft(c: C, rightFunction: (C, B) -> C): C
     fun swap(): Either<B, A>
-    fun <B1:Any> map(f: (B) -> B1): Either<A, B1>
-    fun <A1:Any> mapLeft(f: (A) -> A1): Either<A1, B>
+    fun <B1 : Any> map(f: (B) -> B1): Either<A, B1>
+    fun <A1 : Any> mapLeft(f: (A) -> A1): Either<A1, B>
     fun <U> forEach(f: (B) -> U)
     fun get(): B
     fun all(p: (B) -> Boolean): Boolean
@@ -23,12 +23,12 @@ sealed interface Either<out A: Any, out B:Any> {
 /**
  * The left side of the disjoint union, as opposed to the [Right] side.
  */
-data class Left<A:Any>(internal val value: A) : Either<A, Nothing> {
+data class Left<A : Any>(internal val value: A) : Either<A, Nothing> {
     override fun <C> fold(leftFunction: (A) -> C, rightFunction: (Nothing) -> C) = leftFunction(value)
     override fun <C> foldLeft(c: C, rightFunction: (C, Nothing) -> C) = c
     override fun swap() = Right(value)
-    override fun <B1:Any> map(f: (Nothing) -> B1) = this
-    override fun <A1:Any> mapLeft(f: (A) -> A1) = Left(f(value))
+    override fun <B1 : Any> map(f: (Nothing) -> B1) = this
+    override fun <A1 : Any> mapLeft(f: (A) -> A1) = Left(f(value))
     override fun <U> forEach(f: (Nothing) -> U) {}
     override fun get() = throw NoSuchElementException()
     override fun all(p: (Nothing) -> Boolean) = true
@@ -45,12 +45,12 @@ data class Left<A:Any>(internal val value: A) : Either<A, Nothing> {
 /**
  * The right side of the disjoint union, as opposed to the [Left] side.
  */
-data class Right<B:Any>(internal val value: B) : Either<Nothing, B> {
+data class Right<B : Any>(internal val value: B) : Either<Nothing, B> {
     override fun <C> fold(leftFunction: (Nothing) -> C, rightFunction: (B) -> C) = rightFunction(value)
     override fun <C> foldLeft(c: C, rightFunction: (C, B) -> C) = rightFunction(c, value)
     override fun swap() = Left(value)
-    override fun <B1:Any> map(f: (B) -> B1) = flatMap { Right(f(value)) }
-    override fun <A1:Any> mapLeft(f: (Nothing) -> A1) = this
+    override fun <B1 : Any> map(f: (B) -> B1) = flatMap { Right(f(value)) }
+    override fun <A1 : Any> mapLeft(f: (Nothing) -> A1) = this
 
     override fun <U> forEach(f: (B) -> U) {
         f(value)
@@ -68,44 +68,49 @@ data class Right<B:Any>(internal val value: B) : Either<Nothing, B> {
     override fun getOrNull() = value
 }
 
-fun <A:Any> A.toLeft(): Either<A, Nothing> = Left(this)
-fun <A:Any> A.toRight(): Either<Nothing, A> = Right(this)
+fun <A : Any> A.toLeft(): Either<A, Nothing> = Left(this)
+fun <A : Any> A.toRight(): Either<Nothing, A> = Right(this)
 
-fun <A:Any, B:Any> Either<A, B>.orElse(default: () -> Either<A, B>) = when (this) {
+fun <A : Any, B : Any> Either<A, B>.orElse(default: () -> Either<A, B>) = when (this) {
     is Right -> this
     else -> default()
 }
 
-fun <A:Any, B:Any> Either<A, B>.contains(b: B) = fold({ false }) { it == b }
+fun <A : Any, B : Any> Either<A, B>.contains(b: B) = fold({ false }) { it == b }
 
-fun <A:Any, B:Any, C:Any> Either<A, B>.flatMap(f: (B) -> Either<A, C>): Either<A, C> = when (this) {
+fun <A : Any, B : Any, C : Any> Either<A, B>.flatMap(f: (B) -> Either<A, C>): Either<A, C> = when (this) {
     is Right -> f(value)
     is Left -> this
 }
 
-fun <A:Any, B:Any> Either<A, B>.filterOrElse(p: (B) -> Boolean, default: () -> A) =
+fun <A : Any, B : Any, C : Any> Either<A, B>.flatMapLeft(f: (A) -> Either<C, B>): Either<C, B> = when (this) {
+    is Right -> this
+    is Left -> f(value)
+}
+
+fun <A : Any, B : Any> Either<A, B>.filterOrElse(p: (B) -> Boolean, default: () -> A) =
     flatMap { it.takeIf(p)?.toRight() ?: default().toLeft() }
 
-fun <E : Exception, B:Any> Either<E, B>.toTry(): Try<B> = fold({ Failure(it) }) { Success(it) }
+fun <E : Exception, B : Any> Either<E, B>.toTry(): Try<B> = fold({ Failure(it) }) { Success(it) }
 
 @Suppress("UNCHECKED_CAST")
-fun <A:Any, B:Any, C:Any> Either<A, B>.widen(): Either<A, C> = this as Either<A,C>
+fun <A : Any, B : Any, C : Any> Either<A, B>.widen(): Either<A, C> = this as Either<A, C>
 
-fun <AA: Any, A : AA, B:Any> Either<A, B>.leftWiden(): Either<AA, B> = this
+fun <AA : Any, A : AA, B : Any> Either<A, B>.leftWiden(): Either<AA, B> = this
 
-fun <A:Any> Either<A, A>.merge(): A = fold({ it }) { it }
+fun <A : Any> Either<A, A>.merge(): A = fold({ it }) { it }
 
-fun <A:Any, B:Any> Either<A, Either<A, B>>.flatten(): Either<A, B> = flatMap { it }
-fun <B:Any> Either<*, B>.getOrElse(default: () -> B): B = fold({ default() }, { it })
+fun <A : Any, B : Any> Either<A, Either<A, B>>.flatten(): Either<A, B> = flatMap { it }
+fun <B : Any> Either<*, B>.getOrElse(default: () -> B): B = fold({ default() }, { it })
 
 @Suppress("UNCHECKED_CAST")
-fun <A: Any, B:Any, A1 : A> Either<A, Either<A1, B>>.joinRight() = when (this) {
+fun <A : Any, B : Any, A1 : A> Either<A, Either<A1, B>>.joinRight() = when (this) {
     is Right -> this.value
     else -> this as Either<A, B>
 }
 
 @Suppress("UNCHECKED_CAST")
-fun <A:Any, B: Any, A1 : A, B1 : B> Either<Either<A1, B1>, B>.joinLeft() = when (this) {
+fun <A : Any, B : Any, A1 : A, B1 : B> Either<Either<A1, B1>, B>.joinLeft() = when (this) {
     is Left -> this.value
     else -> this as Either<A, B>
 }

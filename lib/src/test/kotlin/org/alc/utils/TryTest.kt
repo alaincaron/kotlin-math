@@ -102,7 +102,7 @@ class TryTest {
     @Test
     fun filter() {
         val e = RuntimeException()
-        val predicate =  { x: Int -> if (x < 0) throw e else x % 2 == 0 }
+        val predicate = { x: Int -> if (x < 0) throw e else x % 2 == 0 }
         val a = Success(2)
         assertSame(a, a.filter(predicate))
         val x = Success(1).filter(predicate)
@@ -111,5 +111,22 @@ class TryTest {
         assertEquals(Failure(e), Success(-1).filter(predicate))
         val b = Failure<Int>(RuntimeException())
         assertSame(b, b.filter(predicate))
+    }
+
+    @Test
+    fun toTryBlock() {
+        val x = "foobar".toTry { length }
+        assertEquals(Success(6), x)
+        val y = "foobar".toTry { throw IllegalArgumentException() }
+        assertIs<Failure<IllegalArgumentException>>(y)
+    }
+
+    @Test
+    fun toTry() {
+        val x = "foobar".toTry()
+        assertEquals(Success("foobar"), x)
+        val e = IllegalArgumentException()
+        val y = e.toTry()
+        assertEquals(Failure(e), y)
     }
 }

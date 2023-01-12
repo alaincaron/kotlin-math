@@ -1,10 +1,7 @@
 package org.alc.utils
 
 import org.junit.jupiter.api.assertThrows
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 class EitherTest {
     @Test
@@ -237,5 +234,24 @@ class EitherTest {
         assertEquals(Right("flower"), v1.joinLeft())
         assertEquals(Left(12), v2.joinLeft())
         assertEquals(Right("daisy"), v3.joinLeft())
+    }
+
+    @Test
+    fun flatMap() {
+        val left = Left("foobar")
+        val f =  { i:Int -> Right(2 * i) }
+        assertSame(left, left.flatMap(f))
+
+        val right = Right(2)
+        assertEquals(Right(4), right.flatMap(f))
+    }
+    @Test
+    fun flatMapLeft() {
+        val right = Right("foobar")
+        val f =  { i:Int -> Left(2 * i) }
+        assertSame(right, right.flatMapLeft(f))
+
+        val left = Left(2)
+        assertEquals(Left(4), left.flatMapLeft(f))
     }
 }

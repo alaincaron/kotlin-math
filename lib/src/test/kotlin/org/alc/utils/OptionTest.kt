@@ -130,4 +130,28 @@ class OptionTest {
         assertEquals(None, b.toNone())
     }
 
+    @Test
+    fun maybe() {
+        assertEquals(Some(2), true.maybe { 2 })
+        assertEquals(None, false.maybe { 2 })
+    }
+
+    @Test
+    fun flatten() {
+        assertEquals(Some(2), Some(Some(2)).flatten())
+        assertEquals(None, None.flatten())
+        assertEquals(None, Some(None).flatten())
+    }
+
+    @Test
+    fun widen() {
+        val a = Some(5)
+        val b: Option<Number> = a.widen()
+        assertEquals(5, b.get())
+        assertSame(a, b)
+
+        val c: Option<Int> = None
+        val d: Option<Number> = c.widen()
+        assertSame(c, d)
+    }
 }
