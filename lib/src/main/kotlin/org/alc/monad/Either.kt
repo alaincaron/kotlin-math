@@ -1,13 +1,10 @@
 package org.alc.monad
 
 
-sealed interface EitherMonad<out A : Any, out B : Any> : Monad<A, B> {
-    fun filter(predicate: (B) -> Boolean): Option<EitherMonad<A, B>>
-    override fun <B1 : Any> map(f: (B) -> B1): EitherMonad<A, B1>
+sealed interface Either<out A : Any, out B : Any> : Monad<A, B> {
+    fun filter(predicate: (B) -> Boolean): Option<Monad<A, B>>
+    override fun <B1 : Any> map(f: (B) -> B1): Monad<A, B1>
     fun <C> fold(leftFunction: (A) -> C, rightFunction: (B) -> C): C
-}
-
-sealed interface Either<out A : Any, out B : Any> : EitherMonad<A, B> {
     fun swap(): Either<B, A>
     fun <U> onLeft(f: (A) -> U): Either<A, B>
     fun <U> onRight(f: (B) -> U): Either<A, B>
@@ -66,37 +63,6 @@ data class Right<B : Any>(internal val value: B) : Either<Nothing, B> {
     override fun <U> onRight(f: (B) -> U) = also { f(it.value) }
     override fun getOrNull() = value
 }
-
-class LeftProjection<A : Any, B : Any> internal constructor(e: Either<A, B>) : EitherMonad<B, A> {
-    private val entry = e.swap()
-    override fun filter(predicate: (A) -> Boolean): Option<LeftProjection<A,B>> =
-        if (entry.exists(predicate)) Some(this) else None
-
-    override fun <A1 : Any> map(f: (A) -> A1): EitherMonad<B, A1> = entry.map(f)
-
-    override fun <C> fold(leftFunction: (B) -> C, rightFunction: (A) -> C) =
-        entry.fold(leftFunction, rightFunction)
-
-    override fun exists(predicate: (A) -> Boolean) = entry.exists(predicate)
-
-    override fun <U> forEach(f: (A) -> U) = entry.forEach(f)
-
-    override fun all(predicate: (A) -> Boolean) = entry.all(predicate)
-
-    override fun get() = entry.get()
-
-    override fun toList() = entry.toList()
-
-    override fun toSet() = entry.toSet()
-
-    override fun toSequence() = entry.toSequence()
-
-    override fun toOption() = entry.toOption()
-
-    override fun getOrNull() = entry.getOrNull()
-}
-
-fun <A: Any, B: Any> Either<A,B>.leftProjection() = LeftProjection(this)
 
 fun <A : Any> A.toLeft(): Either<A, Nothing> = Left(this)
 fun <A : Any> A.toRight(): Either<Nothing, A> = Right(this)

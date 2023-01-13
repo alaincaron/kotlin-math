@@ -1,6 +1,5 @@
 package org.alc.monad
 
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.*
 
@@ -255,44 +254,4 @@ class EitherTest {
         val left = Left(2)
         assertEquals(Left(4), left.flatMapLeft(f))
     }
-
-    @Test
-    fun leftProjectionRight() {
-        val right: Either<Int,String> = Right("foobar")
-        val projection = right.leftProjection()
-
-        assertFalse(projection.exists { true })
-        assertDoesNotThrow {  projection.forEach { throw RuntimeException() }}
-        assertTrue(projection.all { false})
-        assertThrows<NoSuchElementException> { projection.get() }
-        assertEquals(Left("foobar"), projection.map { it + 1 })
-        assertEquals(emptyList(), projection.toList())
-        assertEquals(emptySet(), projection.toSet())
-        assertEquals(emptySequence(), projection.toSequence())
-        assertEquals(None, projection.toOption())
-        assertNull(projection.getOrNull())
-    }
-
-    @Test
-    fun leftProjectionLeft() {
-        val left: Either<String,Int> = Left("foobar")
-        val projection = left.leftProjection()
-
-        assertTrue(projection.exists { it == "foobar" })
-        assertFalse(projection.exists { it != "foobar" })
-        assertThrows<RuntimeException> {
-            projection.forEach { throw RuntimeException() }
-        }
-        assertTrue(projection.all { it == "foobar"})
-        assertFalse(projection.all { it != "foobar"})
-        assertEquals("foobar", projection.get())
-
-        assertEquals(Right(6), projection.map { it.length })
-        assertEquals(listOf("foobar"), projection.toList())
-        assertEquals(setOf("foobar"), projection.toSet())
-        assertEquals(listOf("foobar"), projection.toSequence().toList())
-        assertEquals(Some("foobar"), projection.toOption())
-        assertEquals("foobar", projection.getOrNull())
-    }
-
 }
