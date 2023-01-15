@@ -1,6 +1,6 @@
 package org.alc.math.rational
 
-import org.alc.math.ring.RingElement
+import org.alc.math.ring.DivisionRingElement
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.MathContext
@@ -45,7 +45,7 @@ operator fun Byte.compareTo(other: Rational) = Rational.valueOf(this).compareTo(
 class Rational private constructor(
     val num: BigInteger,
     val den: BigInteger = BigInteger.ONE
-) : Number(), RingElement<Rational>, Comparable<Rational> {
+) : Number(), DivisionRingElement<Rational>, Comparable<Rational> {
 
     sealed interface Format
 
@@ -161,11 +161,11 @@ class Rational private constructor(
         else -> valueOf(this.num, this.den * other)
     }
 
-    override operator fun div(other: Rational) = when {
-        other.isZero() -> throw ArithmeticException("Division by 0")
-        isNaN() || other.isNaN() -> NaN
-        other == ONE -> this
-        else -> valueOf(this.num * other.den, this.den * other.num)
+    override operator fun div(den: Rational) = when {
+        den.isZero() -> throw ArithmeticException("Division by 0")
+        isNaN() || den.isNaN() -> NaN
+        den == ONE -> this
+        else -> valueOf(this.num * den.den, this.den * den.num)
     }
 
     operator fun unaryPlus() = this
@@ -218,7 +218,7 @@ class Rational private constructor(
         }
     }
 
-    override operator fun rem(other: Rational) = divideAndRemainder(other).second
+    override operator fun rem(den: Rational) = divideAndRemainder(den).second
 
     fun divideAndRemainder(other: Rational): Pair<BigInteger, Rational> = when {
         isNaN() || other.isNaN() -> Pair(BigInteger.ZERO, NaN)

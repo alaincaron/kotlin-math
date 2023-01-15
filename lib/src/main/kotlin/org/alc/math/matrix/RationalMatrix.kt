@@ -1,27 +1,25 @@
 package org.alc.math.matrix
 
+import org.alc.math.rational.Rational
 import org.alc.util.matrix.Matrix
-import kotlin.math.abs
-import kotlin.math.absoluteValue
-import kotlin.math.max
 
-object DoubleMatrix {
-    operator fun invoke(nbRows: Int, nbColumns: Int, value: Double) =
+object RationalMatrix {
+    operator fun invoke(nbRows: Int, nbColumns: Int, value: Rational) =
         Matrix(nbRows, nbColumns) { _, _ -> value }
 
-    operator fun invoke(nbRows: Int, nbColumns: Int) = invoke(nbRows, nbColumns, 0.0)
-    operator fun invoke(matrix: Matrix<Double>) = Matrix(matrix)
+    operator fun invoke(nbRows: Int, nbColumns: Int) = invoke(nbRows, nbColumns, Rational.ZERO)
+    operator fun invoke(matrix: Matrix<Rational>) = Matrix(matrix)
 
-    fun identity(size: Int) = Matrix(size, size) { i, j -> if (i == j) 1.0 else 0.0 }
+    fun identity(size: Int) = Matrix(size, size) { i, j -> if (i == j) Rational.ONE else Rational.ZERO }
 
-    class GaussianSolver(private val matrix: Matrix<Double>) {
+    class GaussianSolver(private val matrix: Matrix<Rational>) {
 
         private fun gaussianElimination(): PivotResult {
             if (matrix.nbRows == 0 || matrix.nbColumns == 0) return PivotResult.SINGULAR
 
             //find the largest absolute value for each row to use in scale ratios
-            val greatest = DoubleArray(matrix.nbRows) { i ->
-                matrix.rowReduce(i, 0.0) { acc, x -> max(acc, abs(x)) }
+            val greatest = Array(matrix.nbRows) { i ->
+                matrix.rowReduce(i, Rational.ZERO) { acc, x -> acc.max(x.abs()) }
             }
 
             //Gaussian elimination:
@@ -37,11 +35,11 @@ object DoubleMatrix {
             return result
         }
 
-        fun determinant(): Double {
+        fun determinant(): Rational {
             var result = when (gaussianElimination()) {
-                PivotResult.SINGULAR -> return 0.0
-                PivotResult.SWAP -> -1.0
-                else -> 1.0
+                PivotResult.SINGULAR -> return Rational.ZERO
+                PivotResult.SWAP -> Rational.MINUS_ONE
+                else -> Rational.ONE
             }
             for (i in 0 until matrix.nbRows) {
                 result *= matrix[i, i]
@@ -49,9 +47,9 @@ object DoubleMatrix {
             return result
         }
 
-        fun solve(): DoubleArray {
+        fun solve(): Array<Rational> {
             invert()
-            return DoubleArray(matrix.nbRows) { i -> matrix[i, matrix.nbRows] }
+            return Array(matrix.nbRows) { i -> matrix[i, matrix.nbRows] }
         }
 
         fun invert() {
@@ -72,7 +70,7 @@ object DoubleMatrix {
                         matrix[row1, col] -= factor * matrix[row, col]
                     }
                 }
-                matrix[row, row] = 1.0
+                matrix[row, row] = Rational.ONE
                 for (col in matrix.nbRows until matrix.nbColumns) {
                     matrix[row, col] /= pivot
                 }
@@ -80,10 +78,10 @@ object DoubleMatrix {
         }
 
 
-        private fun scaleRatios(iteration: Int, greatest: DoubleArray): DoubleArray {
-            val ratios = DoubleArray(matrix.nbRows)
+        private fun scaleRatios(iteration: Int, greatest: Array<Rational>): Array<Rational> {
+            val ratios = Array(matrix.nbRows) { Rational.ZERO }
             for (row in iteration until matrix.nbRows - iteration) {
-                ratios[row] = abs(matrix[row, iteration] / greatest[row])
+                ratios[row] = (matrix[row, iteration] / greatest[row]).abs()
             }
             return ratios
         }
@@ -101,7 +99,7 @@ object DoubleMatrix {
             }
         }
 
-        private fun pivotAndSwap(iteration: Int, ratios: DoubleArray): PivotResult {
+        private fun pivotAndSwap(iteration: Int, ratios: Array<Rational>): PivotResult {
 
             var maxRatio = ratios[iteration]
             var maxIdx = iteration
@@ -116,19 +114,19 @@ object DoubleMatrix {
                 matrix.swapRows(iteration, maxIdx)
                 result = PivotResult.SWAP
             }
-            if (matrix[iteration, iteration].absoluteValue <= 1e-10) {
+            if (matrix[iteration, iteration] == Rational.ZERO) {
                 result = PivotResult.SINGULAR
             }
             return result
         }
 
 
-        private fun invert(iteration: Int, ratios: DoubleArray): PivotResult {
+        private fun invert(iteration: Int, ratios: Array<Rational>): PivotResult {
             val result = pivotAndSwap(iteration, ratios)
             if (result == PivotResult.SINGULAR) return result
             for (row in iteration + 1 until matrix.nbRows) {
                 val value = matrix[row, iteration] / matrix[iteration, iteration]
-                if (value != 0.0) {
+                if (value != Rational.ZERO) {
                     for (col in iteration until matrix.nbColumns) {
                         matrix[row, col] -= value * matrix[iteration, col]
                     }
@@ -140,64 +138,65 @@ object DoubleMatrix {
 
 }
 
-fun Matrix<Double>.determinant(): Double {
+fun Matrix<Rational>.determinant(): Rational {
     requireIsSquare()
     val work = Matrix(this)
-    val gauss = DoubleMatrix.GaussianSolver(work)
+    val gauss = RationalMatrix.GaussianSolver(work)
     return gauss.determinant()
 }
 
-fun Matrix<Double>.invert(): Matrix<Double> {
+fun Matrix<Rational>.invert(): Matrix<Rational> {
     val work = invertBase()
     return Matrix(nbRows, nbColumns) { i, j -> work[i, j + nbColumns] }
 }
 
-fun Matrix<Double>.invertInPlace(): Matrix<Double> {
+fun Matrix<Rational>.invertInPlace(): Matrix<Rational> {
     val work = invertBase()
     return transformIndexed { i, j, _ -> work[i, j + nbColumns] }
 
 }
-fun Matrix<Double>.solve(values: DoubleArray): DoubleArray {
+
+fun Matrix<Rational>.solve(values: Array<Rational>): Array<Rational> {
     require(nbRows == values.size)
     { "Matrix and values must have same number of rows" }
     val work = Matrix(
         nbRows,
         nbColumns + 1
     ) { i, j -> if (j == nbColumns) values[i] else this[i, j] }
-    val gauss = DoubleMatrix.GaussianSolver(work)
+    val gauss = RationalMatrix.GaussianSolver(work)
     return gauss.solve()
 
 }
 
-private fun Matrix<Double>.invertBase(): Matrix<Double> {
+private fun Matrix<Rational>.invertBase(): Matrix<Rational> {
     requireIsSquare()
     val boundary = nbColumns - 1
     val work = Matrix(nbRows, 2 * nbColumns) { i, j ->
         when (j) {
             in 0..boundary -> this[i, j]
-            i + nbColumns -> 1.0
-            else -> 0.0
+            i + nbColumns -> Rational.ONE
+            else -> Rational.ZERO
         }
     }
-    DoubleMatrix.GaussianSolver(work).invert()
+    RationalMatrix.GaussianSolver(work).invert()
     return work
 }
 
 
-operator fun Matrix<Double>.plus(other: Matrix<Double>): Matrix<Double> {
+operator fun Matrix<Rational>.plus(other: Matrix<Rational>): Matrix<Rational> {
     require(sameDimensions(other)) { "Matrices must be of same dimension" }
-    return Matrix(nbRows, nbColumns) { i,j -> this[i, j] + other[i, j] }
+    return Matrix(nbRows, nbColumns) { i, j -> this[i, j] + other[i, j] }
 }
 
-operator fun Matrix<Double>.minus(other: Matrix<Double>): Matrix<Double> {
+operator fun Matrix<Rational>.minus(other: Matrix<Rational>): Matrix<Rational> {
     requireSameDimensions(other)
-    return Matrix(nbRows, nbColumns) { i,j -> this[i, j] - other[i, j] }
+    return Matrix(nbRows, nbColumns) { i, j -> this[i, j] - other[i, j] }
 }
 
-operator fun Matrix<Double>.times(other: Matrix<Double>): Matrix<Double> {
+operator fun Matrix<Rational>.times(other: Matrix<Rational>): Matrix<Rational> {
     require(compatibleForMultiplication(other))
-    return Matrix(nbRows, other.nbColumns) { i,j  ->
-        var sum = 0.0
+    return Matrix(nbRows, other.nbColumns) { i, j ->
+        var sum = Rational.ZERO
         for (k in 0 until this.nbColumns) {
             sum += this[i, k] * other[k, j]
         }
@@ -205,20 +204,20 @@ operator fun Matrix<Double>.times(other: Matrix<Double>): Matrix<Double> {
     }
 }
 
-operator fun Matrix<Double>.plusAssign(other: Matrix<Double>) {
+operator fun Matrix<Rational>.plusAssign(other: Matrix<Rational>) {
     requireSameDimensions(other)
-    transformIndexed {i,j,v -> v + other[i,j]}
+    transformIndexed { i, j, v -> v + other[i, j] }
 }
 
-operator fun Matrix<Double>.minusAssign(other: Matrix<Double>) {
+operator fun Matrix<Rational>.minusAssign(other: Matrix<Rational>) {
     requireSameDimensions(other)
-    transformIndexed {i,j,v -> v - other[i,j]}
+    transformIndexed { i, j, v -> v - other[i, j] }
 }
 
-operator fun Matrix<Double>.unaryMinus() =
-     Matrix(nbRows, nbColumns) { i, j -> -this[i, j] }
+operator fun Matrix<Rational>.unaryMinus() =
+    Matrix(nbRows, nbColumns) { i, j -> -this[i, j] }
 
-operator fun Matrix<Double>.unaryPlus() = Matrix(this)
+operator fun Matrix<Rational>.unaryPlus() = Matrix(this)
 
 
 

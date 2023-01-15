@@ -1,5 +1,7 @@
 package org.alc.math.rational
 
+import org.alc.math.Point2D
+import org.junit.jupiter.api.assertThrows
 import kotlin.math.sqrt
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -54,7 +56,7 @@ class PolynomialTest {
 
     @Test
     fun rootDegree1() {
-        val p = Polynomial.withCoefficients(1,-2)
+        val p = Polynomial.withCoefficients(1, -2)
         assertEquals(2.0, p.root())
         val p1 = Polynomial.withCoefficients(2, 1)
         assertEquals(-0.5, p1.root())
@@ -225,4 +227,41 @@ class PolynomialTest {
         val p3 = Polynomial.withCoefficients(1.0, -0.0, -0.0)
         assertSame(Polynomial.SQUARE, p3)
     }
+
+    @Test
+    fun linearInterpolation() {
+        val p = Polynomial.interpolate(
+            Point2D(1 over 1, 5 over 1),
+            Point2D(6 over 1, 15 over 1)
+        )
+        val expected = Polynomial.withCoefficients(2 over 1, 3 over 1)
+        assertEquals(expected, p)
+    }
+
+    @Test
+    fun linearInterpolationSingularity() {
+        assertThrows<ArithmeticException> {
+            Polynomial.interpolate(
+                listOf(
+                    Point2D(1 over 1, 5 over 1),
+                    Point2D(1 over 1, 8 over 1)
+                )
+            )
+        }
+    }
+
+    @Test
+    fun polynomialInterpolation() {
+        val p = Polynomial.interpolate(
+            Point2D(1 over 1, -1 over 1),
+            Point2D(2 over 1, 1 over 1),
+            Point2D(3 over 1, 5 over 1)
+        )
+        val expected = Polynomial.withCoefficients(1, -1, -1)
+        assertEquals(expected, p)
+        val root = (1.0 + sqrt(5.0)) / 2.0
+        assertEquals(root, p.root(initial_guess = 1.0, epsilon = 1e-10))
+        assertEquals(0.0, p.apply(root.toRational()).toDouble(), 1e-15)
+    }
+
 }

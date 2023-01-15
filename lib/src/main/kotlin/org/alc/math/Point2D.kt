@@ -1,3 +1,3 @@
 package org.alc.math
 
-data class Point2D(val x: Double, val y: Double)
+data class Point2D<T: Number>(val x: T, val y: T)

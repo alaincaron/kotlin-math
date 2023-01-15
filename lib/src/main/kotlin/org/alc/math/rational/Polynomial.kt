@@ -1,5 +1,7 @@
 package org.alc.math.rational
 
+import org.alc.math.Point2D
+import org.alc.math.matrix.RationalMatrix
 import java.lang.Integer.max
 import java.util.function.Function
 import kotlin.math.abs
@@ -250,6 +252,34 @@ open class Polynomial internal constructor(val coefficients: List<Rational>) : F
 
             else -> nonTrivialList(coefficients)
         }
+
+        fun interpolate(vararg points: Point2D<Rational>) = interpolate(points.asList())
+
+        fun interpolate(points: List<Point2D<Rational>>): Polynomial {
+            require(points.size >= 2) { "Interpolation requires at least 2 points" }
+            if (points.size == 2) return linearInterpolation(points[0], points[1])
+
+            val m = RationalMatrix(points.size, points.size + 1, Rational.ONE)
+            for (i in points.indices) {
+                m[i, points.size] = points[i].y
+                val v = points[i].x
+                var c = v
+                for (j in points.size - 2 downTo 0) {
+                    m[i, j] = c
+                    c *= v
+                }
+            }
+            return fromRationals(RationalMatrix.GaussianSolver(m).solve().asList())
+        }
+
+        private fun linearInterpolation(p1: Point2D<Rational>, p2: Point2D<Rational>): Polynomial {
+            val delta_x = p1.x - p2.x
+            if (delta_x == Rational.ZERO) throw ArithmeticException("Infinite slope")
+            val slope = (p1.y - p2.y) / delta_x
+            val b = p1.y - p1.x * slope
+            return fromRationals(listOf(slope, b))
+        }
+
 
         private fun nonTrivialList(coefficients: List<Rational>): Polynomial {
             val c = coefficients.asSequence().dropWhile { x -> x == Rational.ZERO }

@@ -1,8 +1,8 @@
 package org.alc.math.polynomial
 
 import org.alc.math.Point2D
-import org.alc.math.matrix.GaussianSolver
 import org.alc.math.matrix.DoubleMatrix
+import org.alc.math.ring.DivisionRingElement
 import java.lang.Integer.max
 import java.util.function.Function
 import kotlin.math.abs
@@ -43,12 +43,13 @@ class QuadraticPolynomial internal constructor(coefficients: List<Double>) : Pol
     }
 }
 
-open class Polynomial internal constructor(val coefficients: List<Double>) : Function<Double, Double> {
+open class Polynomial internal constructor(val coefficients: List<Double>) : Function<Double, Double>,
+    DivisionRingElement<Polynomial> {
 
     override fun apply(x: Double) = coefficients.fold(0.0) { sum, v -> sum * x + v }
     fun degree() = coefficients.size - 1
 
-    operator fun plus(other: Polynomial): Polynomial {
+    override operator fun plus(other: Polynomial): Polynomial {
         if (this == ZERO) return other
         if (other == ZERO) return this
         val d = max(this.degree(), other.degree())
@@ -65,7 +66,7 @@ open class Polynomial internal constructor(val coefficients: List<Double>) : Fun
         return fromDoubles(p)
     }
 
-    operator fun minus(other: Polynomial): Polynomial {
+    override operator fun minus(other: Polynomial): Polynomial {
         if (other == ZERO) return this
         if (this == ZERO) return -other
         if (other == this) return ZERO
@@ -83,7 +84,7 @@ open class Polynomial internal constructor(val coefficients: List<Double>) : Fun
         return fromDoubles(p)
     }
 
-    operator fun times(other: Polynomial): Polynomial {
+    override operator fun times(other: Polynomial): Polynomial {
         if (this == ZERO || other == ZERO) return ZERO
         if (this == ONE) return other
         if (other == ONE) return this
@@ -121,8 +122,8 @@ open class Polynomial internal constructor(val coefficients: List<Double>) : Fun
         return Pair(fromDoubles(q), fromDoubles(r))
     }
 
-    operator fun div(den: Polynomial) = divideAndRemainder(den).first
-    operator fun rem(den: Polynomial) = divideAndRemainder(den).second
+    override operator fun div(den: Polynomial) = divideAndRemainder(den).first
+    override operator fun rem(den: Polynomial) = divideAndRemainder(den).second
 
     operator fun div(den: Double) = canonicalValue(coefficients.asSequence().map { it / den })
 
@@ -235,9 +236,9 @@ open class Polynomial internal constructor(val coefficients: List<Double>) : Fun
             else -> nonTrivialList(coefficients)
         }
 
-        fun interpolate(vararg points: Point2D) = interpolate(points.asList())
+        fun interpolate(vararg points: Point2D<Double>) = interpolate(points.asList())
 
-        fun interpolate(points: List<Point2D>): Polynomial {
+        fun interpolate(points: List<Point2D<Double>>): Polynomial {
             require(points.size >= 2) { "Interpolation requires at least 2 points" }
             if (points.size == 2) return linearInterpolation(points[0], points[1])
 
@@ -251,10 +252,10 @@ open class Polynomial internal constructor(val coefficients: List<Double>) : Fun
                     c *= v
                 }
             }
-            return fromDoubles(GaussianSolver(m).solve().asList())
+            return fromDoubles(DoubleMatrix.GaussianSolver(m).solve().asList())
         }
 
-        private fun linearInterpolation(p1: Point2D, p2: Point2D): Polynomial {
+        private fun linearInterpolation(p1: Point2D<Double>, p2: Point2D<Double>): Polynomial {
             val delta_x = p1.x - p2.x
             if (delta_x == 0.0) throw ArithmeticException("Infinite slope")
             val slope = (p1.y - p2.y) / delta_x

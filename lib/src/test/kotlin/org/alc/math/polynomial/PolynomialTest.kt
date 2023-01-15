@@ -248,6 +248,5 @@ class PolynomialTest {
         val root = (1.0 + sqrt(5.0)) / 2.0
         assertEquals(root, p.root(initial_guess = 1.0, epsilon = 1e-10))
         assertEquals(0.0, p.apply(root), 1e-15)
-
     }
 }

@@ -83,7 +83,7 @@ class DoubleMatrixTest {
         m[1, 2] = 0.0
         m[1, 3] = 1.0
 
-        GaussianSolver(m).invert()
+        DoubleMatrix.GaussianSolver(m).invert()
         assertEquals(1.0, m[0,0], 1e-15)
         assertEquals(0.0, m[0,1], 1e-15)
         assertEquals(0.0, m[1,0], 1e-15)
