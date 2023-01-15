@@ -6,15 +6,6 @@ import kotlin.test.assertEquals
 
 
 class MatrixTest {
-    @Test
-    fun createMutableMatrix() {
-        val a = MutableMatrix(2, 2) { i, j -> 2 * i + j }
-        assertEquals(0, a[0, 0])
-        a[0, 0] = 10
-        assertEquals(10, a[0, 0])
-        assertThrows<ArrayIndexOutOfBoundsException> { a[0, 5] = 15 }
-        assertThrows<ArrayIndexOutOfBoundsException> { a[5, 0] = 15 }
-    }
 
     @Test
     fun createMatrix() {
@@ -56,18 +47,18 @@ class MatrixTest {
 
     @Test
     fun transform() {
-        val a = MutableMatrix(2, 3) { i, j -> 3 * i + j }
+        val a = Matrix(2, 3) { i, j -> 3 * i + j }
         a.transform { x -> x + 1 }
-        val d = MutableMatrix(2, 3) { i, j -> 3 * i + j + 1 }
+        val d = Matrix(2, 3) { i, j -> 3 * i + j + 1 }
         assertEquals(d, a)
 
     }
 
     @Test
     fun transformIndexed() {
-        val a = MutableMatrix(2, 3) { i, j -> 3 * i + j }
+        val a = Matrix(2, 3) { i, j -> 3 * i + j }
         a.transformIndexed { i, j, x -> 2 * i + 2 * j + x }
-        val d = MutableMatrix(2, 3) { i, j -> 5 * i + 3 * j }
+        val d = Matrix(2, 3) { i, j -> 5 * i + 3 * j }
         assertEquals(d, a)
     }
 }

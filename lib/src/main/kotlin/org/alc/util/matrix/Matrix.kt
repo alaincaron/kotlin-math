@@ -2,40 +2,39 @@ package org.alc.util.matrix
 
 import java.util.*
 
-abstract class AbstractMatrix<T> {
-    internal val data: Array<Array<Any?>>
+class Matrix<T> {
+    private val data: Array<Array<Any?>>
     val nbRows: Int
     val nbColumns: Int
 
     constructor(nbRows: Int, nbColumns: Int, f: (Int, Int) -> T) {
+        require(nbRows > 0 && nbColumns > 0) { "rows and columns must be greater than 0"}
         this.nbRows = nbRows
         this.nbColumns = nbColumns
         data = Array(nbRows) { i -> Array(nbColumns) { j -> f(i, j) } }
     }
 
-    constructor(values: AbstractMatrix<T>) : this(values.nbRows, values.nbColumns, { i, j -> values[i, j] })
+    constructor(values: Matrix<T>) : this(values.nbRows, values.nbColumns, { i, j -> values[i, j] })
 
-    companion object {
-        internal fun <X> transposeFunction(matrix: AbstractMatrix<X>) =
-            { i: Int, j: Int -> matrix[j, i] }
+    fun isSquare() = nbRows == nbColumns
+    fun sameDimensions(other: Matrix<*>) = nbRows == other.nbRows && nbColumns == other.nbColumns
+    fun compatibleForMultiplication(other: Matrix<*>) = nbColumns == other.nbRows
 
-        internal fun <T, R> mapFunction(f: (T) -> R, matrix: AbstractMatrix<T>) =
-            { i: Int, j: Int -> f(matrix[i, j]) }
-
-        internal fun <T, R> mapIndexedFunction(f: (Int, Int, T) -> R, matrix: AbstractMatrix<T>) =
-            { i: Int, j: Int -> f(i, j, matrix[i, j]) }
-    }
-
-    abstract fun transpose(): AbstractMatrix<T>
-    abstract fun <R> map(f: (T) -> R): AbstractMatrix<R>
-    abstract fun <R> mapIndexed(f: (Int, Int, T) -> R): AbstractMatrix<R>
+    fun requireIsSquare() = require(isSquare()) { "Matrix must be square"}
+    fun requireSameDimensions(other: Matrix<*>) =
+        require(sameDimensions(other)) { "Matrices must be of same dimensions"}
+    fun requireCompatibleForMultiplication(other: Matrix<*>) =
+        require(compatibleForMultiplication(other))
+        { "Matrices must be compatible (this.nbColumns == other.nbRows"}
 
     @Suppress("UNCHECKED_CAST")
     fun <U> forEach(f: (T) -> U): Unit = data.forEach { row -> row.forEach { f(it as T) } }
 
-    @Suppress("UNCHECKED_CAST")
     fun <U> forEachIndexed(f: (Int, Int, T) -> U): Unit =
-        data.forEachIndexed { i, row -> row.forEachIndexed { j, item -> f(i, j, item as T) } }
+        data.forEachIndexed { i, row -> row.forEachIndexed { j, item ->
+            @Suppress("UNCHECKED_CAST")
+            f(i, j, item as T)
+        } }
 
     fun <U> rowReduce(row: Int, initial: U, f: (U, T) -> U): U {
         var acc = initial
@@ -54,15 +53,15 @@ abstract class AbstractMatrix<T> {
     }
 
 
-    @Suppress("UNCHECKED_CAST")
     operator fun get(i: Int, j: Int): T {
         val x = data[i]
+        @Suppress("UNCHECKED_CAST")
         return x[j] as T
     }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is AbstractMatrix<*>) return false
+        if (other !is Matrix<*>) return false
 
         if (nbRows != other.nbRows) return false
         if (nbColumns != other.nbColumns) return false
@@ -89,18 +88,12 @@ abstract class AbstractMatrix<T> {
     }
 
 
-}
-
-open class MutableMatrix<T> : AbstractMatrix<T> {
-    constructor(nbRows: Int, nbColumns: Int, f: (Int, Int) -> T) : super(nbRows, nbColumns, f)
-    constructor(nbRows: Int, nbColumns: Int, value: T) : this(nbRows, nbColumns, { _, _ -> value })
-    constructor(values: AbstractMatrix<T>) : super(values)
 
     operator fun set(i: Int, j: Int, value: T) {
         data[i][j] = value
     }
 
-    fun swapRows(a: Int, b: Int): MutableMatrix<T> {
+    fun swapRows(a: Int, b: Int): Matrix<T> {
         if (a != b) {
             val tmp = data[a]
             data[a] = data[b]
@@ -109,13 +102,13 @@ open class MutableMatrix<T> : AbstractMatrix<T> {
         return this
     }
 
-    override fun transpose() = MutableMatrix(nbColumns, nbRows, transposeFunction(this))
-    override fun <R> map(f: (T) -> R) = MutableMatrix(nbRows, nbColumns, mapFunction(f, this))
-    override fun <R> mapIndexed(f: (Int, Int, T) -> R) =
-        MutableMatrix(nbRows, nbColumns, mapIndexedFunction(f, this))
+    fun transpose() = Matrix(nbColumns, nbRows) { i: Int, j: Int -> this[j, i] }
+    fun <R> map(f: (T) -> R) = Matrix(nbRows, nbColumns) { i: Int, j: Int -> f(this[i, j]) }
+    fun <R> mapIndexed(f: (Int, Int, T) -> R) =
+        Matrix(nbRows, nbColumns) { i: Int, j: Int -> f(i, j, this[i, j]) }
 
-    fun <U : T> transform(f: (T) -> U): MutableMatrix<T> {
-        for (i in 0 until data.size) {
+    fun <U : T> transform(f: (T) -> U): Matrix<T> {
+        for (i in data.indices) {
             for (j in 0 until data[i].size) {
                 set(i, j, f(get(i, j)))
             }
@@ -123,8 +116,8 @@ open class MutableMatrix<T> : AbstractMatrix<T> {
         return this
     }
 
-    fun <U : T> transformIndexed(f: (Int, Int, T) -> U): MutableMatrix<T> {
-        for (i in 0 until data.size) {
+    fun <U : T> transformIndexed(f: (Int, Int, T) -> U): Matrix<T> {
+        for (i in data.indices) {
             for (j in 0 until data[i].size) {
                 set(i, j, f(i, j, get(i, j)))
             }
@@ -133,12 +126,3 @@ open class MutableMatrix<T> : AbstractMatrix<T> {
     }
 }
 
-open class Matrix<T> : AbstractMatrix<T> {
-    constructor(nbRows: Int, nbColumns: Int, f: (Int, Int) -> T) : super(nbRows, nbColumns, f)
-    constructor(values: AbstractMatrix<T>) : super(values)
-
-    override fun transpose() = Matrix(nbColumns, nbRows, transposeFunction(this))
-    override fun <R> map(f: (T) -> R) = Matrix(nbRows, nbColumns, mapFunction(f, this))
-    override fun <R> mapIndexed(f: (Int, Int, T) -> R) =
-        Matrix(nbRows, nbColumns, mapIndexedFunction(f, this))
-}

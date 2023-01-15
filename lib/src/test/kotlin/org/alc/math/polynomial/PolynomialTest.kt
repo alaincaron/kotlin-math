@@ -1,8 +1,6 @@
 package org.alc.math.polynomial
 
 import org.alc.math.Point2D
-import org.alc.math.matrix.MutableDoubleMatrix
-import org.alc.math.matrix.solve
 import org.junit.jupiter.api.assertThrows
 import kotlin.math.sqrt
 import kotlin.test.Test

@@ -1,8 +1,8 @@
 package org.alc.math.polynomial
 
 import org.alc.math.Point2D
-import org.alc.math.matrix.GaussianElimination
-import org.alc.math.matrix.MutableDoubleMatrix
+import org.alc.math.matrix.GaussianSolver
+import org.alc.math.matrix.DoubleMatrix
 import java.lang.Integer.max
 import java.util.function.Function
 import kotlin.math.abs
@@ -241,7 +241,7 @@ open class Polynomial internal constructor(val coefficients: List<Double>) : Fun
             require(points.size >= 2) { "Interpolation requires at least 2 points" }
             if (points.size == 2) return linearInterpolation(points[0], points[1])
 
-            val m = MutableDoubleMatrix(points.size, points.size + 1, 1.0)
+            val m = DoubleMatrix(points.size, points.size + 1, 1.0)
             for (i in points.indices) {
                 m[i, points.size] = points[i].y
                 val v = points[i].x
@@ -251,7 +251,7 @@ open class Polynomial internal constructor(val coefficients: List<Double>) : Fun
                     c *= v
                 }
             }
-            return fromDoubles(GaussianElimination(m).solve().asList())
+            return fromDoubles(GaussianSolver(m).solve().asList())
         }
 
         private fun linearInterpolation(p1: Point2D, p2: Point2D): Polynomial {

@@ -1,8 +1,6 @@
 package org.alc.math.matrix
 
-import org.alc.util.matrix.AbstractMatrix
 import org.alc.util.matrix.Matrix
-import org.alc.util.matrix.MutableMatrix
 import kotlin.math.abs
 import kotlin.math.absoluteValue
 import kotlin.math.max
@@ -12,81 +10,93 @@ object DoubleMatrix {
         Matrix(nbRows, nbColumns) { _, _ -> value }
 
     operator fun invoke(nbRows: Int, nbColumns: Int) = invoke(nbRows, nbColumns, 0.0)
-    operator fun invoke(matrix: AbstractMatrix<Double>) = Matrix(matrix)
+    operator fun invoke(matrix: Matrix<Double>) = Matrix(matrix)
 
     fun identity(size: Int) = Matrix(size, size) { i, j -> if (i == j) 1.0 else 0.0 }
 }
 
-object MutableDoubleMatrix {
-    operator fun invoke(nbRows: Int, nbColumns: Int, value: Double) =
-        MutableMatrix(nbRows, nbColumns) { _, _ -> value }
-
-    operator fun invoke(nbRows: Int, nbColumns: Int) = invoke(nbRows, nbColumns, 0.0)
-    operator fun invoke(matrix: AbstractMatrix<Double>) = MutableMatrix(matrix)
-
-    fun identity(size: Int) = MutableMatrix(size, size) { i, j -> if (i == j) 1.0 else 0.0 }
+fun Matrix<Double>.determinant(): Double {
+    requireIsSquare()
+    val work = Matrix(this)
+    val gauss = GaussianSolver(work)
+    return gauss.determinant()
 }
 
-fun MutableMatrix<Double>.determinant() = GaussianResolver.determinant(this)
-fun Matrix<Double>.determinant() = GaussianResolver.determinant(this)
+fun Matrix<Double>.invert(): Matrix<Double> {
+    val work = invertBase()
+    return Matrix(nbRows, nbColumns) { i, j -> work[i, j + nbColumns] }
+}
 
-fun MutableMatrix<Double>.invert() = GaussianResolver.invert(this)
-fun Matrix<Double>.invert() = GaussianResolver.invert(this)
-fun Matrix<Double>.solve(values: DoubleArray) = GaussianResolver.solve(this, values)
-fun MutableMatrix<Double>.solve(values: DoubleArray) = GaussianResolver.solve(this, values)
+fun Matrix<Double>.invertInPlace(): Matrix<Double> {
+    val work = invertBase()
+    return transformIndexed { i, j, _ -> work[i, j + nbColumns] }
 
-private object GaussianResolver {
-    fun solve(
-        matrix: AbstractMatrix<Double>,
-        values: DoubleArray
-    ): DoubleArray {
-        require(matrix.nbRows == values.size)
-        { "Matrix and values must have same number of rows" }
-        val work = MutableMatrix(
-            matrix.nbRows,
-            matrix.nbColumns + 1
-        ) { i, j -> if (j == matrix.nbColumns) values[i] else matrix[i, j] }
-        val gauss = GaussianElimination(work)
-        return gauss.solve()
-    }
+}
+fun Matrix<Double>.solve(values: DoubleArray): DoubleArray {
+    require(nbRows == values.size)
+    { "Matrix and values must have same number of rows" }
+    val work = Matrix(
+        nbRows,
+        nbColumns + 1
+    ) { i, j -> if (j == nbColumns) values[i] else this[i, j] }
+    val gauss = GaussianSolver(work)
+    return gauss.solve()
 
-    fun determinant(matrix: AbstractMatrix<Double>): Double {
-        require(matrix.nbRows == matrix.nbColumns && matrix.nbRows > 0)
-        { "Matrix is not square with positive number of rows." }
-        val work = MutableMatrix(matrix)
-        val gauss = GaussianElimination(work)
-        return gauss.determinant()
-    }
+}
 
-    fun invert(matrix: MutableMatrix<Double>): MutableMatrix<Double> {
-        val work = invertBase(matrix)
-        return matrix.transformIndexed { i, j, _ -> work[i, j + matrix.nbColumns] }
-    }
-
-    fun invert(matrix: Matrix<Double>): Matrix<Double> {
-        val work = invertBase(matrix)
-        return Matrix(matrix.nbRows, matrix.nbColumns) { i, j -> work[i, j + matrix.nbColumns] }
-    }
-
-
-    private fun invertBase(matrix: AbstractMatrix<Double>): MutableMatrix<Double> {
-        require(matrix.nbRows == matrix.nbColumns && matrix.nbRows > 0)
-        { "Matrix is not square with positive number of rows." }
-        val boundary = matrix.nbColumns - 1
-        val work = MutableMatrix(matrix.nbRows, 2 * matrix.nbColumns) { i, j ->
-            when (j) {
-                in 0..boundary -> matrix[i, j]
-                i + matrix.nbColumns -> 1.0
-                else -> 0.0
-            }
+private fun Matrix<Double>.invertBase(): Matrix<Double> {
+    requireIsSquare()
+    val boundary = nbColumns - 1
+    val work = Matrix(nbRows, 2 * nbColumns) { i, j ->
+        when (j) {
+            in 0..boundary -> this[i, j]
+            i + nbColumns -> 1.0
+            else -> 0.0
         }
-        GaussianElimination(work).invert()
-        return work
     }
+    GaussianSolver(work).invert()
+    return work
 }
 
 
-class GaussianElimination(private val matrix: MutableMatrix<Double>) {
+operator fun Matrix<Double>.plus(other: Matrix<Double>): Matrix<Double> {
+    require(sameDimensions(other)) { "Matrices must be of same dimension" }
+    return Matrix(nbRows, nbColumns) { i: Int, j: Int -> this[i, j] + other[i, j] }
+}
+
+operator fun Matrix<Double>.minus(other: Matrix<Double>): Matrix<Double> {
+    requireSameDimensions(other)
+    return Matrix(nbRows, nbColumns) { i: Int, j: Int -> this[i, j] - other[i, j] }
+}
+
+operator fun Matrix<Double>.times(other: Matrix<Double>): Matrix<Double> {
+    require(compatibleForMultiplication(other))
+    return Matrix(nbRows, other.nbColumns) { i: Int, j: Int ->
+        var sum = 0.0
+        for (k in 0 until this.nbColumns) {
+            sum += this[i, k] * other[k, j]
+        }
+        sum
+    }
+}
+
+operator fun Matrix<Double>.plusAssign(other: Matrix<Double>) {
+    requireSameDimensions(other)
+    transformIndexed {i,j,v -> v + other[i,j]}
+}
+
+operator fun Matrix<Double>.minusAssign(other: Matrix<Double>) {
+    requireSameDimensions(other)
+    transformIndexed {i,j,v -> v - other[i,j]}
+}
+
+operator fun Matrix<Double>.unaryMinus() =
+     Matrix(nbRows, nbColumns) { i, j -> -this[i, j] }
+
+operator fun Matrix<Double>.unaryPlus() = Matrix(this)
+
+
+class GaussianSolver(private val matrix: Matrix<Double>) {
 
     private fun gaussianElimination(): PivotResult {
         if (matrix.nbRows == 0 || matrix.nbColumns == 0) return PivotResult.SINGULAR
@@ -100,7 +110,7 @@ class GaussianElimination(private val matrix: MutableMatrix<Double>) {
         var result = PivotResult.NO_SWAP
         for (i in 0 until matrix.nbRows) {
             val ratios = scaleRatios(i, greatest)
-            val tmp = gaussianElimination(i, ratios)
+            val tmp = invert(i, ratios)
             if (tmp == PivotResult.SINGULAR)
                 return PivotResult.SINGULAR
             else if (tmp == PivotResult.SWAP)
@@ -195,7 +205,7 @@ class GaussianElimination(private val matrix: MutableMatrix<Double>) {
     }
 
 
-    private fun gaussianElimination(iteration: Int, ratios: DoubleArray): PivotResult {
+    private fun invert(iteration: Int, ratios: DoubleArray): PivotResult {
         val result = pivotAndSwap(iteration, ratios)
         if (result == PivotResult.SINGULAR) return result
         for (row in iteration + 1 until matrix.nbRows) {
