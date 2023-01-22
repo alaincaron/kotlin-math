@@ -1,5 +1,6 @@
 package org.alc.math.matrix
 
+import org.alc.math.rational.Rational
 import org.alc.util.matrix.Matrix
 import kotlin.math.abs
 import kotlin.math.absoluteValue
@@ -16,19 +17,27 @@ object DoubleMatrix {
 
     class GaussianSolver(private val matrix: Matrix<Double>) {
 
+        private fun computeGreatest(iteration: Int, greatest:DoubleArray): Unit {
+            for (row in iteration until matrix.nbRows) {
+                greatest[row] = matrix[row,row].absoluteValue
+                for (col in row + 1 until matrix.nbRows) {
+                    greatest[row] = max(greatest[row], matrix[row,col].absoluteValue)
+                }
+            }
+        }
+
+
         private fun gaussianElimination(): PivotResult {
             if (matrix.nbRows == 0 || matrix.nbColumns == 0) return PivotResult.SINGULAR
 
-            //find the largest absolute value for each row to use in scale ratios
-            val greatest = DoubleArray(matrix.nbRows) { i ->
-                matrix.rowReduce(i, 0.0) { acc, x -> max(acc, abs(x)) }
-            }
+            val greatest = DoubleArray(matrix.nbRows)
 
             //Gaussian elimination:
             var result = PivotResult.NO_SWAP
-            for (i in 0 until matrix.nbRows) {
-                val ratios = scaleRatios(i, greatest)
-                val tmp = invert(i, ratios)
+            for (iteration in 0 until matrix.nbRows) {
+                computeGreatest(iteration, greatest)
+                val ratios = scaleRatios(iteration, greatest)
+                val tmp = invert(iteration, ratios)
                 if (tmp == PivotResult.SINGULAR)
                     return PivotResult.SINGULAR
                 else if (tmp == PivotResult.SWAP)
@@ -82,8 +91,10 @@ object DoubleMatrix {
 
         private fun scaleRatios(iteration: Int, greatest: DoubleArray): DoubleArray {
             val ratios = DoubleArray(matrix.nbRows)
-            for (row in iteration until matrix.nbRows - iteration) {
-                ratios[row] = abs(matrix[row, iteration] / greatest[row])
+            for (row in iteration until matrix.nbRows) {
+                if (greatest[row] > 0.0) {
+                    ratios[row] = abs(matrix[row, iteration] / greatest[row])
+                }
             }
             return ratios
         }
@@ -152,14 +163,14 @@ fun Matrix<Double>.invert(): Matrix<Double> {
     return Matrix(nbRows, nbColumns) { i, j -> work[i, j + nbColumns] }
 }
 
-fun Matrix<Double>.invertInPlace(): Matrix<Double> {
+fun Matrix<Double>.invertTransform(): Matrix<Double> {
     val work = invertBase()
     return transformIndexed { i, j, _ -> work[i, j + nbColumns] }
-
 }
+
+
 fun Matrix<Double>.solve(values: DoubleArray): DoubleArray {
-    require(nbRows == values.size)
-    { "Matrix and values must have same number of rows" }
+    require(nbRows == values.size) { "Matrix and values must have same number of rows" }
     val work = Matrix(
         nbRows,
         nbColumns + 1
@@ -185,18 +196,18 @@ private fun Matrix<Double>.invertBase(): Matrix<Double> {
 
 
 operator fun Matrix<Double>.plus(other: Matrix<Double>): Matrix<Double> {
-    require(sameDimensions(other)) { "Matrices must be of same dimension" }
-    return Matrix(nbRows, nbColumns) { i,j -> this[i, j] + other[i, j] }
+    requireSameDimensions(other)
+    return Matrix(nbRows, nbColumns) { i, j -> this[i, j] + other[i, j] }
 }
 
 operator fun Matrix<Double>.minus(other: Matrix<Double>): Matrix<Double> {
     requireSameDimensions(other)
-    return Matrix(nbRows, nbColumns) { i,j -> this[i, j] - other[i, j] }
+    return Matrix(nbRows, nbColumns) { i, j -> this[i, j] - other[i, j] }
 }
 
 operator fun Matrix<Double>.times(other: Matrix<Double>): Matrix<Double> {
-    require(compatibleForMultiplication(other))
-    return Matrix(nbRows, other.nbColumns) { i,j  ->
+    requireCompatibleForMultiplication(other)
+    return Matrix(nbRows, other.nbColumns) { i, j ->
         var sum = 0.0
         for (k in 0 until this.nbColumns) {
             sum += this[i, k] * other[k, j]
@@ -207,16 +218,16 @@ operator fun Matrix<Double>.times(other: Matrix<Double>): Matrix<Double> {
 
 operator fun Matrix<Double>.plusAssign(other: Matrix<Double>) {
     requireSameDimensions(other)
-    transformIndexed {i,j,v -> v + other[i,j]}
+    transformIndexed { i, j, v -> v + other[i, j] }
 }
 
 operator fun Matrix<Double>.minusAssign(other: Matrix<Double>) {
     requireSameDimensions(other)
-    transformIndexed {i,j,v -> v - other[i,j]}
+    transformIndexed { i, j, v -> v - other[i, j] }
 }
 
 operator fun Matrix<Double>.unaryMinus() =
-     Matrix(nbRows, nbColumns) { i, j -> -this[i, j] }
+    Matrix(nbRows, nbColumns) { i, j -> -this[i, j] }
 
 operator fun Matrix<Double>.unaryPlus() = Matrix(this)
 

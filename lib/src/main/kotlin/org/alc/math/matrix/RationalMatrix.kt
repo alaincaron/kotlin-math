@@ -1,5 +1,6 @@
 package org.alc.math.matrix
 
+import org.alc.math.polynomial.Polynomial
 import org.alc.math.rational.Rational
 import org.alc.util.matrix.Matrix
 
@@ -14,19 +15,27 @@ object RationalMatrix {
 
     class GaussianSolver(private val matrix: Matrix<Rational>) {
 
+        private fun computeGreatest(iteration: Int, greatest:Array<Rational>): Unit {
+            for (row in iteration until matrix.nbRows) {
+                greatest[row] = matrix[row,row].abs()
+                for (col in row + 1 until matrix.nbRows) {
+                    greatest[row] = greatest[row].max(matrix[row,col].abs())
+                }
+            }
+        }
+
         private fun gaussianElimination(): PivotResult {
             if (matrix.nbRows == 0 || matrix.nbColumns == 0) return PivotResult.SINGULAR
 
             //find the largest absolute value for each row to use in scale ratios
-            val greatest = Array(matrix.nbRows) { i ->
-                matrix.rowReduce(i, Rational.ZERO) { acc, x -> acc.max(x.abs()) }
-            }
+            val greatest = Array(matrix.nbRows) { i -> Rational.ZERO}
 
             //Gaussian elimination:
             var result = PivotResult.NO_SWAP
-            for (i in 0 until matrix.nbRows) {
-                val ratios = scaleRatios(i, greatest)
-                val tmp = invert(i, ratios)
+            for (iteration in 0 until matrix.nbRows) {
+                computeGreatest(iteration, greatest)
+                val ratios = scaleRatios(iteration, greatest)
+                val tmp = invert(iteration, ratios)
                 if (tmp == PivotResult.SINGULAR)
                     return PivotResult.SINGULAR
                 else if (tmp == PivotResult.SWAP)
@@ -80,8 +89,10 @@ object RationalMatrix {
 
         private fun scaleRatios(iteration: Int, greatest: Array<Rational>): Array<Rational> {
             val ratios = Array(matrix.nbRows) { Rational.ZERO }
-            for (row in iteration until matrix.nbRows - iteration) {
-                ratios[row] = (matrix[row, iteration] / greatest[row]).abs()
+            for (row in iteration until matrix.nbRows) {
+                if (greatest[row] > Rational.ZERO) {
+                    ratios[row] = (matrix[row, iteration] / greatest[row]).abs()
+                }
             }
             return ratios
         }
@@ -150,10 +161,9 @@ fun Matrix<Rational>.invert(): Matrix<Rational> {
     return Matrix(nbRows, nbColumns) { i, j -> work[i, j + nbColumns] }
 }
 
-fun Matrix<Rational>.invertInPlace(): Matrix<Rational> {
+fun Matrix<Rational>.invertTransform(): Matrix<Rational> {
     val work = invertBase()
     return transformIndexed { i, j, _ -> work[i, j + nbColumns] }
-
 }
 
 fun Matrix<Rational>.solve(values: Array<Rational>): Array<Rational> {

@@ -148,4 +148,26 @@ class DoubleMatrixTest {
         assertEquals(m3, m1)
     }
 
+    @Test fun test123() {
+        val m = DoubleMatrix(3, 3)
+        m[0, 0] = 1.0
+        m[0, 1] = 2.0
+        m[0, 2] = 3.0
+
+        m[1,0] = 3.0
+        m[1,1] = 4.0
+        m[1,2] = 6.0
+
+        m[2,0] = 6.0
+        m[2,1] = 7.0
+        m[2,2] = 8.0
+
+        assertEquals(5.0, m.determinant(), 1e-10)
+        val m2 = Matrix(m).swapColumns(2,0)
+
+        assertEquals(5.0, m.determinant(), 1e-10)
+        assertEquals(-5.0, m2.determinant(), 1e-10)
+        println("m1.determinant = ${m2.determinant()}")
+    }
+
 }

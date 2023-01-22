@@ -13,7 +13,7 @@ object LongMatrix {
 }
 
 operator fun Matrix<Long>.plus(other: Matrix<Long>): Matrix<Long> {
-    require(sameDimensions(other)) { "Matrices must be of same dimension" }
+    requireSameDimensions(other)
     return Matrix(nbRows, nbColumns) { i, j -> this[i, j] + other[i, j] }
 }
 

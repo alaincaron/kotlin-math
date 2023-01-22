@@ -148,4 +148,24 @@ class RationalMatrixTest {
         assertEquals(m3, m1)
     }
 
+    @Test fun test123() {
+        val m = RationalMatrix(3, 3)
+        m[0, 0] = 1 over 1
+        m[0, 1] = 2 over 1
+        m[0, 2] = 3 over 1
+
+        m[1,0] = 3 over 1
+        m[1,1] = 4 over 1
+        m[1,2] = 6 over 1
+
+        m[2,0] = 6 over 1
+        m[2,1] = 7 over 1
+        m[2,2] = 8 over 1
+        assertEquals(5 over 1, m.determinant())
+
+        val m1 = Matrix(m).swapColumns(2,0)
+        assertEquals(-5 over 1, m1.determinant())
+
+    }
+
 }
