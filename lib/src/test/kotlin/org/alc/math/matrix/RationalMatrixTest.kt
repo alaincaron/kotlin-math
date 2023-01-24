@@ -1,7 +1,9 @@
 package org.alc.math.matrix
 
-import org.alc.math.rational.*
+import org.alc.math.rational.Rational
 import org.alc.math.rational.over
+import org.alc.math.rational.plus
+import org.alc.math.rational.toRational
 import org.alc.util.matrix.Matrix
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.assertThrows

@@ -1,6 +1,5 @@
 package org.alc.math.matrix
 
-import org.alc.math.polynomial.Polynomial
 import org.alc.math.rational.Rational
 import org.alc.util.matrix.Matrix
 
@@ -15,7 +14,7 @@ object RationalMatrix {
 
     class GaussianSolver(private val matrix: Matrix<Rational>) {
 
-        private fun computeGreatest(iteration: Int, greatest:Array<Rational>): Unit {
+        private fun computeGreatest(iteration: Int, greatest:Array<Rational>) {
             for (row in iteration until matrix.nbRows) {
                 greatest[row] = matrix[row,row].abs()
                 for (col in row + 1 until matrix.nbRows) {
@@ -28,7 +27,7 @@ object RationalMatrix {
             if (matrix.nbRows == 0 || matrix.nbColumns == 0) return PivotResult.SINGULAR
 
             //find the largest absolute value for each row to use in scale ratios
-            val greatest = Array(matrix.nbRows) { i -> Rational.ZERO}
+            val greatest = Array(matrix.nbRows) { Rational.ZERO}
 
             //Gaussian elimination:
             var result = PivotResult.NO_SWAP
@@ -175,7 +174,6 @@ fun Matrix<Rational>.solve(values: Array<Rational>): Array<Rational> {
     ) { i, j -> if (j == nbColumns) values[i] else this[i, j] }
     val gauss = RationalMatrix.GaussianSolver(work)
     return gauss.solve()
-
 }
 
 private fun Matrix<Rational>.invertBase(): Matrix<Rational> {

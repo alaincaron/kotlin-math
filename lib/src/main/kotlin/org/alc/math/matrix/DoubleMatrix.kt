@@ -26,7 +26,6 @@ object DoubleMatrix {
             }
         }
 
-
         private fun gaussianElimination(): PivotResult {
             if (matrix.nbRows == 0 || matrix.nbColumns == 0) return PivotResult.SINGULAR
 
