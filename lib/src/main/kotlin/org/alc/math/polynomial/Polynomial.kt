@@ -3,6 +3,7 @@ package org.alc.math.polynomial
 import org.alc.math.Point2D
 import org.alc.math.matrix.DoubleMatrix
 import org.alc.math.ring.DivisionRingElement
+import org.alc.math.ring.RemainderRingElement
 import java.lang.Integer.max
 import java.util.function.Function
 import kotlin.math.abs
@@ -44,7 +45,7 @@ class QuadraticPolynomial internal constructor(coefficients: List<Double>) : Pol
 }
 
 open class Polynomial internal constructor(val coefficients: List<Double>) : Function<Double, Double>,
-    DivisionRingElement<Polynomial> {
+    RemainderRingElement<Polynomial> {
 
     override fun apply(x: Double) = coefficients.fold(0.0) { sum, v -> sum * x + v }
     fun degree() = coefficients.size - 1

@@ -5,7 +5,7 @@ import org.alc.util.matrix.Matrix
 
 object RationalMatrix {
     operator fun invoke(nbRows: Int, nbColumns: Int, value: Rational) =
-        Matrix(nbRows, nbColumns) { _, _ -> value }
+        Matrix(nbRows, nbColumns, value)
 
     operator fun invoke(nbRows: Int, nbColumns: Int) = invoke(nbRows, nbColumns, Rational.ZERO)
     operator fun invoke(matrix: Matrix<Rational>) = Matrix(matrix)

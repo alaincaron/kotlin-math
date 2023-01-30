@@ -15,6 +15,7 @@ class Matrix<T> {
     }
 
     constructor(values: Matrix<T>) : this(values.nbRows, values.nbColumns, { i, j -> values[i, j] })
+    constructor(nbRows: Int, nbColumns: Int, value: T): this(nbRows, nbColumns, { _,_ -> value })
 
     operator fun get(i: Int, j: Int): T {
         val x = data[i]

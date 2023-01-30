@@ -1,11 +1,13 @@
 package org.alc.math.complex
 
+import org.alc.math.ring.DivisionRingElement
+import org.alc.math.ring.RemainderRingElement
 import java.util.*
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.atan
 
-class Complex private constructor(val re: Double, val im: Double = 0.0) {
+class Complex private constructor(val re: Double, val im: Double = 0.0): DivisionRingElement<Complex> {
 
     companion object {
         /** The imaginary unit i as constant */
@@ -83,7 +85,7 @@ class Complex private constructor(val re: Double, val im: Double = 0.0) {
      * @param z the summand
      * @return sum of this and z
      */
-    operator fun plus(z: Complex): Complex {
+    override operator fun plus(z: Complex): Complex {
         return when {
             isNaN() || z.isNaN() -> NaN
             isInfinite() -> if (z.isInfinite()) NaN else INF
@@ -122,7 +124,7 @@ class Complex private constructor(val re: Double, val im: Double = 0.0) {
      * @param z the minuend
      * @return difference of this and x
      */
-    operator fun minus(z: Complex): Complex {
+    override operator fun minus(z: Complex): Complex {
         return when {
             isNaN() || z.isNaN() -> NaN
             isInfinite() -> if (z.isInfinite()) NaN else INF
@@ -161,7 +163,7 @@ class Complex private constructor(val re: Double, val im: Double = 0.0) {
      * @param z the multiplicand
      * @return product of this and z
      */
-    operator fun times(z: Complex): Complex {
+    override operator fun times(z: Complex): Complex {
         return when {
             isNaN() || z.isNaN() -> NaN
             isInfinite() -> if (z.isZero()) NaN else INF
@@ -201,7 +203,7 @@ class Complex private constructor(val re: Double, val im: Double = 0.0) {
      * @param z the denominator
      * @return product of this and z
      */
-    operator fun div(z: Complex): Complex {
+    override operator fun div(z: Complex): Complex {
         return when {
             isNaN() || z.isNaN() -> NaN
             isInfinite() -> if (z.isInfinite()) NaN else INF

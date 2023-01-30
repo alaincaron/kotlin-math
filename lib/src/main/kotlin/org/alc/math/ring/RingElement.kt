@@ -8,5 +8,8 @@ interface RingElement<T:Any> {
 
 interface DivisionRingElement<T:Any> : RingElement<T> {
     operator fun div(den: T): T
+}
+
+interface RemainderRingElement<T: Any>: DivisionRingElement<T> {
     operator fun rem(den: T): T
 }
