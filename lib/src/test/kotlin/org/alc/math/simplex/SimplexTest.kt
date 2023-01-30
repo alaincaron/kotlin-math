@@ -1,8 +1,8 @@
 package org.alc.math.simplex
-import kotlin.test.*
 
 import org.alc.math.matrix.DoubleMatrix
 import org.junit.jupiter.api.Test
+import kotlin.test.assertEquals
 
 class SimplexTest {
 
@@ -49,7 +49,7 @@ class SimplexTest {
         print("soln = $soln")
 
         assertEquals(
-            Pair(listOf(0.4,0.0, 1.2, 0.0, 0.0, 6.0, 6.4), 6.4),
+            Pair(listOf(0.4, 0.0, 1.2, 0.0, 0.0, 6.0, 6.4), 6.4),
             soln
         )
     }
@@ -116,4 +116,23 @@ class SimplexTest {
         )
     }
 
+    @Test
+    fun multipleSolutions() {
+        val z = doubleArrayOf(4.0, 14.0)
+        val m = DoubleMatrix(2, 2)
+        m[0, 0] = 2.0
+        m[0, 1] = 7.0
+        m[1, 0] = 7.0
+        m[1, 1] = 2.0
+
+        val c = doubleArrayOf(21.0, 21.0)
+
+        val soln = SimplexSolver.solve(z, m, c)
+        print("soln = $soln")
+
+        assertEquals(
+            Pair(listOf(0.0, 3.0, 0.0, 15.0, 42.0), 42.0),
+            soln
+        )
+    }
 }
