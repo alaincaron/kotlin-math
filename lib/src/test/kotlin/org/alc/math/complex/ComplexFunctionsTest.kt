@@ -5,7 +5,7 @@ import java.lang.Math.PI
 import kotlin.math.E
 import kotlin.test.assertEquals
 
-class BasicFunctionsTest {
+class ComplexFunctionsTest {
 
     @Test
     fun testExp() {
