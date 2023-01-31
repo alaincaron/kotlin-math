@@ -18,12 +18,17 @@ class RationalVector private constructor(private val values: Array<Rational>) {
     }
 
     companion object {
-        operator fun invoke(vararg values: Rational) =
-            RationalVector(Array(values.size) { i -> values[i]})
+        operator fun invoke(vararg values: Number) =
+            RationalVector(Array(values.size) { i -> values[i].toRational() })
 
         operator fun invoke(size: Int, f: (Int) -> Rational) =
             RationalVector(Array(size, f))
+
+        operator fun invoke(original: RationalVector) =
+            RationalVector(original.size) { i -> original[i] }
     }
+
+    fun copy() = RationalVector(this)
 
     operator fun plus(other: RationalVector): RationalVector {
         require(size == other.size) { "Vectors must be of the same size" }
