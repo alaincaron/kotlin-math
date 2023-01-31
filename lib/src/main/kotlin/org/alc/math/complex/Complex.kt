@@ -1,11 +1,11 @@
 package org.alc.math.complex
 
 import org.alc.math.ring.DivisionRingElement
-import org.alc.math.ring.RemainderRingElement
 import java.util.*
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.atan
+import org.alc.math.fix0
 
 class Complex private constructor(val re: Double, val im: Double = 0.0): DivisionRingElement<Complex> {
 
@@ -27,16 +27,21 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): Divisio
 
         const val DEFAULT_ZERO_SNAP_PRECISION = 1E-13
 
-         fun create(z: Complex) = z
-         fun create(str: String) = str.toComplex()
-         fun create(re: Int, im: Int = 0) = create(re.toDouble(), im.toDouble())
+        operator fun invoke(z: Complex) = z
+        operator fun invoke(str: String) = str.toComplex()
+        operator fun invoke(re: Int, im: Int = 0) = invoke(re.toDouble(), im.toDouble())
 
-        fun create(re: Double, im: Double) = when (val c = Complex(re, im)) {
-            ZERO -> ZERO
-            ONE -> ONE
-            NaN -> NaN
-            INF -> INF
-            else -> c
+        operator fun invoke(re: Double, im: Double): Complex {
+            if (re.isNaN() || im.isNaN()) return NaN
+            if (re.isInfinite() || im.isInfinite()) return INF
+
+            return when (val c = Complex(fix0(re), fix0(im))) {
+                ZERO -> ZERO
+                ONE -> ONE
+                NaN -> NaN
+                INF -> INF
+                else -> c
+            }
         }
     }
 
@@ -66,13 +71,13 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): Divisio
      *  checks infinity property (remark that in case of complex numbers there is only one unsigned infinity)
      *  @return true if this is infinite
      */
-    fun isInfinite() = this === INF
+    fun isInfinite() = re.isInfinite()
 
     /**
      * checks the "not a number" property (NaN represents an essential singularity)
      * @return true if this is NaN
      */
-    fun isNaN() = this === NaN
+    fun isNaN() = re.isNaN()
 
     /**
      * checks to zero
@@ -82,17 +87,17 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): Divisio
 
     /**
      * Plus operator adding two complex numbers
-     * @param z the summand
+     * @param other the summand
      * @return sum of this and z
      */
-    override operator fun plus(z: Complex): Complex {
+    override operator fun plus(other: Complex): Complex {
         return when {
-            isNaN() || z.isNaN() -> NaN
-            isInfinite() -> if (z.isInfinite()) NaN else INF
-            z.isInfinite() -> if (isInfinite()) NaN else INF
-            isZero() -> z
-            z.isZero() -> this
-            else -> create(re + z.re, im + z.im)
+            isNaN() || other.isNaN() -> NaN
+            isInfinite() -> if (other.isInfinite()) NaN else INF
+            other.isInfinite() -> if (isInfinite()) NaN else INF
+            isZero() -> other
+            other.isZero() -> this
+            else -> invoke(re + other.re, im + other.im)
         }
     }
 
@@ -108,7 +113,7 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): Divisio
             x.isInfinite() -> if (isInfinite()) NaN else INF
             isZero() -> x.R
             x == 0.0 -> this
-            else -> create(re + x, im)
+            else -> invoke(re + x, im)
         }
     }
 
@@ -121,17 +126,17 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): Divisio
 
     /**
      * Minus operator subtracting two complex numbers
-     * @param z the minuend
+     * @param other the minuend
      * @return difference of this and x
      */
-    override operator fun minus(z: Complex): Complex {
+    override operator fun minus(other: Complex): Complex {
         return when {
-            isNaN() || z.isNaN() -> NaN
-            isInfinite() -> if (z.isInfinite()) NaN else INF
-            z.isInfinite() -> if (isInfinite()) NaN else INF
-            isZero() -> -z
-            z.isZero() -> this
-            else -> create(re - z.re, im - z.im)
+            isNaN() || other.isNaN() -> NaN
+            isInfinite() -> if (other.isInfinite()) NaN else INF
+            other.isInfinite() -> if (isInfinite()) NaN else INF
+            isZero() -> -other
+            other.isZero() -> this
+            else -> invoke(re - other.re, im - other.im)
         }
     }
 
@@ -147,7 +152,7 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): Divisio
             x.isInfinite() -> if (isInfinite()) NaN else INF
             isZero() -> -x.R
             x == 0.0 -> this
-            else -> create(re - x, im)
+            else -> invoke(re - x, im)
         }
     }
 
@@ -160,18 +165,18 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): Divisio
 
     /**
      * Times operator multiplying two complex numbers
-     * @param z the multiplicand
+     * @param other the multiplicand
      * @return product of this and z
      */
-    override operator fun times(z: Complex): Complex {
+    override operator fun times(other: Complex): Complex {
         return when {
-            isNaN() || z.isNaN() -> NaN
-            isInfinite() -> if (z.isZero()) NaN else INF
-            z.isInfinite() -> if (isZero()) NaN else INF
-            isZero() || z.isZero() -> ZERO
-            z == ONE -> this
-            this == ONE -> z
-            else -> create(re * z.re - im * z.im, im * z.re + re * z.im)
+            isNaN() || other.isNaN() -> NaN
+            isInfinite() -> if (other.isZero()) NaN else INF
+            other.isInfinite() -> if (isZero()) NaN else INF
+            isZero() || other.isZero() -> ZERO
+            other == ONE -> this
+            this == ONE -> other
+            else -> invoke(re * other.re - im * other.im, im * other.re + re * other.im)
         }
     }
 
@@ -187,7 +192,7 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): Divisio
             x.isInfinite() -> if (isZero()) NaN else INF
             isZero() || x == 0.0 -> ZERO
             x == 1.0 -> this
-            else -> create(re * x, im * x)
+            else -> invoke(re * x, im * x)
         }
     }
 
@@ -200,20 +205,20 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): Divisio
 
     /**
      * Divide operator dividing two complex numbers
-     * @param z the denominator
+     * @param den the denominator
      * @return product of this and z
      */
-    override operator fun div(z: Complex): Complex {
+    override operator fun div(den: Complex): Complex {
         return when {
-            isNaN() || z.isNaN() -> NaN
-            isInfinite() -> if (z.isInfinite()) NaN else INF
-            z.isInfinite() -> ZERO
-            z.isZero() -> if (isZero()) NaN else INF
+            isNaN() || den.isNaN() -> NaN
+            isInfinite() -> if (den.isInfinite()) NaN else INF
+            den.isInfinite() -> ZERO
+            den.isZero() -> if (isZero()) NaN else INF
             isZero() -> ZERO
-            z == ONE -> this
+            den == ONE -> this
             else -> {
-                val d = z.re * z.re + z.im * z.im
-                create((re * z.re + im * z.im) / d, (im * z.re - re * z.im) / d)
+                val d = den.re * den.re + den.im * den.im
+                invoke((re * den.re + im * den.im) / d, (im * den.re - re * den.im) / d)
             }
         }
     }
@@ -231,7 +236,7 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): Divisio
             x == 0.0 -> if (isZero()) NaN else INF
             isZero() -> ZERO
             x == 1.0 -> this
-            else -> create(re / x, im / x)
+            else -> invoke(re / x, im / x)
         }
     }
 
@@ -251,7 +256,7 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): Divisio
             isNaN() -> NaN
             isInfinite() -> INF
             isZero() -> ZERO
-            else -> create(-re, -im)
+            else -> invoke(-re, -im)
         }
     }
 
@@ -272,7 +277,7 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): Divisio
             isNaN() -> NaN
             isInfinite() -> INF
             isZero() -> ZERO
-            else -> create(re, -im)
+            else -> invoke(re, -im)
         }
     }
 
@@ -282,7 +287,7 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): Divisio
      * @return the "rounded" number
      */
     fun zeroSnap(precision: Double = DEFAULT_ZERO_SNAP_PRECISION): Complex {
-        return create(
+        return invoke(
             if (abs(re) <= precision) 0.0 else re,
             if (abs(im) <= precision) 0.0 else im
         )
@@ -329,9 +334,7 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): Divisio
     }
 
     override fun hashCode(): Int {
-        var result = re.hashCode()
-        result = 31 * result + im.hashCode()
-        return result
+        return Objects.hash(re, im)
     }
 
     override fun toString() = asString()
@@ -343,14 +346,14 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): Divisio
  * @return this * I
  */
 val Number.I: Complex
-    get() = Complex.create(0.0, toDouble())
+    get() = Complex(0.0, toDouble())
 
 /**
  * Creates a complex number with this as real part and no imaginary part
  * @return this as complex number
  */
 val Number.R: Complex
-    get() = Complex.create(toDouble(), 0.0)
+    get() = Complex(toDouble(), 0.0)
 
 /**
  * Plus operator adding a number of type Number and a complex one
@@ -399,19 +402,19 @@ fun String.toComplex(): Complex {
             when (parts.size) {
                 0 -> throw NumberFormatException("empty String")
                 1 -> if (parts[0].endsWith("i")) {
-                    Complex.create(0.0, parseIm(parts[0]).toDouble())
+                    Complex(0.0, parseIm(parts[0]).toDouble())
                 } else {
-                    Complex.create(parts[0].toDouble(), 0.0)
+                    Complex(parts[0].toDouble(), 0.0)
                 }
 
                 2 -> if (parts[1].endsWith("i")) {
-                    Complex.create(0.0, (parts[0] + parseIm(parts[1])).toDouble())
+                    Complex(0.0, (parts[0] + parseIm(parts[1])).toDouble())
                 } else {
-                    Complex.create((parts[0] + parts[1]).toDouble(), 0.0)
+                    Complex((parts[0] + parts[1]).toDouble(), 0.0)
                 }
 
-                3 -> Complex.create(parts[0].toDouble(), (parts[1] + parseIm(parts[2])).toDouble())
-                4 -> Complex.create((parts[0] + parts[1]).toDouble(), (parts[2] + parseIm(parts[3])).toDouble())
+                3 -> Complex(parts[0].toDouble(), (parts[1] + parseIm(parts[2])).toDouble())
+                4 -> Complex((parts[0] + parts[1]).toDouble(), (parts[2] + parseIm(parts[3])).toDouble())
                 else -> throw NumberFormatException("For input string: \"$this\"")
             }
         }

@@ -9,7 +9,7 @@ fun exp(z: Complex) = when (z) {
     Complex.NaN, Complex.INF -> Complex.NaN
     else -> {
         val r: Double = kotlin.math.exp(z.re)
-        Complex.create(r * kotlin.math.cos(z.im), r * kotlin.math.sin(z.im))
+        Complex(r * kotlin.math.cos(z.im), r * kotlin.math.sin(z.im))
     }
 }
 
@@ -25,7 +25,7 @@ fun exp(z: Number) = exp(z.R)
  */
 fun ln(z: Complex) = when (z) {
     Complex.ZERO, Complex.INF, Complex.NaN -> Complex.NaN
-    else -> Complex.create(kotlin.math.ln(z.mod), kotlin.math.atan2(z.im, z.re))
+    else -> Complex(kotlin.math.ln(z.mod), kotlin.math.atan2(z.im, z.re))
 }
 
 /**
@@ -41,7 +41,7 @@ fun ln(z: Number) = ln(z.R)
 fun sin(z: Complex) =
     when (z) {
         Complex.NaN, Complex.INF -> Complex.NaN
-        else -> Complex.create(
+        else -> Complex(
             kotlin.math.sin(z.re) * kotlin.math.cosh(z.im),
             kotlin.math.cos(z.re) * kotlin.math.sinh(z.im)
         )
@@ -60,7 +60,7 @@ fun sin(z: Number) = sin(z.R)
 fun cos(z: Complex) = when (z) {
     Complex.NaN, Complex.INF -> Complex.NaN
     else ->
-        Complex.create(
+        Complex(
             kotlin.math.cos(z.re) * kotlin.math.cosh(z.im),
             -kotlin.math.sin(z.re) * kotlin.math.sinh(z.im)
         )
@@ -82,9 +82,9 @@ fun sqrt(z: Complex) = when (z) {
         else -> {
             val t: Double = kotlin.math.sqrt((kotlin.math.abs(z.re) + z.mod) / 2)
             if (z.re >= 0) {
-                Complex.create(t, z.im / (2 * t))
+                Complex(t, z.im / (2 * t))
             } else {
-                Complex.create(kotlin.math.abs(z.im) / (2 * t), 1.0.withSign(z.im) * t)
+                Complex(kotlin.math.abs(z.im) / (2 * t), 1.0.withSign(z.im) * t)
             }
         }
     }

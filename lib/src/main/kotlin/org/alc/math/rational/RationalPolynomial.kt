@@ -1,50 +1,12 @@
 package org.alc.math.rational
 
-import org.alc.math.Point2D
+import org.alc.math.Point2d
 import org.alc.math.matrix.RationalMatrix
 import java.lang.Integer.max
 import java.util.function.Function
 import kotlin.math.abs
 import kotlin.math.sqrt
 
-class ConstantRationalPolynomial internal constructor(coefficients: List<Rational>) : RationalPolynomial(coefficients) {
-
-    val value get() = coefficients[0]
-
-    internal constructor(coefficient: Rational) : this(listOf(coefficient))
-
-    override fun root(initial_guess: Double, epsilon: Double, max_iterations: Int) = Double.NaN
-    override fun rationalRoot(initial_guess: Rational, epsilon: Rational, max_iterations: Int) = Rational.NaN
-
-    override fun derivative(): ConstantRationalPolynomial = ZERO
-}
-
- class LinearRationalPolynomial internal constructor(coefficients: List<Rational>) : RationalPolynomial(coefficients) {
-    val m get() = coefficients[0]
-    val b get() = coefficients[1]
-
-    override fun rationalRoot(initial_guess: Rational, epsilon: Rational, max_iterations: Int) = -b / m
-
-    override fun root(initial_guess: Double, epsilon: Double, max_iterations: Int) = (-b / m).toDouble()
-
-    override fun derivative() = withCoefficients(m) as ConstantRationalPolynomial
-}
-
- class QuadraticRationalPolynomial internal constructor(coefficients: List<Rational>) : RationalPolynomial(coefficients) {
-
-    val a get() = coefficients[0]
-    val b get() = coefficients[1]
-    val c get() = coefficients[2]
-
-    val extremum get() = -b / 2 / a
-    override fun derivative() = withCoefficients(2 * a, b) as LinearRationalPolynomial
-
-    override fun root(initial_guess: Double, epsilon: Double, max_iterations: Int): Double {
-        val x = b * b - 4 * a * c
-        if (x < 0) return Double.NaN
-        return (-b.toDouble() + sqrt(x.toDouble())) / (2.0 * a.toDouble())
-    }
-}
 
 open class RationalPolynomial internal constructor(val coefficients: List<Rational>) : Function<Rational, Rational> {
 
@@ -65,7 +27,7 @@ open class RationalPolynomial internal constructor(val coefficients: List<Ration
             val c2 = if (i2 < 0) Rational.ZERO else other.coefficients[i2]
             p.add(c1 + c2)
         }
-        return fromRationals(p)
+        return create(p)
     }
 
     operator fun minus(other: RationalPolynomial): RationalPolynomial {
@@ -83,7 +45,7 @@ open class RationalPolynomial internal constructor(val coefficients: List<Ration
             val c2 = if (i2 < 0) Rational.ZERO else other.coefficients[i2]
             p.add(c1 - c2)
         }
-        return fromRationals(p)
+        return create(p)
     }
 
     operator fun times(other: RationalPolynomial): RationalPolynomial {
@@ -99,7 +61,7 @@ open class RationalPolynomial internal constructor(val coefficients: List<Ration
                 result[i + j] += this.coefficients[i] * other.coefficients[j]
             }
         }
-        return fromRationals(result)
+        return create(result)
     }
 
     operator fun times(other: Rational) = when (other) {
@@ -121,7 +83,7 @@ open class RationalPolynomial internal constructor(val coefficients: List<Ration
             r.removeAt(0)
             i += 1
         }
-        return Pair(fromRationals(q), fromRationals(r))
+        return Pair(create(q), create(r))
     }
 
     operator fun div(den: RationalPolynomial) = divideAndRemainder(den).first
@@ -147,7 +109,7 @@ open class RationalPolynomial internal constructor(val coefficients: List<Ration
             d.add((n - i) * coefficients[i])
             ++i
         }
-        return fromRationals(d)
+        return create(d)
     }
 
     open fun rationalRoot(
@@ -237,12 +199,10 @@ open class RationalPolynomial internal constructor(val coefficients: List<Ration
 
     companion object {
 
-        fun withCoefficients(vararg coefficients: Number) =
-            fromRationals(coefficients.asSequence().map { it.toRational() }.toList())
+        fun create(vararg coefficients: Number) =
+            create(coefficients.map { it.toRational() })
 
-        fun withCoefficients(vararg coefficients: Rational) = fromRationals(coefficients.asList())
-
-        fun fromRationals(coefficients: List<Rational>) = when (coefficients.size) {
+        internal fun create(coefficients: List<Rational>) = when (coefficients.size) {
             0 -> ZERO
             1 -> when (coefficients[0]) {
                 Rational.ZERO -> ZERO
@@ -253,9 +213,9 @@ open class RationalPolynomial internal constructor(val coefficients: List<Ration
             else -> nonTrivialList(coefficients)
         }
 
-        fun interpolate(vararg points: Point2D<Rational>) = interpolate(points.asList())
+        fun interpolate(vararg points: Point2d<Rational>) = interpolate(points.asList())
 
-        fun interpolate(points: List<Point2D<Rational>>): RationalPolynomial {
+        fun interpolate(points: List<Point2d<Rational>>): RationalPolynomial {
             require(points.size >= 2) { "Interpolation requires at least 2 points" }
             if (points.size == 2) return linearInterpolation(points[0], points[1])
 
@@ -269,15 +229,15 @@ open class RationalPolynomial internal constructor(val coefficients: List<Ration
                     c *= v
                 }
             }
-            return fromRationals(RationalMatrix.GaussianSolver(m).solve().asList())
+            return create(RationalMatrix.GaussianSolver(m).solve().asList())
         }
 
-        private fun linearInterpolation(p1: Point2D<Rational>, p2: Point2D<Rational>): RationalPolynomial {
+        private fun linearInterpolation(p1: Point2d<Rational>, p2: Point2d<Rational>): RationalPolynomial {
             val delta_x = p1.x - p2.x
             if (delta_x == Rational.ZERO) throw ArithmeticException("Infinite slope")
             val slope = (p1.y - p2.y) / delta_x
             val b = p1.y - p1.x * slope
-            return fromRationals(listOf(slope, b))
+            return create(listOf(slope, b))
         }
 
 
@@ -299,17 +259,17 @@ open class RationalPolynomial internal constructor(val coefficients: List<Ration
             if (cachedValue != null) return cachedValue
             return when (c.size) {
                 0 -> ZERO
-                1 -> ConstantRationalPolynomial(c)
-                2 -> LinearRationalPolynomial(c)
-                3 -> QuadraticRationalPolynomial(c)
+                1 -> Constant(c)
+                2 -> Linear(c)
+                3 -> Quadratic(c)
                 else -> RationalPolynomial(c)
             }
         }
 
-        val ZERO = store(ConstantRationalPolynomial(Rational.ZERO))
-        val ONE = store(ConstantRationalPolynomial(Rational.ONE))
-        val IDENTITY = store(LinearRationalPolynomial(listOf(Rational.ONE, Rational.ZERO)))
-        val SQUARE = store(QuadraticRationalPolynomial(listOf(Rational.ONE, Rational.ZERO, Rational.ZERO)))
+        val ZERO = store(Constant(Rational.ZERO))
+        val ONE = store(Constant(Rational.ONE))
+        val IDENTITY = store(Linear(listOf(Rational.ONE, Rational.ZERO)))
+        val SQUARE = store(Quadratic(listOf(Rational.ONE, Rational.ZERO, Rational.ZERO)))
         val CUBE = store(RationalPolynomial(listOf(Rational.ONE, Rational.ZERO, Rational.ZERO, Rational.ZERO)))
 
         init {
@@ -317,6 +277,47 @@ open class RationalPolynomial internal constructor(val coefficients: List<Ration
         }
     }
 
+    class Constant internal constructor(coefficients: List<Rational>) :
+        RationalPolynomial(coefficients) {
+
+        val value get() = coefficients[0]
+
+        internal constructor(coefficient: Rational) : this(listOf(coefficient))
+
+        override fun root(initial_guess: Double, epsilon: Double, max_iterations: Int) = Double.NaN
+        override fun rationalRoot(initial_guess: Rational, epsilon: Rational, max_iterations: Int) = Rational.NaN
+
+        override fun derivative(): Constant = ZERO
+    }
+
+    class Linear internal constructor(coefficients: List<Rational>) :
+        RationalPolynomial(coefficients) {
+        val m get() = coefficients[0]
+        val b get() = coefficients[1]
+
+        override fun rationalRoot(initial_guess: Rational, epsilon: Rational, max_iterations: Int) = -b / m
+
+        override fun root(initial_guess: Double, epsilon: Double, max_iterations: Int) = (-b / m).toDouble()
+
+        override fun derivative() = create(listOf(m)) as Constant
+    }
+
+    class Quadratic internal constructor(coefficients: List<Rational>) :
+        RationalPolynomial(coefficients) {
+
+        val a get() = coefficients[0]
+        val b get() = coefficients[1]
+        val c get() = coefficients[2]
+
+        val extremum get() = -b / 2 / a
+        override fun derivative() = create(listOf(2 * a, b)) as Linear
+
+        override fun root(initial_guess: Double, epsilon: Double, max_iterations: Int): Double {
+            val x = b * b - 4 * a * c
+            if (x < 0) return Double.NaN
+            return (-b.toDouble() + sqrt(x.toDouble())) / (2.0 * a.toDouble())
+        }
+    }
 }
 
 

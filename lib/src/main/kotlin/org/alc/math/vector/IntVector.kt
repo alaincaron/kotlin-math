@@ -6,7 +6,6 @@ import kotlin.math.sqrt
 operator fun Int.times(other: IntVector) = other * this
 
 class IntVector private constructor(private val values: IntArray) {
-
     val size get() = values.size
     operator fun get(i: Int) = values[i]
     operator fun set(i: Int, value: Int) {
@@ -16,18 +15,19 @@ class IntVector private constructor(private val values: IntArray) {
     companion object {
         operator fun invoke(vararg values: Int) = IntVector(values.copyOf())
         operator fun invoke(size: Int, f: (Int) -> Int) = IntVector(IntArray(size, f))
+        operator fun invoke(original: IntVector) = IntVector(original.size) { i -> original[i] }
     }
+
+    fun copy() = IntVector(this)
 
     operator fun plus(other: IntVector): IntVector {
         require(size == other.size) { "Vectors must be of the same size" }
-        val newValues = IntArray(size) { i -> values[i] + other.values[i] }
-        return IntVector(newValues)
+        return IntVector(size) { i -> values[i] + other.values[i] }
     }
 
     operator fun minus(other: IntVector): IntVector {
         require(size == other.size) { "Vectors must be of the same size" }
-        val newValues = IntArray(size) { i -> values[i] - other.values[i] }
-        return IntVector(newValues)
+        return IntVector(size) { i -> values[i] - other.values[i] }
     }
 
     operator fun times(other: IntVector): Int {
@@ -48,7 +48,7 @@ class IntVector private constructor(private val values: IntArray) {
     infix fun dot(other: IntVector): Int = this * other
 
     infix fun cross(other: IntVector): IntVector {
-        require(size == other.size && size == 3) { "Vectors must of size 3" }
+        require(size == other.size && size == 3) { "Vectors be must of size 3" }
         return IntVector(3) {
             when (it) {
                 0 -> (get(1) * other[2]) - (get(2) * other[1])

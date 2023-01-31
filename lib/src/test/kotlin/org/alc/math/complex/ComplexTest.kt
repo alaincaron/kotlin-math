@@ -23,8 +23,8 @@ class ComplexTest {
 
     @Test
     fun testIBuilder() {
-        assertEquals(2.0 + 3.0.I, Complex.create(2.0, 3.0))
-        assertEquals(2.0 + 3.0 * Complex.I, Complex.create(2.0, 3.0))
+        assertEquals(2.0 + 3.0.I, Complex(2.0, 3.0))
+        assertEquals(2.0 + 3.0 * Complex.I, Complex(2.0, 3.0))
     }
 
 
@@ -102,10 +102,10 @@ class ComplexTest {
     fun testDoubleAddAndSub() {
         val z0 = 2.0 + 3.0.I
         val d0 = 3.0
-        assertEquals(Complex.create(d0, 0.0), Complex.ZERO + d0)
-        assertEquals(Complex.create(-d0, 0.0), Complex.ZERO - d0)
-        assertEquals(Complex.create(5.0, 3.0), z0 + d0)
-        assertEquals(Complex.create(-1.0, 3.0), z0 - d0)
+        assertEquals(Complex(d0, 0.0), Complex.ZERO + d0)
+        assertEquals(Complex(-d0, 0.0), Complex.ZERO - d0)
+        assertEquals(Complex(5.0, 3.0), z0 + d0)
+        assertEquals(Complex(-1.0, 3.0), z0 - d0)
 
         val testData = listOf(
                 Triple(Complex.INF, d0, Complex.INF),
@@ -164,7 +164,7 @@ class ComplexTest {
     fun testDoubleMultiplication() {
         val z0 = 3.0 + 3.0.I
         val d0 = 3.0
-        val w0 = Complex.create(9.0, 9.0)
+        val w0 = Complex(9.0, 9.0)
         assertEquals(w0, z0 * d0)
         assertEquals(w0, d0 * z0)
         val testData = listOf(
@@ -224,7 +224,7 @@ class ComplexTest {
     fun testDoubleDivision() {
         val z0 = 3.0 + 3.0.I
         val d0 = 3.0
-        val w0 = Complex.create(1.0, 1.0)
+        val w0 = Complex(1.0, 1.0)
         val testData = listOf(
                 Triple(z0, d0, w0),
                 Triple(Complex.ZERO, d0, Complex.ZERO),
@@ -256,7 +256,7 @@ class ComplexTest {
     fun testDoubleDivisionReverse() {
         val z0 = 3.0 + 3.0.I
         val d0 = 3.0
-        val w0 = Complex.create(0.5, -0.5)
+        val w0 = Complex(0.5, -0.5)
         val testData = listOf(
                 Triple(d0, z0, w0),
                 Triple(d0, Complex.ZERO, Complex.INF),
@@ -296,8 +296,8 @@ class ComplexTest {
 
     @Test
     fun testConjugate() {
-        val input = Complex.create(3.0, 4.0)
-        val expected = Complex.create(3.0, -4.0)
+        val input = Complex(3.0, 4.0)
+        val expected = Complex(3.0, -4.0)
         assertEquals(expected, input.conj())
         assertEquals(expected, !input)
         assertEquals(25.0, (input * !input).mod)
@@ -306,7 +306,7 @@ class ComplexTest {
     @Test
     fun testToString() {
         assertEquals("0.0", Complex.ZERO.toString())
-        assertEquals("0.0", Complex.create(-0.0, -0.0).toString())
+        assertEquals("0.0", Complex(-0.0, -0.0).toString())
         assertEquals("1.0", Complex.ONE.toString())
         assertEquals("-1.0", (-1.0).R.toString())
         assertEquals("i", Complex.I.toString())
@@ -321,7 +321,7 @@ class ComplexTest {
 
     @Test
     fun testEquals() {
-        val z0 = Complex.create(4, 5)
+        val z0 = Complex(4, 5)
         val z1 = 4 + 5.I
         val four = 4.R
         val fiveI = 5.I
@@ -340,7 +340,7 @@ class ComplexTest {
 
     @Test
     fun testHashCode() {
-        val z0 = Complex.create(4, 5)
+        val z0 = Complex(4, 5)
         val z1 = 4 + 5.I
         val four = 4.R
         val fiveI = 5.I
@@ -352,10 +352,10 @@ class ComplexTest {
 
     @Test
     fun testConstructor() {
-        val z0 = Complex.create(4, 5)
-        val z1 = Complex.create(z0)
+        val z0 = Complex(4, 5)
+        val z1 = Complex(z0)
         assertSame(z0, z1)
-        val z2 = Complex.create("4+5i")
+        val z2 = Complex("4+5i")
         assertEquals(z0, z2)
     }
 

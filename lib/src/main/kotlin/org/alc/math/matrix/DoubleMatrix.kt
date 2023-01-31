@@ -1,6 +1,5 @@
 package org.alc.math.matrix
 
-import org.alc.math.rational.Rational
 import org.alc.util.matrix.Matrix
 import kotlin.math.abs
 import kotlin.math.absoluteValue
