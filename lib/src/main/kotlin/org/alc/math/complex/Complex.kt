@@ -1,13 +1,13 @@
 package org.alc.math.complex
 
-import org.alc.math.ring.DivisionRingElement
 import java.util.*
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.atan
 import org.alc.math.fix0
+import org.alc.math.ring.RingElement
 
-class Complex private constructor(val re: Double, val im: Double = 0.0): DivisionRingElement<Complex> {
+class Complex private constructor(val re: Double, val im: Double = 0.0): RingElement<Complex> {
 
     companion object {
         /** The imaginary unit i as constant */
@@ -208,7 +208,7 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): Divisio
      * @param den the denominator
      * @return product of this and z
      */
-    override operator fun div(den: Complex): Complex {
+    operator fun div(den: Complex): Complex {
         return when {
             isNaN() || den.isNaN() -> NaN
             isInfinite() -> if (den.isInfinite()) NaN else INF
@@ -251,7 +251,7 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): Divisio
      * Negates a complex number
      * @return negation of this
      */
-    operator fun unaryMinus(): Complex {
+    override operator fun unaryMinus(): Complex {
         return when {
             isNaN() -> NaN
             isInfinite() -> INF
@@ -260,7 +260,7 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): Divisio
         }
     }
 
-    operator fun unaryPlus() = this
+    override operator fun unaryPlus() = this
 
     /**
      * Calculates the complex conjugation

@@ -6,15 +6,16 @@ import kotlin.math.sqrt
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
 import org.alc.math.rational.*
+import kotlin.test.assertContentEquals
 
 class RationalVectorTest {
 
     @Test
     fun add() {
-        val x = RationalVector(1, 2)
+        val x = RationalVector(1,2)
         val y = RationalVector(2, 3)
         val z = x + y
-        assertEquals(RationalVector(3, 5), z)
+        assertContentEquals(RationalVector(3, 5), z)
     }
 
     @Test
@@ -22,7 +23,7 @@ class RationalVectorTest {
         val x = RationalVector(1, 2)
         val y = RationalVector(2, 3)
         val z = x - y
-        assertEquals(RationalVector(-1, -1), z)
+        assertContentEquals(RationalVector(-1, -1), z)
     }
 
     @Test
@@ -48,7 +49,7 @@ class RationalVectorTest {
     @Test
     fun unaryMinus() {
         val x = RationalVector(1.0, 2.0, -3.0)
-        assertEquals(RationalVector(-1.0, -2.0, 3.0), -x)
+        assertContentEquals(RationalVector(-1.0, -2.0, 3.0), -x)
     }
 
     @Test
@@ -64,22 +65,22 @@ class RationalVectorTest {
         val x1 = RationalVector(1.0, 2.0, 3.0)
         val x2 = RationalVector(2.0, 5.0, 7.0)
 
-        assertEquals(RationalVector(3) { Rational.ZERO }, x1 cross x1)
-        assertEquals(RationalVector(-1.0, -1.0, 1.0), x1 cross x2)
-        assertEquals(RationalVector(1.0, 1.0, -1.0), x2 cross x1)
+        assertContentEquals(Array(3) { Rational.ZERO }, x1 cross x1)
+        assertContentEquals(RationalVector(-1.0, -1.0, 1.0), x1 cross x2)
+        assertContentEquals(RationalVector(1.0, 1.0, -1.0), x2 cross x1)
 
         val x = RationalVector(1.0, 0.0, 0.0)
         val y = RationalVector(0.0, 1.0, 0.0)
         val z = RationalVector(0.0, 0.0, 1.0)
 
-        assertEquals(z, x cross y)
-        assertEquals(-z, y cross x)
+        assertContentEquals(z, x cross y)
+        assertContentEquals(-z, y cross x)
 
-        assertEquals(-y, x cross z)
-        assertEquals(y, z cross x)
+        assertContentEquals(-y, x cross z)
+        assertContentEquals(y, z cross x)
 
-        assertEquals(x, y cross z)
-        assertEquals(-x, z cross y)
+        assertContentEquals(x, y cross z)
+        assertContentEquals(-x, z cross y)
     }
 
 }

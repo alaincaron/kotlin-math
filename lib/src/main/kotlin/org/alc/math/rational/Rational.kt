@@ -1,6 +1,6 @@
 package org.alc.math.rational
 
-import org.alc.math.ring.RemainderRingElement
+import org.alc.math.ring.DivisionRingElement
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.MathContext
@@ -51,7 +51,7 @@ operator fun Byte.compareTo(other: Rational) = Rational.valueOf(this).compareTo(
 class Rational private constructor(
     val num: BigInteger,
     val den: BigInteger = BigInteger.ONE
-) : Number(), RemainderRingElement<Rational>, Comparable<Rational> {
+) : Number(), DivisionRingElement<Rational>, Comparable<Rational> {
 
     sealed interface Format
 
@@ -188,7 +188,7 @@ class Rational private constructor(
         else -> valueOf(this.num, this.den * other)
     }
 
-    override operator fun div(den: Rational) = when {
+     override operator fun div(den: Rational) = when {
         den.isZero() -> throw ArithmeticException("Division by 0")
         isNaN() || den.isNaN() -> NaN
         den == ONE -> this
@@ -201,9 +201,9 @@ class Rational private constructor(
         else -> valueOf(this.num * den.den, this.den * den.num)
     }
 
-    operator fun unaryPlus() = this
+    override operator fun unaryPlus() = this
 
-    operator fun unaryMinus() = when (num.signum()) {
+    override operator fun unaryMinus() = when (num.signum()) {
         0 -> this // covers both 0 and NaN
 
         else -> canonicalValue(-this.num, this.den)
@@ -253,7 +253,7 @@ class Rational private constructor(
         }
     }
 
-    override operator fun rem(den: Rational) = divideAndRemainder(den).second
+    operator fun rem(den: Rational) = divideAndRemainder(den).second
 
     fun divideAndRemainder(other: Rational): Pair<BigInteger, Rational> = when {
         other.isZero() -> throw ArithmeticException("Division by 0")
@@ -284,7 +284,7 @@ class Rational private constructor(
         else -> valueOf(this.num.pow(exponent), this.den.pow(exponent))
     }
 
-    fun abs() = when {
+     fun abs() = when {
         num.signum() >= 0 -> this // covers both 0 and NaN
         else -> canonicalValue(-this.num, this.den)
     }

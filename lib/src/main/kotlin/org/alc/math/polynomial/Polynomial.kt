@@ -3,7 +3,7 @@ package org.alc.math.polynomial
 import org.alc.math.Point2d
 import org.alc.math.fix0
 import org.alc.math.matrix.DoubleMatrix
-import org.alc.math.ring.RemainderRingElement
+import org.alc.math.ring.DivisionRingElement
 import java.lang.Integer.max
 import java.util.function.Function
 import kotlin.math.abs
@@ -11,7 +11,7 @@ import kotlin.math.round
 import kotlin.math.sqrt
 
 open class Polynomial internal constructor(val coefficients: List<Double>) : Function<Double, Double>,
-    RemainderRingElement<Polynomial> {
+    DivisionRingElement<Polynomial> {
 
     override fun apply(x: Double) = coefficients.fold(0.0) { sum, v -> sum * x + v }
     fun degree() = coefficients.size - 1
@@ -89,14 +89,14 @@ open class Polynomial internal constructor(val coefficients: List<Double>) : Fun
         return Pair(create(q), create(r))
     }
 
-    override operator fun div(den: Polynomial) = divideAndRemainder(den).first
-    override operator fun rem(den: Polynomial) = divideAndRemainder(den).second
+     override operator fun div(den: Polynomial) = divideAndRemainder(den).first
+     operator fun rem(den: Polynomial) = divideAndRemainder(den).second
 
     operator fun div(den: Double) = canonicalValue(coefficients.asSequence().map { it / den })
 
-    operator fun unaryPlus() = this
+    override operator fun unaryPlus() = this
 
-    operator fun unaryMinus() = when (this) {
+    override operator fun unaryMinus() = when (this) {
         ZERO -> this
         else -> canonicalValue(coefficients.asSequence().map { -it })
     }

@@ -191,42 +191,5 @@ private fun Matrix<Rational>.invertBase(): Matrix<Rational> {
 }
 
 
-operator fun Matrix<Rational>.plus(other: Matrix<Rational>): Matrix<Rational> {
-    require(sameDimensions(other)) { "Matrices must be of same dimension" }
-    return Matrix(nbRows, nbColumns) { i, j -> this[i, j] + other[i, j] }
-}
-
-operator fun Matrix<Rational>.minus(other: Matrix<Rational>): Matrix<Rational> {
-    requireSameDimensions(other)
-    return Matrix(nbRows, nbColumns) { i, j -> this[i, j] - other[i, j] }
-}
-
-operator fun Matrix<Rational>.times(other: Matrix<Rational>): Matrix<Rational> {
-    require(compatibleForMultiplication(other))
-    return Matrix(nbRows, other.nbColumns) { i, j ->
-        var sum = Rational.ZERO
-        for (k in 0 until this.nbColumns) {
-            sum += this[i, k] * other[k, j]
-        }
-        sum
-    }
-}
-
-operator fun Matrix<Rational>.plusAssign(other: Matrix<Rational>) {
-    requireSameDimensions(other)
-    transformIndexed { i, j, v -> v + other[i, j] }
-}
-
-operator fun Matrix<Rational>.minusAssign(other: Matrix<Rational>) {
-    requireSameDimensions(other)
-    transformIndexed { i, j, v -> v - other[i, j] }
-}
-
-operator fun Matrix<Rational>.unaryMinus() =
-    Matrix(nbRows, nbColumns) { i, j -> -this[i, j] }
-
-operator fun Matrix<Rational>.unaryPlus() = Matrix(this)
-
-
 
 

@@ -1,9 +1,8 @@
 package org.alc.math.complex
 
-import org.alc.math.ring.DefaultDivisionRing
-import org.alc.math.ring.DefaultRemainderRing
+import org.alc.math.ring.Ring
 
-class ComplexRing : DefaultDivisionRing<Complex> {
+object ComplexRing : Ring<Complex> {
     override fun zero() = Complex.ZERO
     override fun one() = Complex.ONE
 }
