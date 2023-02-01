@@ -1,5 +1,6 @@
 package org.alc.math.matrix
 
+import org.alc.math.rational.over
 import org.alc.util.matrix.Matrix
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.assertThrows
@@ -162,12 +163,11 @@ class DoubleMatrixTest {
         m[2,1] = 7.0
         m[2,2] = 8.0
 
-        assertEquals(5.0, m.determinant(), 1e-10)
+        assertEquals(5.0, m.determinant(), 1e-13)
         val m2 = Matrix(m).swapColumns(2,0)
 
-        assertEquals(5.0, m.determinant(), 1e-10)
-        assertEquals(-5.0, m2.determinant(), 1e-10)
+        assertEquals(5.0, m.determinant(), 1e-13)
+        assertEquals(-5.0, m2.determinant(), 1e-13)
         println("m1.determinant = ${m2.determinant()}")
     }
-
 }

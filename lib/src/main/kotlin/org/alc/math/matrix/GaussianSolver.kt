@@ -1,6 +1,5 @@
 package org.alc.math.matrix
 
-import org.alc.math.rational.Rational
 import org.alc.math.ring.DivisionRingElement
 import org.alc.math.ring.Ring
 import org.alc.util.matrix.Matrix
@@ -9,7 +8,7 @@ class GaussianSolver<T: DivisionRingElement<T>>(
     private val ring: Ring<T>, private val matrix: Matrix<T>) where T: Comparable<T>
  {
 
-    private fun abs(x: T) = if (x < ring.zero()) x else -x
+    private fun abs(x: T) = if (x < ring.zero()) -x else x
     private fun max(a: T, b: T) = if (a > b) a else b
 
     private fun computeGreatest(iteration: Int, greatest: MutableList<T>) {
@@ -122,7 +121,7 @@ class GaussianSolver<T: DivisionRingElement<T>>(
             matrix.swapRows(iteration, maxIdx)
             result = PivotResult.SWAP
         }
-        if (matrix[iteration, iteration] == Rational.ZERO) {
+        if (matrix[iteration, iteration] == ring.zero()) {
             result = PivotResult.SINGULAR
         }
         return result

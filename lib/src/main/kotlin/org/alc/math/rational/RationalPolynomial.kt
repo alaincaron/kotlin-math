@@ -1,6 +1,7 @@
 package org.alc.math.rational
 
 import org.alc.math.Point2d
+import org.alc.math.matrix.GaussianSolver
 import org.alc.math.matrix.RationalMatrix
 import java.lang.Integer.max
 import java.util.function.Function
@@ -229,7 +230,7 @@ open class RationalPolynomial internal constructor(val coefficients: List<Ration
                     c *= v
                 }
             }
-            return create(RationalMatrix.GaussianSolver(m).solve().asList())
+            return create(GaussianSolver(RationalRing, m).solve())
         }
 
         private fun linearInterpolation(p1: Point2d<Rational>, p2: Point2d<Rational>): RationalPolynomial {

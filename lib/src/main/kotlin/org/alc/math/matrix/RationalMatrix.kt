@@ -1,6 +1,7 @@
 package org.alc.math.matrix
 
 import org.alc.math.rational.Rational
+import org.alc.math.rational.RationalRing
 import org.alc.util.matrix.Matrix
 
 object RationalMatrix {
@@ -12,146 +13,12 @@ object RationalMatrix {
 
     fun identity(size: Int) = Matrix(size, size) { i, j -> if (i == j) Rational.ONE else Rational.ZERO }
 
-    class GaussianSolver(private val matrix: Matrix<Rational>) {
-
-        private fun computeGreatest(iteration: Int, greatest:Array<Rational>) {
-            for (row in iteration until matrix.nbRows) {
-                greatest[row] = matrix[row,row].abs()
-                for (col in row + 1 until matrix.nbRows) {
-                    greatest[row] = greatest[row].max(matrix[row,col].abs())
-                }
-            }
-        }
-
-        private fun gaussianElimination(): PivotResult {
-            if (matrix.nbRows == 0 || matrix.nbColumns == 0) return PivotResult.SINGULAR
-
-            //find the largest absolute value for each row to use in scale ratios
-            val greatest = Array(matrix.nbRows) { Rational.ZERO}
-
-            //Gaussian elimination:
-            var result = PivotResult.NO_SWAP
-            for (iteration in 0 until matrix.nbRows) {
-                computeGreatest(iteration, greatest)
-                val ratios = scaleRatios(iteration, greatest)
-                val tmp = invert(iteration, ratios)
-                if (tmp == PivotResult.SINGULAR)
-                    return PivotResult.SINGULAR
-                else if (tmp == PivotResult.SWAP)
-                    result = result.toggle()
-            }
-            return result
-        }
-
-        fun determinant(): Rational {
-            var result = when (gaussianElimination()) {
-                PivotResult.SINGULAR -> return Rational.ZERO
-                PivotResult.SWAP -> Rational.MINUS_ONE
-                else -> Rational.ONE
-            }
-            for (i in 0 until matrix.nbRows) {
-                result *= matrix[i, i]
-            }
-            return result
-        }
-
-        fun solve(): Array<Rational> {
-            invert()
-            return Array(matrix.nbRows) { i -> matrix[i, matrix.nbRows] }
-        }
-
-        fun invert() {
-            val result = gaussianElimination()
-            if (result == PivotResult.SINGULAR) {
-                throw ArithmeticException("Matrix is singular")
-            }
-
-            backSubstitution()
-        }
-
-        private fun backSubstitution() {
-            for (row in matrix.nbRows - 1 downTo 0) {
-                val pivot = matrix[row, row]
-                for (row1 in 0 until row) {
-                    val factor = matrix[row1, row] / pivot
-                    for (col in row until matrix.nbColumns) {
-                        matrix[row1, col] -= factor * matrix[row, col]
-                    }
-                }
-                matrix[row, row] = Rational.ONE
-                for (col in matrix.nbRows until matrix.nbColumns) {
-                    matrix[row, col] /= pivot
-                }
-            }
-        }
-
-
-        private fun scaleRatios(iteration: Int, greatest: Array<Rational>): Array<Rational> {
-            val ratios = Array(matrix.nbRows) { Rational.ZERO }
-            for (row in iteration until matrix.nbRows) {
-                if (greatest[row] > Rational.ZERO) {
-                    ratios[row] = (matrix[row, iteration] / greatest[row]).abs()
-                }
-            }
-            return ratios
-        }
-
-        enum class PivotResult {
-            SWAP,
-            NO_SWAP,
-            SINGULAR;
-
-            fun toggle() = when (this) {
-                SWAP -> NO_SWAP
-                NO_SWAP -> SWAP
-                else -> SINGULAR
-
-            }
-        }
-
-        private fun pivotAndSwap(iteration: Int, ratios: Array<Rational>): PivotResult {
-
-            var maxRatio = ratios[iteration]
-            var maxIdx = iteration
-            for (i in iteration until matrix.nbRows) {
-                if (maxRatio < ratios[i]) {
-                    maxRatio = ratios[i]
-                    maxIdx = i
-                }
-            }
-            var result = PivotResult.NO_SWAP
-            if (maxIdx != iteration) {
-                matrix.swapRows(iteration, maxIdx)
-                result = PivotResult.SWAP
-            }
-            if (matrix[iteration, iteration] == Rational.ZERO) {
-                result = PivotResult.SINGULAR
-            }
-            return result
-        }
-
-
-        private fun invert(iteration: Int, ratios: Array<Rational>): PivotResult {
-            val result = pivotAndSwap(iteration, ratios)
-            if (result == PivotResult.SINGULAR) return result
-            for (row in iteration + 1 until matrix.nbRows) {
-                val value = matrix[row, iteration] / matrix[iteration, iteration]
-                if (value != Rational.ZERO) {
-                    for (col in iteration until matrix.nbColumns) {
-                        matrix[row, col] -= value * matrix[iteration, col]
-                    }
-                }
-            }
-            return result
-        }
-    }
-
 }
 
 fun Matrix<Rational>.determinant(): Rational {
     requireIsSquare()
     val work = Matrix(this)
-    val gauss = RationalMatrix.GaussianSolver(work)
+    val gauss = GaussianSolver(RationalRing, work)
     return gauss.determinant()
 }
 
@@ -172,8 +39,8 @@ fun Matrix<Rational>.solve(values: Array<Rational>): Array<Rational> {
         nbRows,
         nbColumns + 1
     ) { i, j -> if (j == nbColumns) values[i] else this[i, j] }
-    val gauss = RationalMatrix.GaussianSolver(work)
-    return gauss.solve()
+    val gauss = GaussianSolver(RationalRing,work)
+    return gauss.solve().toTypedArray()
 }
 
 private fun Matrix<Rational>.invertBase(): Matrix<Rational> {
@@ -186,7 +53,7 @@ private fun Matrix<Rational>.invertBase(): Matrix<Rational> {
             else -> Rational.ZERO
         }
     }
-    RationalMatrix.GaussianSolver(work).invert()
+    GaussianSolver(RationalRing, work).invert()
     return work
 }
 

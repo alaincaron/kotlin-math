@@ -1,9 +1,6 @@
 package org.alc.math.matrix
 
-import org.alc.math.rational.Rational
-import org.alc.math.rational.over
-import org.alc.math.rational.plus
-import org.alc.math.rational.toRational
+import org.alc.math.rational.*
 import org.alc.util.matrix.Matrix
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.assertThrows
@@ -85,7 +82,7 @@ class RationalMatrixTest {
         m[1, 2] = 0 over 1
         m[1, 3] = 1 over 1
 
-        RationalMatrix.GaussianSolver(m).invert()
+        GaussianSolver(RationalRing, m).invert()
         assertSame(Rational.ONE, m[0,0])
         assertSame(Rational.ZERO, m[0,1])
         assertSame(Rational.ZERO, m[1,0])
@@ -167,7 +164,5 @@ class RationalMatrixTest {
 
         val m1 = Matrix(m).swapColumns(2,0)
         assertEquals(-5 over 1, m1.determinant())
-
     }
-
 }
