@@ -1,8 +1,6 @@
 package org.alc.math.matrix
 
-import org.alc.math.rational.over
 import org.alc.util.matrix.Matrix
-import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -84,7 +82,7 @@ class DoubleMatrixTest {
         m[1, 2] = 0.0
         m[1, 3] = 1.0
 
-        DoubleMatrix.GaussianSolver(m).invert()
+        DoubleGaussianElimination(m).invert()
         assertEquals(1.0, m[0,0], 1e-15)
         assertEquals(0.0, m[0,1], 1e-15)
         assertEquals(0.0, m[1,0], 1e-15)

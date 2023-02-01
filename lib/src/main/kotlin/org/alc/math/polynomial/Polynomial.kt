@@ -2,6 +2,7 @@ package org.alc.math.polynomial
 
 import org.alc.math.Point2d
 import org.alc.math.fix0
+import org.alc.math.matrix.DoubleGaussianElimination
 import org.alc.math.matrix.DoubleMatrix
 import org.alc.math.ring.DivisionRingElement
 import java.lang.Integer.max
@@ -220,7 +221,7 @@ open class Polynomial internal constructor(val coefficients: List<Double>) : Fun
                     c *= v
                 }
             }
-            return create(DoubleMatrix.GaussianSolver(m).solve().asList())
+            return create(DoubleGaussianElimination(m).solve().asList())
         }
 
         private fun linearInterpolation(p1: Point2d<Double>, p2: Point2d<Double>): Polynomial {

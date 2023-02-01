@@ -1,50 +1,42 @@
 package org.alc.math.matrix
 
-import org.alc.math.ring.DivisionRingElement
-import org.alc.math.ring.Ring
 import org.alc.util.matrix.Matrix
+import kotlin.math.abs
+import kotlin.math.absoluteValue
+import kotlin.math.max
 
-class GaussianSolver<T: DivisionRingElement<T>>(
-    private val ring: Ring<T>, private val matrix: Matrix<T>) where T: Comparable<T>
- {
+class DoubleGaussianElimination(private val matrix: Matrix<Double>) {
 
-    private fun abs(x: T) = if (x < ring.zero()) -x else x
-    private fun max(a: T, b: T) = if (a > b) a else b
-
-    private fun computeGreatest(iteration: Int, greatest: MutableList<T>) {
+    private fun computeGreatest(iteration: Int, greatest:DoubleArray) {
         for (row in iteration until matrix.nbRows) {
-            greatest[row] = abs(matrix[row, row])
+            greatest[row] = matrix[row,row].absoluteValue
             for (col in row + 1 until matrix.nbRows) {
-                greatest[row] = max(greatest[row], abs(matrix[row, col]))
+                greatest[row] = max(greatest[row], matrix[row, col].absoluteValue)
             }
         }
     }
 
-    private fun gaussianElimination(): PivotResult {
+    fun gaussianElimination(): PivotResult {
         if (matrix.nbRows == 0 || matrix.nbColumns == 0) return PivotResult.SINGULAR
 
-        //find the largest absolute value for each row to use in scale ratios
-        val greatest = MutableList(matrix.nbRows) { ring.zero() }
+        val greatest = DoubleArray(matrix.nbRows)
 
         //Gaussian elimination:
         var result = PivotResult.NO_SWAP
         for (iteration in 0 until matrix.nbRows) {
             computeGreatest(iteration, greatest)
             val ratios = scaleRatios(iteration, greatest)
-            val tmp = invert(iteration, ratios)
-            if (tmp == PivotResult.SINGULAR)
-                return PivotResult.SINGULAR
-            else if (tmp == PivotResult.SWAP)
-                result = result.toggle()
+            result = result.transition(pivotAndReduce(iteration, ratios))
+            if (result == PivotResult.SINGULAR) break
         }
         return result
     }
 
-    fun determinant(): T {
+    fun determinant(): Double {
         var result = when (gaussianElimination()) {
-            PivotResult.SINGULAR -> return ring.zero()
-            PivotResult.SWAP -> ring.zero() - ring.one()
-            else -> ring.one()
+            PivotResult.SINGULAR -> return 0.0
+            PivotResult.SWAP -> -1.0
+            else -> 1.0
         }
         for (i in 0 until matrix.nbRows) {
             result *= matrix[i, i]
@@ -52,9 +44,9 @@ class GaussianSolver<T: DivisionRingElement<T>>(
         return result
     }
 
-    fun solve(): List<T> {
+    fun solve(): DoubleArray {
         invert()
-        return List(matrix.nbRows) { i -> matrix[i, matrix.nbRows] }
+        return DoubleArray(matrix.nbRows) { i -> matrix[i, matrix.nbRows] }
     }
 
     fun invert() {
@@ -75,7 +67,7 @@ class GaussianSolver<T: DivisionRingElement<T>>(
                     matrix[row1, col] -= factor * matrix[row, col]
                 }
             }
-            matrix[row, row] = ring.one()
+            matrix[row, row] = 1.0
             for (col in matrix.nbRows until matrix.nbColumns) {
                 matrix[row, col] /= pivot
             }
@@ -83,30 +75,17 @@ class GaussianSolver<T: DivisionRingElement<T>>(
     }
 
 
-    private fun scaleRatios(iteration: Int, greatest: List<T>): MutableList<T> {
-        val ratios = MutableList(matrix.nbRows) { ring.zero()}
+    private fun scaleRatios(iteration: Int, greatest: DoubleArray): DoubleArray {
+        val ratios = DoubleArray(matrix.nbRows)
         for (row in iteration until matrix.nbRows) {
-            if (greatest[row] > ring.zero()) {
+            if (greatest[row] > 0.0) {
                 ratios[row] = abs(matrix[row, iteration] / greatest[row])
             }
         }
         return ratios
     }
 
-    enum class PivotResult {
-        SWAP,
-        NO_SWAP,
-        SINGULAR;
-
-        fun toggle() = when (this) {
-            SWAP -> NO_SWAP
-            NO_SWAP -> SWAP
-            else -> SINGULAR
-
-        }
-    }
-
-    private fun pivotAndSwap(iteration: Int, ratios: List<T>): PivotResult {
+    private fun pivotAndSwap(iteration: Int, ratios: DoubleArray): PivotResult {
 
         var maxRatio = ratios[iteration]
         var maxIdx = iteration
@@ -121,19 +100,19 @@ class GaussianSolver<T: DivisionRingElement<T>>(
             matrix.swapRows(iteration, maxIdx)
             result = PivotResult.SWAP
         }
-        if (matrix[iteration, iteration] == ring.zero()) {
+        if (matrix[iteration, iteration].absoluteValue <= 1e-10) {
             result = PivotResult.SINGULAR
         }
         return result
     }
 
 
-    private fun invert(iteration: Int, ratios: List<T>): PivotResult {
+    private fun pivotAndReduce(iteration: Int, ratios: DoubleArray): PivotResult {
         val result = pivotAndSwap(iteration, ratios)
         if (result == PivotResult.SINGULAR) return result
         for (row in iteration + 1 until matrix.nbRows) {
             val value = matrix[row, iteration] / matrix[iteration, iteration]
-            if (value.compareTo(ring.zero()) != 0) {
+            if (value != 0.0) {
                 for (col in iteration until matrix.nbColumns) {
                     matrix[row, col] -= value * matrix[iteration, col]
                 }
@@ -142,4 +121,3 @@ class GaussianSolver<T: DivisionRingElement<T>>(
         return result
     }
 }
-

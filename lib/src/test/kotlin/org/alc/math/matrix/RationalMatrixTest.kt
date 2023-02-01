@@ -82,7 +82,7 @@ class RationalMatrixTest {
         m[1, 2] = 0 over 1
         m[1, 3] = 1 over 1
 
-        GaussianSolver(RationalRing, m).invert()
+        GaussianElimination(RationalRing, m).invert()
         assertSame(Rational.ONE, m[0,0])
         assertSame(Rational.ZERO, m[0,1])
         assertSame(Rational.ZERO, m[1,0])
