@@ -11,7 +11,8 @@ import kotlin.math.abs
 import kotlin.math.round
 import kotlin.math.sqrt
 
-open class Polynomial internal constructor(val coefficients: List<Double>) : Function<Double, Double>,
+class Polynomial private constructor(val coefficients: List<Double>) :
+    Function<Double, Double>,
     DivisionRingElement<Polynomial> {
 
     override fun apply(x: Double) = coefficients.fold(0.0) { sum, v -> sum * x + v }
@@ -31,7 +32,7 @@ open class Polynomial internal constructor(val coefficients: List<Double>) : Fun
             val c2 = if (i2 < 0) 0.0 else other.coefficients[i2]
             p.add(c1 + c2)
         }
-        return create(p)
+        return invoke(p)
     }
 
     override operator fun minus(other: Polynomial): Polynomial {
@@ -49,7 +50,7 @@ open class Polynomial internal constructor(val coefficients: List<Double>) : Fun
             val c2 = if (i2 < 0) 0.0 else other.coefficients[i2]
             p.add(c1 - c2)
         }
-        return create(p)
+        return invoke(p)
     }
 
     override operator fun times(other: Polynomial): Polynomial {
@@ -65,7 +66,7 @@ open class Polynomial internal constructor(val coefficients: List<Double>) : Fun
                 result[i + j] += this.coefficients[i] * other.coefficients[j]
             }
         }
-        return create(result)
+        return invoke(result)
     }
 
     operator fun times(other: Double) = when (other) {
@@ -87,11 +88,11 @@ open class Polynomial internal constructor(val coefficients: List<Double>) : Fun
             r.removeAt(0)
             i += 1
         }
-        return Pair(create(q), create(r))
+        return Pair(invoke(q), invoke(r))
     }
 
-     override operator fun div(den: Polynomial) = divideAndRemainder(den).first
-     operator fun rem(den: Polynomial) = divideAndRemainder(den).second
+    override operator fun div(den: Polynomial) = divideAndRemainder(den).first
+    operator fun rem(den: Polynomial) = divideAndRemainder(den).second
 
     operator fun div(den: Double) = canonicalValue(coefficients.asSequence().map { it / den })
 
@@ -104,7 +105,7 @@ open class Polynomial internal constructor(val coefficients: List<Double>) : Fun
 
     fun negate() = unaryMinus()
 
-    open fun derivative(): Polynomial {
+    fun derivative(): Polynomial {
         val n = this.degree()
         if (n == 0) return ZERO
         val d = mutableListOf<Double>()
@@ -113,11 +114,26 @@ open class Polynomial internal constructor(val coefficients: List<Double>) : Fun
             d.add((n - i) * coefficients[i])
             ++i
         }
-        return create(d)
+        return invoke(d)
     }
 
+    fun root(initial_guess: Double = 1.0, epsilon: Double = 1e-6, max_iterations: Int = 20) = when (degree()) {
+        0 -> Double.NaN
+        1 -> -coefficients[1] / coefficients[0]
+        2 -> root2()
+        else -> newtonRoot(initial_guess, epsilon, max_iterations)
+    }
 
-    open fun root(initial_guess: Double = 1.0, epsilon: Double = 1e-6, max_iterations: Int = 1000): Double {
+    private fun root2(): Double {
+        val a = coefficients[0]
+        val b = coefficients[1]
+        val c = coefficients[2]
+        val x = b * b - 4.0 * a * c
+        if (x < 0.0) return Double.NaN
+        return (-b + sqrt(x)) / (2.0 * a)
+    }
+
+    private fun newtonRoot(initial_guess: Double, epsilon: Double, max_iterations: Int): Double {
         var x0 = initial_guess
         for (iter in 1..max_iterations) {
             var f = coefficients[0]
@@ -128,9 +144,9 @@ open class Polynomial internal constructor(val coefficients: List<Double>) : Fun
             }
             val ratio = f / f_prime
             x0 -= ratio
-            if (abs(ratio) <= epsilon) break
+            if (abs(ratio) <= epsilon) return x0
         }
-        return x0
+        return Double.NaN
     }
 
     override fun equals(other: Any?): Boolean {
@@ -188,13 +204,13 @@ open class Polynomial internal constructor(val coefficients: List<Double>) : Fun
 
 
     companion object {
-        fun create(vararg coefficients: Double) = create(
+        operator fun invoke(vararg coefficients: Double) = invoke(
             mutableListOf<Double>().also { it.addAll(coefficients.asList()) }
         )
 
-        fun create(vararg coefficients: Number) = create(coefficients.map { it.toDouble() })
+        operator fun invoke(vararg coefficients: Number) = invoke(coefficients.map { it.toDouble() })
 
-        internal fun create(coefficients: List<Double>) = when (coefficients.size) {
+        internal fun invoke(coefficients: List<Double>) = when (coefficients.size) {
             0 -> ZERO
             1 -> when (coefficients[0]) {
                 0.0 -> ZERO
@@ -221,7 +237,7 @@ open class Polynomial internal constructor(val coefficients: List<Double>) : Fun
                     c *= v
                 }
             }
-            return create(DoubleGaussianElimination(m).solve().asList())
+            return invoke(DoubleGaussianElimination(m).solve().asList())
         }
 
         private fun linearInterpolation(p1: Point2d<Double>, p2: Point2d<Double>): Polynomial {
@@ -229,7 +245,7 @@ open class Polynomial internal constructor(val coefficients: List<Double>) : Fun
             if (delta_x == 0.0) throw ArithmeticException("Infinite slope")
             val slope = (p1.y - p2.y) / delta_x
             val b = p1.y - p1.x * slope
-            return create(listOf(slope, b))
+            return invoke(listOf(slope, b))
         }
 
         private fun nonTrivialList(coefficients: List<Double>): Polynomial {
@@ -239,9 +255,9 @@ open class Polynomial internal constructor(val coefficients: List<Double>) : Fun
 
         private val instanceCache = mutableMapOf<List<Double>, Polynomial>()
 
-        private fun <T : Polynomial> store(t: T): T {
-            instanceCache[t.coefficients] = t
-            return t
+        private fun store(p: Polynomial): Polynomial {
+            instanceCache[p.coefficients] = p
+            return p
         }
 
         private fun canonicalValue(coefficients: Sequence<Double>): Polynomial {
@@ -250,52 +266,18 @@ open class Polynomial internal constructor(val coefficients: List<Double>) : Fun
             if (cachedValue != null) return cachedValue
             return when (c.size) {
                 0 -> ZERO
-                1 -> Constant(c)
-                2 -> Linear(c)
-                3 -> Quadratic(c)
                 else -> Polynomial(c)
             }
         }
 
-        val ZERO = store(Constant(0.0))
-        val ONE = store(Constant(1.0))
-        val IDENTITY = store(Linear(listOf(1.0, 0.0)))
-        val SQUARE = store(Quadratic(listOf(1.0, 0.0, 0.0)))
+        val ZERO = store(Polynomial(listOf(0.0)))
+        val ONE = store(Polynomial(listOf(1.0)))
+        val IDENTITY = store(Polynomial(listOf(1.0, 0.0)))
+        val SQUARE = store(Polynomial(listOf(1.0, 0.0, 0.0)))
         val CUBE = store(Polynomial(listOf(1.0, 0.0, 0.0, 0.0)))
 
         init {
             instanceCache[listOf()] = ZERO
-        }
-    }
-
-    class Constant internal constructor(coefficients: List<Double>) : Polynomial(coefficients) {
-        val value get() = coefficients[0]
-
-        internal constructor(coefficient: Double) : this(listOf(coefficient))
-
-        override fun root(initial_guess: Double, epsilon: Double, max_iterations: Int) = Double.NaN
-        override fun derivative(): Constant = ZERO
-    }
-
-    class Linear internal constructor(coefficients: List<Double>) : Polynomial(coefficients) {
-        val slope get() = coefficients[0]
-
-        override fun root(initial_guess: Double, epsilon: Double, max_iterations: Int) = -coefficients[1] / coefficients[0]
-        override fun derivative() = create(listOf(slope)) as Constant
-    }
-
-    class Quadratic internal constructor(coefficients: List<Double>) : Polynomial(coefficients) {
-        val a get() = coefficients[0]
-        val b get() = coefficients[1]
-        val c get() = coefficients[2]
-
-        val extremum get() = -b / 2 / a
-        override fun derivative() = create(listOf(2.0 * a, b)) as Linear
-
-        override fun root(initial_guess: Double, epsilon: Double, max_iterations: Int): Double {
-            val x = b * b - 4.0 * a * c
-            if (x < 0.0) return Double.NaN
-            return (-b + sqrt(x)) / (2.0 * a)
         }
     }
 }

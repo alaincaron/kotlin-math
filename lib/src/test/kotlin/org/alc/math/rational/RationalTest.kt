@@ -392,7 +392,7 @@ class RationalTest {
 
     @Test
     fun divideBigInteger() {
-        val a = Rational.valueOf(2)
+        val a = Rational(2)
         val b = BigInteger.valueOf(2L)
         val c = -b
         assertSame(Rational.ONE, a / b)
@@ -509,7 +509,7 @@ class RationalTest {
 
     @Test
     fun testEquals() {
-        assertTrue(Rational.valueOf(1, 3).equals(1 over 3))
+        assertTrue(Rational(1, 3).equals(1 over 3))
         assertFalse((1 over 2).equals(1 over 3))
         assertFalse(Rational.NaN.equals(Rational.NaN))
         assertFalse(Rational.ONE.equals(Rational.NaN))
@@ -529,10 +529,10 @@ class RationalTest {
         val c = 1 over 4
         assertEquals(1 over 6, a % b)
         assertSame(Rational.ZERO, a % c)
-        assertEquals(Rational.ONE, Rational.valueOf(5) % Rational.valueOf(2))
+        assertEquals(Rational.ONE, Rational(5) % Rational(2))
         assertEquals(2 over 3, (8 over 3) % 2)
-        assertEquals(Rational.ONE, Rational.valueOf(5) % 2L)
-        assertSame(Rational.ONE, Rational.valueOf(5) % BigInteger.valueOf(2L))
+        assertEquals(Rational.ONE, Rational(5) % 2L)
+        assertSame(Rational.ONE, Rational(5) % BigInteger.valueOf(2L))
         assertSame(Rational.NaN, a % Rational.NaN)
         assertSame(Rational.NaN, Rational.NaN % a)
         assertSame(Rational.NaN, Rational.POSITIVE_INFINITY % a)
@@ -702,8 +702,8 @@ class RationalTest {
     @Test
     fun min() {
         assertSame(Rational.MINUS_ONE, min(Rational.ONE, Rational.MINUS_ONE, Rational.ZERO))
-        val b = Rational.valueOf(3)
-        assertSame(b, min(Rational.valueOf(12), b, Rational.TEN))
+        val b = Rational(3)
+        assertSame(b, min(Rational(12), b, Rational.TEN))
         assertSame(Rational.NaN, min(b, Rational.TEN, Rational.NaN, Rational.ZERO))
         assertSame(Rational.ONE, min(Rational.ONE, Rational.TEN, Rational.POSITIVE_INFINITY))
         assertSame(Rational.NEGATIVE_INFINITY, min(Rational.ONE, Rational.TEN, Rational.NEGATIVE_INFINITY))
@@ -712,7 +712,7 @@ class RationalTest {
     @Test
     fun max() {
         assertSame(Rational.ONE, max(Rational.ONE, Rational.MINUS_ONE, Rational.ZERO))
-        val b = Rational.valueOf(3)
+        val b = Rational(3)
         assertSame(b, max(Rational.ZERO, Rational.ONE, b))
         assertSame(Rational.NaN, max(b, Rational.TEN, Rational.NaN, Rational.ZERO))
         assertSame(Rational.POSITIVE_INFINITY, max(Rational.ONE, Rational.TEN, Rational.POSITIVE_INFINITY))
