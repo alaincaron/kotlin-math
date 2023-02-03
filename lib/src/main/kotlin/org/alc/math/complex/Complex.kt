@@ -388,8 +388,9 @@ operator fun Number.div(z: Complex) = Complex.ONE / z * this
  * @return the created complex number
  */
 fun String.toComplex(): Complex {
+    val imRegex = Regex("[iI]$")
     fun parseIm(arg: String): String {
-        val im = arg.removeSuffix("i")
+        val im = imRegex.replace(arg, "")
         return im.ifEmpty { "1.0" }
     }
 
@@ -398,16 +399,16 @@ fun String.toComplex(): Complex {
         "NaN" -> Complex.NaN
         else -> {
             val parts = StringTokenizer(this, "+-", true)
-                .toList().map { it.toString().replace('I', 'i') }
+                .toList().map { it.toString() }
             when (parts.size) {
                 0 -> throw NumberFormatException("empty String")
-                1 -> if (parts[0].endsWith("i")) {
+                1 -> if (imRegex.matches(parts[0])) {
                     Complex(0.0, parseIm(parts[0]).toDouble())
                 } else {
                     Complex(parts[0].toDouble(), 0.0)
                 }
 
-                2 -> if (parts[1].endsWith("i")) {
+                2 -> if (imRegex.matches(parts[1])) {
                     Complex(0.0, (parts[0] + parseIm(parts[1])).toDouble())
                 } else {
                     Complex((parts[0] + parts[1]).toDouble(), 0.0)
