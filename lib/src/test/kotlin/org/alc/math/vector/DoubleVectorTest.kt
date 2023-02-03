@@ -78,4 +78,13 @@ class DoubleVectorTest {
         assertContentEquals(x.unaryMinus().transform(::fix0), z cross y)
     }
 
+    @Test fun projection() {
+        val v1 = doubleArrayOf(1.0, 2.0)
+        val v2 = doubleArrayOf(2.0, -1.0)
+        assertContentEquals(DoubleArray(2), (v1 project v2).transform(::fix0))
+
+        val v3 = doubleArrayOf(2.0, 3.0)
+        assertContentEquals(v3 * (8.0/13.0), v1 project v3)
+    }
+
 }

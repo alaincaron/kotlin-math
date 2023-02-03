@@ -1,5 +1,6 @@
 package org.alc.math.vector
 
+import org.alc.math.ring.DivisionRingElement
 import org.alc.math.ring.RingElement
 
 fun requireSameSize(a: Array<*>, b: Array<*>) {
@@ -56,3 +57,6 @@ fun < T : RingElement<T>> Array<T>.transform(f: (T) -> T): Array<T> {
     }
     return this
 }
+
+inline infix fun <reified T: DivisionRingElement<T>> Array<T>.project(base: Array<T>) =
+    ((this * base) / base.normSquare()) * base

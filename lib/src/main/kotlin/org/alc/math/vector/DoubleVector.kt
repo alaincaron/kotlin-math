@@ -19,6 +19,7 @@ operator fun DoubleArray.times(other: DoubleArray): Double {
     return sum
 }
 
+operator fun Double.times(other: DoubleArray) = other * this
 operator fun DoubleArray.times(other: Double) = DoubleArray(size) { i -> this[i] * other }
 operator fun DoubleArray.times(other: Number) = this * other.toDouble()
 operator fun DoubleArray.div(other: Double) = DoubleArray(size) { i -> this[i] / other }
@@ -50,4 +51,7 @@ fun DoubleArray.transform(f: (Double) -> Double): DoubleArray {
     }
     return this
 }
+
+infix fun DoubleArray.project(base: DoubleArray) =
+    ((this * base) / base.normSquare()) * base
 
