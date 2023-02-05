@@ -1,5 +1,7 @@
 package org.alc.math.complex
 
+import java.io.DataInput
+import java.io.DataOutput
 import java.util.regex.Pattern
 
 internal const val doubleRegex = "(?:[-+]?(?:[0-9]*[.])?[0-9]+(?:e[-+]?[0-9]+)?)"
@@ -31,5 +33,15 @@ fun String.toComplex(): Complex {
         Complex(re, -im)
 }
 
+fun DataInput.readComplex(): Complex {
+    val re = this.readDouble()
+    val im = this.readDouble()
+    return Complex(re, im)
+}
+
+fun DataOutput.writeComplex(c: Complex)  {
+    this.writeDouble(c.re)
+    this.writeDouble(c.im)
+}
 
 
