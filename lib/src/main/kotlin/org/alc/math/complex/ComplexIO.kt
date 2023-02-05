@@ -16,7 +16,7 @@ internal val complexRegex = Pattern.compile(
  */
 
 fun String.toComplex(): Complex {
-    if (this == "Infinity") return Complex.INF
+    if (this == "Infinity") return Complex.INFINITY
     if (this == "NaN") return Complex.NaN
     val m = complexRegex.matcher(this)
     if (!m.matches()) throw NumberFormatException("Invalid complex number: \"$this\"")

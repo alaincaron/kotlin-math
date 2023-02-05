@@ -1,33 +1,12 @@
 package org.alc.math.complex
 
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.lang.Math.PI
 import kotlin.test.*
 import kotlin.test.assertEquals
 
 
 class ComplexTest {
-
-    @Test
-    fun testToComplex() {
-        assertEquals(Complex.INF, "Infinity".toComplex())
-        assertEquals(Complex.NaN, "NaN".toComplex())
-        assertEquals(Complex(4.0, 0.0), "4".toComplex())
-        assertEquals(Complex(-4.0, 0.0), "-4".toComplex())
-        assertEquals(Complex(2000.0, 0.0), "2e3".toComplex())
-        assertEquals(Complex(0.0, 2000.0), "2e3i".toComplex())
-        assertEquals(Complex(-2000.0, 0.0), "-2e3".toComplex())
-        assertEquals(Complex(0.0, -2000.0), "-2e3i".toComplex())
-        assertEquals(Complex(2000.0, 2000.0), "2e3 + 2e3i".toComplex())
-        assertEquals(Complex(-2000.0, -2000.0), "-2e3 - 2e3i".toComplex())
-        assertThrows<NumberFormatException> { "".toComplex() }
-        assertThrows<NumberFormatException> { "foobar".toComplex() }
-        assertThrows<NumberFormatException> { "3+4j".toComplex() }
-        assertThrows<NumberFormatException> { "+-3".toComplex() }
-        assertThrows<NumberFormatException> { "2+-3i".toComplex() }
-        assertThrows<NumberFormatException> { "2+3i-3-5i".toComplex() }
-    }
 
     @Test
     fun testIBuilder() {
@@ -43,15 +22,15 @@ class ComplexTest {
 
     @Test
     fun testEulerEquation() {
-        val z = "2.0+3.0I".toComplex()
+        val z = Complex(2, 3)
         assertQuasiEquals(cos(z) + Complex.I * sin(z), exp(Complex.I * z))
     }
 
     @Test
     fun testMod() {
-        assertEquals(Double.POSITIVE_INFINITY, Complex.INF.mod)
+        assertEquals(Double.POSITIVE_INFINITY, Complex.INFINITY.mod)
         assertEquals(Double.NaN, Complex.NaN.mod)
-        val z = "2+3i".toComplex()
+        val z = Complex(2, 3)
         val r = z.mod
         assertQuasiEquals((!z * z).re, r * r)
     }
@@ -59,13 +38,13 @@ class ComplexTest {
     @Test
     fun testArg() {
         assertEquals(0.0, Complex.ZERO.arg)
-        assertEquals(Double.NaN, Complex.INF.arg)
+        assertEquals(Double.NaN, Complex.INFINITY.arg)
         assertEquals(Double.NaN, Complex.NaN.arg)
         assertEquals(0.0, (5 * Complex.ONE).arg)
         assertEquals(0.5, exp(0.5.I).arg)
         assertEquals(PI / 2, 3.I.arg)
         assertQuasiEquals(3, exp(3.I).arg)
-        assertEquals(PI, (-2.R).arg)
+        assertEquals(PI, ((-2).R).arg)
         assertEquals(4 - 2 * PI, exp(4.I).arg)
         assertEquals(-PI / 2, -3.I.arg)
         assertQuasiEquals(6 - 2 * PI, exp(6.I).arg)
@@ -73,7 +52,7 @@ class ComplexTest {
 
     @Test
     fun testConstants() {
-        val z = "2.0+3.0i".toComplex()
+        val z = Complex(2,3)
         assertSame(Complex.ZERO, z * Complex.ZERO)
         assertSame(z, z * Complex.ONE)
     }
@@ -85,19 +64,19 @@ class ComplexTest {
         assertSame(z0, Complex.ZERO + z0)
         assertEquals(-z0, Complex.ZERO - z0)
         val testData = listOf(
-                Triple(Complex.INF, z0, Complex.INF),
+                Triple(Complex.INFINITY, z0, Complex.INFINITY),
                 Triple(Complex.NaN, z0, Complex.NaN),
                 Triple(z0, Complex.ZERO, z0),
                 Triple(Complex.ZERO, Complex.ZERO, Complex.ZERO),
-                Triple(Complex.INF, Complex.ZERO, Complex.INF),
+                Triple(Complex.INFINITY, Complex.ZERO, Complex.INFINITY),
                 Triple(Complex.NaN, Complex.ZERO, Complex.NaN),
-                Triple(z0, Complex.INF, Complex.INF),
-                Triple(Complex.ZERO, Complex.INF, Complex.INF),
-                Triple(Complex.INF, Complex.INF, Complex.NaN),
-                Triple(Complex.NaN, Complex.INF, Complex.NaN),
+                Triple(z0, Complex.INFINITY, Complex.INFINITY),
+                Triple(Complex.ZERO, Complex.INFINITY, Complex.INFINITY),
+                Triple(Complex.INFINITY, Complex.INFINITY, Complex.NaN),
+                Triple(Complex.NaN, Complex.INFINITY, Complex.NaN),
                 Triple(z0, Complex.NaN, Complex.NaN),
                 Triple(Complex.ZERO, Complex.NaN, Complex.NaN),
-                Triple(Complex.INF, Complex.NaN, Complex.NaN),
+                Triple(Complex.INFINITY, Complex.NaN, Complex.NaN),
                 Triple(Complex.NaN, Complex.NaN, Complex.NaN)
         )
         for (t in testData) {
@@ -116,22 +95,22 @@ class ComplexTest {
         assertEquals(Complex(-1.0, 3.0), z0 - d0)
 
         val testData = listOf(
-                Triple(Complex.INF, d0, Complex.INF),
+                Triple(Complex.INFINITY, d0, Complex.INFINITY),
                 Triple(Complex.NaN, d0, Complex.NaN),
                 Triple(Complex.ZERO, 0.0, Complex.ZERO),
-                Triple(Complex.INF, 0.0, Complex.INF),
+                Triple(Complex.INFINITY, 0.0, Complex.INFINITY),
                 Triple(Complex.NaN, 0.0, Complex.NaN),
-                Triple(z0, Double.POSITIVE_INFINITY, Complex.INF),
-                Triple(Complex.ZERO, Double.POSITIVE_INFINITY, Complex.INF),
-                Triple(Complex.INF, Double.POSITIVE_INFINITY, Complex.NaN),
+                Triple(z0, Double.POSITIVE_INFINITY, Complex.INFINITY),
+                Triple(Complex.ZERO, Double.POSITIVE_INFINITY, Complex.INFINITY),
+                Triple(Complex.INFINITY, Double.POSITIVE_INFINITY, Complex.NaN),
                 Triple(Complex.NaN, Double.POSITIVE_INFINITY, Complex.NaN),
-                Triple(z0, Double.NEGATIVE_INFINITY, Complex.INF),
-                Triple(Complex.ZERO, Double.NEGATIVE_INFINITY, Complex.INF),
-                Triple(Complex.INF, Double.NEGATIVE_INFINITY, Complex.NaN),
+                Triple(z0, Double.NEGATIVE_INFINITY, Complex.INFINITY),
+                Triple(Complex.ZERO, Double.NEGATIVE_INFINITY, Complex.INFINITY),
+                Triple(Complex.INFINITY, Double.NEGATIVE_INFINITY, Complex.NaN),
                 Triple(Complex.NaN, Double.NEGATIVE_INFINITY, Complex.NaN),
                 Triple(z0, Double.NaN, Complex.NaN),
                 Triple(Complex.ZERO, Double.NaN, Complex.NaN),
-                Triple(Complex.INF, Double.NaN, Complex.NaN),
+                Triple(Complex.INFINITY, Double.NaN, Complex.NaN),
                 Triple(Complex.NaN, Double.NaN, Complex.NaN)
         )
         for (t in testData) {
@@ -148,19 +127,19 @@ class ComplexTest {
         val z0 = 2.0 + 3.0.I
         val testData = listOf(
                 Triple(Complex.ZERO, z0, Complex.ZERO),
-                Triple(Complex.INF, z0, Complex.INF),
+                Triple(Complex.INFINITY, z0, Complex.INFINITY),
                 Triple(Complex.NaN, z0, Complex.NaN),
                 Triple(z0, Complex.ZERO, Complex.ZERO),
                 Triple(Complex.ZERO, Complex.ZERO, Complex.ZERO),
-                Triple(Complex.INF, Complex.ZERO, Complex.NaN),
+                Triple(Complex.INFINITY, Complex.ZERO, Complex.NaN),
                 Triple(Complex.NaN, Complex.ZERO, Complex.NaN),
-                Triple(z0, Complex.INF, Complex.INF),
-                Triple(Complex.ZERO, Complex.INF, Complex.NaN),
-                Triple(Complex.INF, Complex.INF, Complex.INF),
-                Triple(Complex.NaN, Complex.INF, Complex.NaN),
+                Triple(z0, Complex.INFINITY, Complex.INFINITY),
+                Triple(Complex.ZERO, Complex.INFINITY, Complex.NaN),
+                Triple(Complex.INFINITY, Complex.INFINITY, Complex.INFINITY),
+                Triple(Complex.NaN, Complex.INFINITY, Complex.NaN),
                 Triple(z0, Complex.NaN, Complex.NaN),
                 Triple(Complex.ZERO, Complex.NaN, Complex.NaN),
-                Triple(Complex.INF, Complex.NaN, Complex.NaN),
+                Triple(Complex.INFINITY, Complex.NaN, Complex.NaN),
                 Triple(Complex.NaN, Complex.NaN, Complex.NaN)
         )
         for (t in testData) {
@@ -177,23 +156,23 @@ class ComplexTest {
         assertEquals(w0, d0 * z0)
         val testData = listOf(
                 Triple(Complex.ZERO, d0, Complex.ZERO),
-                Triple(Complex.INF, d0, Complex.INF),
+                Triple(Complex.INFINITY, d0, Complex.INFINITY),
                 Triple(Complex.NaN, d0, Complex.NaN),
                 Triple(z0, 0.0, Complex.ZERO),
                 Triple(Complex.ZERO, 0.0, Complex.ZERO),
-                Triple(Complex.INF, 0.0, Complex.NaN),
+                Triple(Complex.INFINITY, 0.0, Complex.NaN),
                 Triple(Complex.NaN, 0.0, Complex.NaN),
-                Triple(z0, Double.POSITIVE_INFINITY, Complex.INF),
+                Triple(z0, Double.POSITIVE_INFINITY, Complex.INFINITY),
                 Triple(Complex.ZERO, Double.POSITIVE_INFINITY, Complex.NaN),
-                Triple(Complex.INF, Double.POSITIVE_INFINITY, Complex.INF),
+                Triple(Complex.INFINITY, Double.POSITIVE_INFINITY, Complex.INFINITY),
                 Triple(Complex.NaN, Double.POSITIVE_INFINITY, Complex.NaN),
-                Triple(z0, Double.NEGATIVE_INFINITY, Complex.INF),
+                Triple(z0, Double.NEGATIVE_INFINITY, Complex.INFINITY),
                 Triple(Complex.ZERO, Double.NEGATIVE_INFINITY, Complex.NaN),
-                Triple(Complex.INF, Double.NEGATIVE_INFINITY, Complex.INF),
+                Triple(Complex.INFINITY, Double.NEGATIVE_INFINITY, Complex.INFINITY),
                 Triple(Complex.NaN, Double.NEGATIVE_INFINITY, Complex.NaN),
                 Triple(z0, Double.NaN, Complex.NaN),
                 Triple(Complex.ZERO, Double.NaN, Complex.NaN),
-                Triple(Complex.INF, Double.NaN, Complex.NaN),
+                Triple(Complex.INFINITY, Double.NaN, Complex.NaN),
                 Triple(Complex.NaN, Double.NaN, Complex.NaN)
         )
         for (t in testData) {
@@ -208,19 +187,19 @@ class ComplexTest {
         val testData = listOf(
                 Triple(z0, z0, Complex.ONE),
                 Triple(Complex.ZERO, z0, Complex.ZERO),
-                Triple(Complex.INF, z0, Complex.INF),
+                Triple(Complex.INFINITY, z0, Complex.INFINITY),
                 Triple(Complex.NaN, z0, Complex.NaN),
-                Triple(z0, Complex.ZERO, Complex.INF),
+                Triple(z0, Complex.ZERO, Complex.INFINITY),
                 Triple(Complex.ZERO, Complex.ZERO, Complex.NaN),
-                Triple(Complex.INF, Complex.ZERO, Complex.INF),
+                Triple(Complex.INFINITY, Complex.ZERO, Complex.INFINITY),
                 Triple(Complex.NaN, Complex.ZERO, Complex.NaN),
-                Triple(z0, Complex.INF, Complex.ZERO),
-                Triple(Complex.ZERO, Complex.INF, Complex.ZERO),
-                Triple(Complex.INF, Complex.INF, Complex.NaN),
-                Triple(Complex.NaN, Complex.INF, Complex.NaN),
+                Triple(z0, Complex.INFINITY, Complex.ZERO),
+                Triple(Complex.ZERO, Complex.INFINITY, Complex.ZERO),
+                Triple(Complex.INFINITY, Complex.INFINITY, Complex.NaN),
+                Triple(Complex.NaN, Complex.INFINITY, Complex.NaN),
                 Triple(z0, Complex.NaN, Complex.NaN),
                 Triple(Complex.ZERO, Complex.NaN, Complex.NaN),
-                Triple(Complex.INF, Complex.NaN, Complex.NaN),
+                Triple(Complex.INFINITY, Complex.NaN, Complex.NaN),
                 Triple(Complex.NaN, Complex.NaN, Complex.NaN)
         )
         for (t in testData) {
@@ -236,23 +215,23 @@ class ComplexTest {
         val testData = listOf(
                 Triple(z0, d0, w0),
                 Triple(Complex.ZERO, d0, Complex.ZERO),
-                Triple(Complex.INF, d0, Complex.INF),
+                Triple(Complex.INFINITY, d0, Complex.INFINITY),
                 Triple(Complex.NaN, d0, Complex.NaN),
-                Triple(z0, 0.0, Complex.INF),
+                Triple(z0, 0.0, Complex.INFINITY),
                 Triple(Complex.ZERO, 0.0, Complex.NaN),
-                Triple(Complex.INF, 0.0, Complex.INF),
+                Triple(Complex.INFINITY, 0.0, Complex.INFINITY),
                 Triple(Complex.NaN, 0.0, Complex.NaN),
                 Triple(z0, Double.POSITIVE_INFINITY, Complex.ZERO),
                 Triple(Complex.ZERO, Double.POSITIVE_INFINITY, Complex.ZERO),
-                Triple(Complex.INF, Double.POSITIVE_INFINITY, Complex.NaN),
+                Triple(Complex.INFINITY, Double.POSITIVE_INFINITY, Complex.NaN),
                 Triple(Complex.NaN, Double.POSITIVE_INFINITY, Complex.NaN),
                 Triple(z0, Double.NEGATIVE_INFINITY, Complex.ZERO),
                 Triple(Complex.ZERO, Double.NEGATIVE_INFINITY, Complex.ZERO),
-                Triple(Complex.INF, Double.NEGATIVE_INFINITY, Complex.NaN),
+                Triple(Complex.INFINITY, Double.NEGATIVE_INFINITY, Complex.NaN),
                 Triple(Complex.NaN, Double.NEGATIVE_INFINITY, Complex.NaN),
                 Triple(z0, Double.NaN, Complex.NaN),
                 Triple(Complex.ZERO, Double.NaN, Complex.NaN),
-                Triple(Complex.INF, Double.NaN, Complex.NaN),
+                Triple(Complex.INFINITY, Double.NaN, Complex.NaN),
                 Triple(Complex.NaN, Double.NaN, Complex.NaN)
         )
         for (t in testData) {
@@ -267,24 +246,24 @@ class ComplexTest {
         val w0 = Complex(0.5, -0.5)
         val testData = listOf(
                 Triple(d0, z0, w0),
-                Triple(d0, Complex.ZERO, Complex.INF),
-                Triple(d0, Complex.INF, Complex.ZERO),
+                Triple(d0, Complex.ZERO, Complex.INFINITY),
+                Triple(d0, Complex.INFINITY, Complex.ZERO),
                 Triple(d0, Complex.NaN, Complex.NaN),
                 Triple(0.0, z0, Complex.ZERO),
                 Triple(0.0, Complex.ZERO, Complex.NaN),
-                Triple(0.0, Complex.INF, Complex.ZERO),
+                Triple(0.0, Complex.INFINITY, Complex.ZERO),
                 Triple(0.0, Complex.NaN, Complex.NaN),
-                Triple(Double.POSITIVE_INFINITY, z0, Complex.INF),
-                Triple(Double.POSITIVE_INFINITY, Complex.ZERO, Complex.INF),
-                Triple(Double.POSITIVE_INFINITY, Complex.INF, Complex.NaN),
+                Triple(Double.POSITIVE_INFINITY, z0, Complex.INFINITY),
+                Triple(Double.POSITIVE_INFINITY, Complex.ZERO, Complex.INFINITY),
+                Triple(Double.POSITIVE_INFINITY, Complex.INFINITY, Complex.NaN),
                 Triple(Double.POSITIVE_INFINITY, Complex.NaN, Complex.NaN),
-                Triple(Double.NEGATIVE_INFINITY, z0, Complex.INF),
-                Triple(Double.NEGATIVE_INFINITY, Complex.ZERO, Complex.INF),
-                Triple(Double.POSITIVE_INFINITY, Complex.INF, Complex.NaN),
+                Triple(Double.NEGATIVE_INFINITY, z0, Complex.INFINITY),
+                Triple(Double.NEGATIVE_INFINITY, Complex.ZERO, Complex.INFINITY),
+                Triple(Double.POSITIVE_INFINITY, Complex.INFINITY, Complex.NaN),
                 Triple(Double.POSITIVE_INFINITY, Complex.NaN, Complex.NaN),
                 Triple(Double.NaN, z0, Complex.NaN),
                 Triple(Double.NaN, Complex.ZERO, Complex.NaN),
-                Triple(Double.NaN, Complex.INF, Complex.NaN),
+                Triple(Double.NaN, Complex.INFINITY, Complex.NaN),
                 Triple(Double.NaN, Complex.NaN, Complex.NaN)
         )
         for (t in testData) {
@@ -343,7 +322,7 @@ class ComplexTest {
         assertFalse(four.equals(4.toBigDecimal()))
         assertFalse(four.equals(4.toBigInteger()))
         assertFalse(four.equals(""))
-        assertTrue(four.equals("4".toComplex()))
+        assertEquals(four, Complex(4.0, 0.0))
     }
 
     @Test

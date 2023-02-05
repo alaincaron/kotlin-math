@@ -6,7 +6,7 @@ import kotlin.math.withSign
  * Exponential function
  */
 fun exp(z: Complex) = when (z) {
-    Complex.NaN, Complex.INF -> Complex.NaN
+    Complex.NaN, Complex.INFINITY -> Complex.NaN
     else -> {
         val r: Double = kotlin.math.exp(z.re)
         Complex(r * kotlin.math.cos(z.im), r * kotlin.math.sin(z.im))
@@ -24,7 +24,7 @@ fun exp(z: Number) = exp(z.R)
  * Main branch of the Logarithmic function
  */
 fun ln(z: Complex) = when (z) {
-    Complex.ZERO, Complex.INF, Complex.NaN -> Complex.NaN
+    Complex.ZERO, Complex.INFINITY, Complex.NaN -> Complex.NaN
     else -> Complex(kotlin.math.ln(z.mod), kotlin.math.atan2(z.im, z.re))
 }
 
@@ -40,7 +40,7 @@ fun ln(z: Number) = ln(z.R)
  */
 fun sin(z: Complex) =
     when (z) {
-        Complex.NaN, Complex.INF -> Complex.NaN
+        Complex.NaN, Complex.INFINITY -> Complex.NaN
         else -> Complex(
             kotlin.math.sin(z.re) * kotlin.math.cosh(z.im),
             kotlin.math.cos(z.re) * kotlin.math.sinh(z.im)
@@ -58,7 +58,7 @@ fun sin(z: Number) = sin(z.R)
  * Cosine function
  */
 fun cos(z: Complex) = when (z) {
-    Complex.NaN, Complex.INF -> Complex.NaN
+    Complex.NaN, Complex.INFINITY -> Complex.NaN
     else ->
         Complex(
             kotlin.math.cos(z.re) * kotlin.math.cosh(z.im),
@@ -78,7 +78,7 @@ fun cos(z: Number) = cos(z.R)
  * Main branch of the Square Root function
  */
 fun sqrt(z: Complex) = when (z) {
-        Complex.ZERO, Complex.INF, Complex.NaN -> z
+        Complex.ZERO, Complex.INFINITY, Complex.NaN -> z
         else -> {
             val t: Double = kotlin.math.sqrt((kotlin.math.abs(z.re) + z.mod) / 2)
             if (z.re >= 0) {

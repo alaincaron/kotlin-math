@@ -23,7 +23,7 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): RingEle
         val NaN = Complex(Double.NaN, Double.NaN)
 
         /** Infinity represents the North Pole of the complex sphere. */
-        val INF = Complex(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY)
+        val INFINITY = Complex(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY)
 
         const val DEFAULT_ZERO_SNAP_PRECISION = 1E-13
 
@@ -33,13 +33,14 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): RingEle
 
         operator fun invoke(re: Double, im: Double): Complex {
             if (re.isNaN() || im.isNaN()) return NaN
-            if (re.isInfinite() || im.isInfinite()) return INF
+            if (re.isInfinite() || im.isInfinite()) return INFINITY
 
             return when (val c = Complex(fix0(re), fix0(im))) {
                 ZERO -> ZERO
                 ONE -> ONE
                 NaN -> NaN
-                INF -> INF
+                INFINITY -> INFINITY
+                I -> I
                 else -> c
             }
         }
@@ -93,8 +94,8 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): RingEle
     override operator fun plus(other: Complex): Complex {
         return when {
             isNaN() || other.isNaN() -> NaN
-            isInfinite() -> if (other.isInfinite()) NaN else INF
-            other.isInfinite() -> if (isInfinite()) NaN else INF
+            isInfinite() -> if (other.isInfinite()) NaN else INFINITY
+            other.isInfinite() -> if (isInfinite()) NaN else INFINITY
             isZero() -> other
             other.isZero() -> this
             else -> invoke(re + other.re, im + other.im)
@@ -109,8 +110,8 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): RingEle
     operator fun plus(x: Double): Complex {
         return when {
             isNaN() || x.isNaN() -> NaN
-            isInfinite() -> if (x.isInfinite()) NaN else INF
-            x.isInfinite() -> if (isInfinite()) NaN else INF
+            isInfinite() -> if (x.isInfinite()) NaN else INFINITY
+            x.isInfinite() -> if (isInfinite()) NaN else INFINITY
             isZero() -> x.R
             x == 0.0 -> this
             else -> invoke(re + x, im)
@@ -132,8 +133,8 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): RingEle
     override operator fun minus(other: Complex): Complex {
         return when {
             isNaN() || other.isNaN() -> NaN
-            isInfinite() -> if (other.isInfinite()) NaN else INF
-            other.isInfinite() -> if (isInfinite()) NaN else INF
+            isInfinite() -> if (other.isInfinite()) NaN else INFINITY
+            other.isInfinite() -> if (isInfinite()) NaN else INFINITY
             isZero() -> -other
             other.isZero() -> this
             else -> invoke(re - other.re, im - other.im)
@@ -148,8 +149,8 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): RingEle
     operator fun minus(x: Double): Complex {
         return when {
             isNaN() || x.isNaN() -> NaN
-            isInfinite() -> if (x.isInfinite()) NaN else INF
-            x.isInfinite() -> if (isInfinite()) NaN else INF
+            isInfinite() -> if (x.isInfinite()) NaN else INFINITY
+            x.isInfinite() -> if (isInfinite()) NaN else INFINITY
             isZero() -> -x.R
             x == 0.0 -> this
             else -> invoke(re - x, im)
@@ -171,8 +172,8 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): RingEle
     override operator fun times(other: Complex): Complex {
         return when {
             isNaN() || other.isNaN() -> NaN
-            isInfinite() -> if (other.isZero()) NaN else INF
-            other.isInfinite() -> if (isZero()) NaN else INF
+            isInfinite() -> if (other.isZero()) NaN else INFINITY
+            other.isInfinite() -> if (isZero()) NaN else INFINITY
             isZero() || other.isZero() -> ZERO
             other == ONE -> this
             this == ONE -> other
@@ -188,8 +189,8 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): RingEle
     operator fun times(x: Double): Complex {
         return when {
             isNaN() || x.isNaN() -> NaN
-            isInfinite() -> if (x == 0.0) NaN else INF
-            x.isInfinite() -> if (isZero()) NaN else INF
+            isInfinite() -> if (x == 0.0) NaN else INFINITY
+            x.isInfinite() -> if (isZero()) NaN else INFINITY
             isZero() || x == 0.0 -> ZERO
             x == 1.0 -> this
             else -> invoke(re * x, im * x)
@@ -211,9 +212,9 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): RingEle
     operator fun div(den: Complex): Complex {
         return when {
             isNaN() || den.isNaN() -> NaN
-            isInfinite() -> if (den.isInfinite()) NaN else INF
+            isInfinite() -> if (den.isInfinite()) NaN else INFINITY
             den.isInfinite() -> ZERO
-            den.isZero() -> if (isZero()) NaN else INF
+            den.isZero() -> if (isZero()) NaN else INFINITY
             isZero() -> ZERO
             den == ONE -> this
             else -> {
@@ -231,9 +232,9 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): RingEle
     operator fun div(x: Double): Complex {
         return when {
             isNaN() || x.isNaN() -> NaN
-            isInfinite() -> if (x.isInfinite()) NaN else INF
+            isInfinite() -> if (x.isInfinite()) NaN else INFINITY
             x.isInfinite() -> ZERO
-            x == 0.0 -> if (isZero()) NaN else INF
+            x == 0.0 -> if (isZero()) NaN else INFINITY
             isZero() -> ZERO
             x == 1.0 -> this
             else -> invoke(re / x, im / x)
@@ -254,7 +255,7 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): RingEle
     override operator fun unaryMinus(): Complex {
         return when {
             isNaN() -> NaN
-            isInfinite() -> INF
+            isInfinite() -> INFINITY
             isZero() -> ZERO
             else -> invoke(-re, -im)
         }
@@ -275,7 +276,7 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): RingEle
     fun conj(): Complex {
         return when {
             isNaN() -> NaN
-            isInfinite() -> INF
+            isInfinite() -> INFINITY
             isZero() -> ZERO
             else -> invoke(re, -im)
         }
@@ -301,7 +302,7 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): RingEle
     fun asString(format: String = "", locale: Locale = Locale.getDefault()): String {
         return when (this) {
             NaN -> "NaN"
-            INF -> "Infinity"
+            INFINITY -> "Infinity"
             else -> {
                 val reFormatted = if (format.isEmpty()) re.toString() else String.format(locale, format, re)
                 val imFormatted = when (im) {
