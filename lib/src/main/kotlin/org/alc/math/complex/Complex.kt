@@ -383,44 +383,6 @@ operator fun Number.times(z: Complex) = z * this
  */
 operator fun Number.div(z: Complex) = Complex.ONE / z * this
 
-/**
- * Creates a complex number from a string. A valid representation is e.g. "2.5+3.1i"
- * @return the created complex number
- */
-fun String.toComplex(): Complex {
-    val imRegex = Regex("[iI]$")
-    fun parseIm(arg: String): String {
-        val im = imRegex.replace(arg, "")
-        return im.ifEmpty { "1.0" }
-    }
-
-    return when (this) {
-        "Infinity" -> Complex.INF
-        "NaN" -> Complex.NaN
-        else -> {
-            val parts = StringTokenizer(this, "+-", true)
-                .toList().map { it.toString() }
-            when (parts.size) {
-                0 -> throw NumberFormatException("empty String")
-                1 -> if (imRegex.matches(parts[0])) {
-                    Complex(0.0, parseIm(parts[0]).toDouble())
-                } else {
-                    Complex(parts[0].toDouble(), 0.0)
-                }
-
-                2 -> if (imRegex.matches(parts[1])) {
-                    Complex(0.0, (parts[0] + parseIm(parts[1])).toDouble())
-                } else {
-                    Complex((parts[0] + parts[1]).toDouble(), 0.0)
-                }
-
-                3 -> Complex(parts[0].toDouble(), (parts[1] + parseIm(parts[2])).toDouble())
-                4 -> Complex((parts[0] + parts[1]).toDouble(), (parts[2] + parseIm(parts[3])).toDouble())
-                else -> throw NumberFormatException("For input string: \"$this\"")
-            }
-        }
-    }
-}
 
 
 

@@ -10,9 +10,17 @@ import kotlin.test.assertEquals
 class ComplexTest {
 
     @Test
-    fun testToComplexSpecial() {
+    fun testToComplex() {
         assertEquals(Complex.INF, "Infinity".toComplex())
         assertEquals(Complex.NaN, "NaN".toComplex())
+        assertEquals(Complex(4.0, 0.0), "4".toComplex())
+        assertEquals(Complex(-4.0, 0.0), "-4".toComplex())
+        assertEquals(Complex(2000.0, 0.0), "2e3".toComplex())
+        assertEquals(Complex(0.0, 2000.0), "2e3i".toComplex())
+        assertEquals(Complex(-2000.0, 0.0), "-2e3".toComplex())
+        assertEquals(Complex(0.0, -2000.0), "-2e3i".toComplex())
+        assertEquals(Complex(2000.0, 2000.0), "2e3 + 2e3i".toComplex())
+        assertEquals(Complex(-2000.0, -2000.0), "-2e3 - 2e3i".toComplex())
         assertThrows<NumberFormatException> { "".toComplex() }
         assertThrows<NumberFormatException> { "foobar".toComplex() }
         assertThrows<NumberFormatException> { "3+4j".toComplex() }
