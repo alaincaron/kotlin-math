@@ -1,13 +1,12 @@
 package org.alc.math.complex
 
-import java.util.*
-import kotlin.math.PI
-import kotlin.math.abs
-import kotlin.math.atan
 import org.alc.math.fix0
 import org.alc.math.ring.RingElement
+import java.util.*
+import kotlin.math.PI
+import kotlin.math.atan
 
-class Complex private constructor(val re: Double, val im: Double = 0.0): RingElement<Complex> {
+class Complex private constructor(val re: Double, val im: Double = 0.0) : RingElement<Complex> {
 
     companion object {
         /** The imaginary unit i as constant */
@@ -25,13 +24,9 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): RingEle
         /** Infinity represents the North Pole of the complex sphere. */
         val INFINITY = Complex(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY)
 
-        const val DEFAULT_ZERO_SNAP_PRECISION = 1E-13
-
-        operator fun invoke(z: Complex) = z
-        operator fun invoke(str: String) = str.toComplex()
         operator fun invoke(re: Int, im: Int = 0) = invoke(re.toDouble(), im.toDouble())
 
-        operator fun invoke(re: Double, im: Double): Complex {
+        operator fun invoke(re: Double, im: Double = 0.0): Complex {
             if (re.isNaN() || im.isNaN()) return NaN
             if (re.isInfinite() || im.isInfinite()) return INFINITY
 
@@ -283,26 +278,18 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): RingEle
     }
 
     /**
-     * Sets the real and/or the imaginary part to 0 if the value is lower than precision
-     * @param precision
-     * @return the "rounded" number
-     */
-    fun zeroSnap(precision: Double = DEFAULT_ZERO_SNAP_PRECISION): Complex {
-        return invoke(
-            if (abs(re) <= precision) 0.0 else re,
-            if (abs(im) <= precision) 0.0 else im
-        )
-    }
-
-    /**
      * A string representation of a complex number (this) in the Form "2.5+3.1i" for example.
      * @param format This parameter affects the real and the imaginary part equally.
      * @param locale The locale determines e.g. whether a dot or a comma is output.
      */
-    fun asString(format: String = "", locale: Locale = Locale.getDefault()): String {
+    fun toStringBuilder(
+        builder: StringBuilder? = null,
+        format: String = "", locale: Locale = Locale.getDefault()
+    ): StringBuilder {
+        val b = builder ?: StringBuilder()
         return when (this) {
-            NaN -> "NaN"
-            INFINITY -> "Infinity"
+            NaN -> b.append("NaN")
+            INFINITY -> b.append("Infinity")
             else -> {
                 val reFormatted = if (format.isEmpty()) re.toString() else String.format(locale, format, re)
                 val imFormatted = when (im) {
@@ -310,15 +297,14 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): RingEle
                     -1.0 -> "-i"
                     else -> "${if (format.isEmpty()) im.toString() else String.format(locale, format, im)}i"
                 }
-                if (re == 0.0) {
-                    if (im == 0.0) "0.0" else imFormatted
-                } else {
+                b.append(
                     when {
+                        re == 0.0 -> if (im == 0.0) "0.0" else imFormatted
                         im > 0.0 -> "$reFormatted+$imFormatted"
                         im < 0.0 -> "$reFormatted$imFormatted"
                         else -> reFormatted
                     }
-                }
+                )
             }
         }
     }
@@ -338,7 +324,9 @@ class Complex private constructor(val re: Double, val im: Double = 0.0): RingEle
         return Objects.hash(re, im)
     }
 
-    override fun toString() = asString()
+    override fun toString() = toStringBuilder().toString()
+    fun toString(format: String, locale: Locale = Locale.getDefault()) =
+        toStringBuilder(null, format, locale).toString()
 
 }
 

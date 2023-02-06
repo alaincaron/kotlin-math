@@ -43,7 +43,7 @@ class ComplexTest {
         assertEquals(0.0, (5 * Complex.ONE).arg)
         assertEquals(0.5, exp(0.5.I).arg)
         assertEquals(PI / 2, 3.I.arg)
-        assertQuasiEquals(3, exp(3.I).arg)
+        assertQuasiEquals(3.0, exp(3.I).arg)
         assertEquals(PI, ((-2).R).arg)
         assertEquals(4 - 2 * PI, exp(4.I).arg)
         assertEquals(-PI / 2, -3.I.arg)
@@ -336,14 +336,4 @@ class ComplexTest {
         assertNotEquals(0, fiveI.hashCode())
         assertEquals(z0.hashCode(), z1.hashCode())
     }
-
-    @Test
-    fun testConstructor() {
-        val z0 = Complex(4, 5)
-        val z1 = Complex(z0)
-        assertSame(z0, z1)
-        val z2 = Complex("4+5i")
-        assertEquals(z0, z2)
-    }
-
 }
