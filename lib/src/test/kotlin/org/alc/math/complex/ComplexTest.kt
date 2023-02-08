@@ -26,6 +26,10 @@ class ComplexTest {
         assertQuasiEquals(cos(z) + Complex.I * sin(z), exp(Complex.I * z))
     }
 
+    @Test fun invert() {
+        assertSame(Complex.ONE, Complex.ONE.invert())
+        assertEquals(Complex.I.unaryMinus(), Complex.I.invert())
+    }
     @Test
     fun testMod() {
         assertEquals(Double.POSITIVE_INFINITY, Complex.INFINITY.mod)

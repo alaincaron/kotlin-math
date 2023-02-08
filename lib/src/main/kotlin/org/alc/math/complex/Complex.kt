@@ -224,16 +224,14 @@ class Complex private constructor(val re: Double, val im: Double = 0.0) : RingEl
      * @param x the divisor
      * @return division of this and z
      */
-    operator fun div(x: Double): Complex {
-        return when {
-            isNaN() || x.isNaN() -> NaN
-            isInfinite() -> if (x.isInfinite()) NaN else INFINITY
-            x.isInfinite() -> ZERO
-            x == 0.0 -> if (isZero()) NaN else INFINITY
-            isZero() -> ZERO
-            x == 1.0 -> this
-            else -> invoke(re / x, im / x)
-        }
+    operator fun div(x: Double) = when {
+        isNaN() || x.isNaN() -> NaN
+        isInfinite() -> if (x.isInfinite()) NaN else INFINITY
+        x.isInfinite() -> ZERO
+        x == 0.0 -> if (isZero()) NaN else INFINITY
+        isZero() -> ZERO
+        x == 1.0 -> this
+        else -> invoke(re / x, im / x)
     }
 
     /**
@@ -276,6 +274,19 @@ class Complex private constructor(val re: Double, val im: Double = 0.0) : RingEl
             else -> invoke(re, -im)
         }
     }
+
+    fun invert() =  when {
+        isNaN()-> NaN
+        isInfinite() -> ZERO
+        isZero()->  INFINITY
+        isZero() -> ZERO
+        this == ONE -> this
+        else -> {
+            val d = re * re + im * im
+            invoke(re / d, -im / d)
+        }
+    }
+
 
     /**
      * A string representation of a complex number (this) in the Form "2.5+3.1i" for example.
@@ -370,7 +381,7 @@ operator fun Number.times(z: Complex) = z * this
  * @param z the divisor
  * @return division of this and z
  */
-operator fun Number.div(z: Complex) = Complex.ONE / z * this
+operator fun Number.div(z: Complex) = z.invert() * this
 
 
 
