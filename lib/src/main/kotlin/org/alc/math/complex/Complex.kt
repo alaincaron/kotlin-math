@@ -275,10 +275,10 @@ class Complex private constructor(val re: Double, val im: Double = 0.0) : RingEl
         }
     }
 
-    fun invert() =  when {
-        isNaN()-> NaN
+    fun invert() = when {
+        isNaN() -> NaN
         isInfinite() -> ZERO
-        isZero()->  INFINITY
+        isZero() -> INFINITY
         isZero() -> ZERO
         this == ONE -> this
         else -> {
