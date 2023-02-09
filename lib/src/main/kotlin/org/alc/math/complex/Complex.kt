@@ -1,12 +1,12 @@
 package org.alc.math.complex
 
 import org.alc.math.fix0
-import org.alc.math.ring.RingElement
+import org.alc.math.ring.DivisionRingElement
 import java.util.*
 import kotlin.math.PI
 import kotlin.math.atan
 
-class Complex private constructor(val re: Double, val im: Double = 0.0) : RingElement<Complex> {
+class Complex private constructor(val re: Double, val im: Double = 0.0) : DivisionRingElement<Complex> {
 
     companion object {
         /** The imaginary unit i as constant */
@@ -204,7 +204,7 @@ class Complex private constructor(val re: Double, val im: Double = 0.0) : RingEl
      * @param den the denominator
      * @return product of this and z
      */
-    operator fun div(den: Complex): Complex {
+    override operator fun div(den: Complex): Complex {
         return when {
             isNaN() || den.isNaN() -> NaN
             isInfinite() -> if (den.isInfinite()) NaN else INFINITY

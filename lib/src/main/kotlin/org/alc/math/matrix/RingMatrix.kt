@@ -1,6 +1,5 @@
 package org.alc.math.matrix
 
-import org.alc.math.rational.Rational
 import org.alc.math.ring.Ring
 import org.alc.math.ring.RingElement
 import org.alc.util.matrix.Matrix

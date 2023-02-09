@@ -344,4 +344,11 @@ class ComplexTest {
         assertNotEquals(0, fiveI.hashCode())
         assertEquals(z0.hashCode(), z1.hashCode())
     }
+
+    @Test
+    fun testToStringBuilder() {
+        val b = StringBuilder("v = ")
+        assertSame(b, Complex.I.toStringBuilder(b))
+        assertEquals("v = i", b.toString())
+    }
 }
