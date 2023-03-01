@@ -3,7 +3,10 @@ package org.alc.math.complex
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.io.*
+import java.util.*
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+import kotlin.test.assertFalse
 import kotlin.test.assertSame
 
 class ComplexIOTest {
@@ -11,17 +14,17 @@ class ComplexIOTest {
     fun testToComplex() {
         assertEquals(Complex.INFINITY, "Infinity".toComplex())
         assertEquals(Complex.NaN, "NaN".toComplex())
-        assertEquals(Complex.I, "i".toComplex())
+        assertEquals(Complex.I, "I".toComplex())
         assertEquals(-Complex.I, "-i".toComplex())
-        assertEquals(Complex(2,1), "2+i".toComplex())
-        assertEquals(Complex(2,-1), "2-i".toComplex())
+        assertEquals(Complex(2, 1), "2+i".toComplex())
+        assertEquals(Complex(2, -1), "2-I".toComplex())
         assertEquals(4.R, "4".toComplex())
-        assertEquals((Complex(-4,0)), "-4".toComplex())
-        assertEquals(2000.R, "2e3".toComplex())
+        assertEquals((Complex(-4, 0)), "-4".toComplex())
+        assertEquals(2000.R, "2E3".toComplex())
         assertEquals(2000.I, "2e3i".toComplex())
         assertEquals(Complex(-2000), "-2e3".toComplex())
         assertEquals(Complex(0.0, -2000.0), "-2e3i".toComplex())
-        assertEquals(Complex(2000.0, 2000.0), "2e3 + 2e3i".toComplex())
+        assertEquals(Complex(2000.0, 2000.0), "2E3 + 2e3i".toComplex())
         assertEquals(Complex(-2000.0, -2000.0), "-2e3 - 2e3i".toComplex())
         assertThrows<NumberFormatException> { "".toComplex() }
         assertThrows<NumberFormatException> { "foobar".toComplex() }
@@ -38,7 +41,9 @@ class ComplexIOTest {
         val inputStream = DataInputStream(ByteArrayInputStream(arrayStream.toByteArray()))
         return inputStream.readComplex()
     }
-    @Test fun readWrite() {
+
+    @Test
+    fun readWrite() {
         assertSame(Complex.INFINITY, serializeAndDeserialize(Complex.INFINITY))
         assertSame(Complex.NaN, serializeAndDeserialize(Complex.NaN))
         assertSame(Complex.ZERO, serializeAndDeserialize(Complex.ZERO))
@@ -50,5 +55,21 @@ class ComplexIOTest {
         assertEquals(4.I, serializeAndDeserialize(4.I))
     }
 
+    @Test
+    fun scannerHasNextComplex() {
+        assertTrue(Scanner("Infinity").hasNextComplex())
+        assertTrue(Scanner("NaN").hasNextComplex())
+        assertTrue(Scanner("0").hasNextComplex())
+        assertTrue(Scanner("1+2i").hasNextComplex())
+        assertFalse(Scanner("foobar").hasNextComplex())
+    }
 
+    @Test
+    fun scannerNextComplex() {
+        assertSame(Complex.INFINITY, Scanner("Infinity").nextComplex())
+        assertSame(Complex.NaN, Scanner("NaN").nextComplex())
+        assertEquals(Complex(1, 2), Scanner("1+2i").nextComplex())
+        assertSame(Complex.ZERO, Scanner("0").nextComplex())
+        assertThrows<InputMismatchException> { Scanner("foobar").nextComplex() }
+    }
 }
