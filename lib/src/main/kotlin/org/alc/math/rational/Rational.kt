@@ -223,13 +223,13 @@ class Rational private constructor(
 
     operator fun rem(other: Long) = divideAndRemainder(other).second
     fun divideAndRemainder(other: Long) = when {
-        isNaN() -> Pair(BigInteger.ZERO, this)
+        isNaN() -> Pair(ZERO, this)
         other == 0L -> throw ArithmeticException("Division by 0")
-        isZero() -> Pair(BigInteger.ZERO, this)
+        isZero() -> Pair(ZERO, this)
         else -> {
             val lcm = this.den * BigInteger.valueOf(other)
             val x = this.num.divideAndRemainder(lcm)
-            Pair(x[0], if (x[0] == BigInteger.ZERO) this else invoke(x[1], this.den))
+            Pair(Rational(x[0]), if (x[0] == BigInteger.ZERO) this else invoke(x[1], this.den))
         }
     }
 
@@ -250,21 +250,21 @@ class Rational private constructor(
         else -> {
             val lcm = this.den * other
             val x = this.num.divideAndRemainder(lcm)
-            Pair(x[0], if (x[0] == BigInteger.ZERO) this else invoke(x[1], this.den))
+            Pair(Rational(x[0]), if (x[0] == BigInteger.ZERO) this else invoke(x[1], this.den))
         }
     }
 
     operator fun rem(den: Rational) = divideAndRemainder(den).second
 
-    fun divideAndRemainder(other: Rational): Pair<BigInteger, Rational> = when {
+    fun divideAndRemainder(other: Rational): Pair<Rational, Rational> = when {
         other.isZero() -> throw ArithmeticException("Division by 0")
-        isNaN() || other.isNaN() || isInfinite() -> Pair(BigInteger.ZERO, NaN)
-        other.isInfinite() -> Pair(BigInteger.ZERO, this)
-        isZero() -> Pair(BigInteger.ZERO, this)
+        isNaN() || other.isNaN() || isInfinite() -> Pair(ZERO, NaN)
+        other.isInfinite() -> Pair(ZERO, this)
+        isZero() -> Pair(ZERO, this)
         else -> {
             val lcm = this.den * other.den
             val x = (this.num * other.den).divideAndRemainder(other.num * this.den)
-            Pair(x[0], if (x[0] == BigInteger.ZERO) this else invoke(x[1], lcm))
+            Pair(Rational(x[0]), if (x[0] == BigInteger.ZERO) this else invoke(x[1], lcm))
         }
     }
 

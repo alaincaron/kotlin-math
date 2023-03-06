@@ -2,9 +2,10 @@ package org.alc.math.polynomial
 
 import org.alc.math.Point2d
 import org.alc.math.fix0
-import org.alc.math.matrix.DoubleGaussianElimination
 import org.alc.math.matrix.DoubleMatrix
+import org.alc.math.matrix.GaussianElimination
 import org.alc.math.ring.DivisionRingElement
+import org.alc.math.ring.DoubleRing
 import java.lang.Integer.max
 import java.util.function.Function
 import kotlin.math.abs
@@ -237,7 +238,7 @@ class Polynomial private constructor(val coefficients: List<Double>) :
                     c *= v
                 }
             }
-            return invoke(DoubleGaussianElimination(m).solve().asList())
+            return invoke(GaussianElimination(DoubleRing, m).solve())
         }
 
         private fun linearInterpolation(p1: Point2d<Double>, p2: Point2d<Double>): Polynomial {

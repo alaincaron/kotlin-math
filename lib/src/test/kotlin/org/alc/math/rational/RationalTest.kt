@@ -632,30 +632,30 @@ class RationalTest {
 
     @Test
     fun divideAndRemainderTest() {
-        assertEquals(Pair(BigInteger.ONE, 1 over 6), (1 over 2).divideAndRemainder(1 over 3))
-        assertEquals(Pair(BigInteger.ONE, Rational.ZERO), Rational.TEN.divideAndRemainder(10))
-        assertEquals(Pair(BigInteger.ONE, Rational.ZERO), Rational.TEN.divideAndRemainder(10L))
-        assertEquals(Pair(BigInteger.ONE, Rational.ZERO), Rational.TEN.divideAndRemainder(BigInteger.valueOf(10L)))
-        assertEquals(Pair(BigInteger.ONE, Rational.ZERO), Rational.TEN.divideAndRemainder((10).toShort()))
-        assertEquals(Pair(BigInteger.ONE, Rational.ZERO), Rational.TEN.divideAndRemainder((10).toByte()))
+        assertEquals(Pair(Rational.ONE, 1 over 6), (1 over 2).divideAndRemainder(1 over 3))
+        assertEquals(Pair(Rational.ONE, Rational.ZERO), Rational.TEN.divideAndRemainder(10))
+        assertEquals(Pair(Rational.ONE, Rational.ZERO), Rational.TEN.divideAndRemainder(10L))
+        assertEquals(Pair(Rational.ONE, Rational.ZERO), Rational.TEN.divideAndRemainder(BigInteger.valueOf(10L)))
+        assertEquals(Pair(Rational.ONE, Rational.ZERO), Rational.TEN.divideAndRemainder((10).toShort()))
+        assertEquals(Pair(Rational.ONE, Rational.ZERO), Rational.TEN.divideAndRemainder((10).toByte()))
         var pair = Rational.NaN.divideAndRemainder(10)
-        assertEquals(BigInteger.ZERO, pair.first)
+        assertEquals(Rational.ZERO, pair.first)
         assertTrue(pair.second.isNaN())
 
         pair = Rational.POSITIVE_INFINITY.divideAndRemainder(Rational.TEN)
-        assertEquals(BigInteger.ZERO, pair.first)
+        assertEquals(Rational.ZERO, pair.first)
         assertTrue(pair.second.isNaN())
 
         pair = Rational.NEGATIVE_INFINITY.divideAndRemainder(Rational.TEN)
-        assertEquals(BigInteger.ZERO, pair.first)
+        assertEquals(Rational.ZERO, pair.first)
         assertTrue(pair.second.isNaN())
 
         pair = Rational.TEN.divideAndRemainder(Rational.POSITIVE_INFINITY)
-        assertEquals(BigInteger.ZERO, pair.first)
+        assertEquals(Rational.ZERO, pair.first)
         assertSame(Rational.TEN, pair.second)
 
         pair = Rational.TEN.divideAndRemainder(Rational.NEGATIVE_INFINITY)
-        assertEquals(BigInteger.ZERO, pair.first)
+        assertEquals(Rational.ZERO, pair.first)
         assertSame(Rational.TEN, pair.second)
     }
 

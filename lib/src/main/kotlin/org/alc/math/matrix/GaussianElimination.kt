@@ -1,77 +1,17 @@
 package org.alc.math.matrix
 
-import org.alc.math.ring.DivisionRingElement
-import org.alc.math.ring.Ring
+import org.alc.math.ring.DivisionRing
 import org.alc.util.matrix.Matrix
 
-object GaussianSolver {
-    fun <T> determinant(ring: Ring<T>, m: Matrix<T>): T where T : DivisionRingElement<T>, T : Comparable<T> {
-        m.requireIsSquare()
-        val work = Matrix(m)
-        val gauss = GaussianElimination(ring, work)
-        return gauss.determinant()
-    }
+class GaussianElimination<T : Comparable<T>>(
+    private val ring: DivisionRing<T>, private val matrix: Matrix<T>
+) {
 
-    fun <T> invert(ring: Ring<T>, m: Matrix<T>): Matrix<T> where T : DivisionRingElement<T>, T : Comparable<T> {
-        val work = invertBase(ring, m)
-        return Matrix(m.nbRows, m.nbColumns) { i, j -> work[i, j + m.nbColumns] }
-    }
-
-    fun <T> invertTransform(
-        ring: Ring<T>,
-        m: Matrix<T>
-    ): Matrix<T> where T : DivisionRingElement<T>, T : Comparable<T> {
-        val work = invertBase(ring, m)
-        return m.transformIndexed { i, j, _ -> work[i, j + m.nbColumns] }
-    }
-
-    fun <T> solve(
-        ring: Ring<T>,
-        m: Matrix<T>,
-        values: List<T>
-    ): List<T> where T : DivisionRingElement<T>, T : Comparable<T> {
-        require(m.nbRows == values.size)
-        { "Matrix and values must have same number of rows" }
-        val work = Matrix(
-            m.nbRows,
-            m.nbColumns + 1
-        ) { i, j -> if (j == m.nbColumns) values[i] else m[i, j] }
-        val gauss = GaussianElimination(ring, work)
-        return gauss.solve()
-    }
-
-    fun <T> solve(
-        ring: Ring<T>,
-        m: Matrix<T>,
-        values: Array<T>
-    ) where T : DivisionRingElement<T>, T : Comparable<T> = solve(ring, m, values.asList())
-
-
-    private fun <T> invertBase(
-        ring: Ring<T>,
-        m: Matrix<T>
-    ): Matrix<T> where T : DivisionRingElement<T>, T : Comparable<T> {
-        m.requireIsSquare()
-        val boundary = m.nbColumns - 1
-        val work = Matrix(m.nbRows, 2 * m.nbColumns) { i, j ->
-            when (j) {
-                in 0..boundary -> m[i, j]
-                i + m.nbColumns -> ring.one()
-                else -> ring.zero()
-            }
-        }
-        GaussianElimination(ring, work).invert()
-        return work
-    }
-}
-
-
-class GaussianElimination<T>(
-    private val ring: Ring<T>, private val matrix: Matrix<T>
-) where T : DivisionRingElement<T>, T : Comparable<T> {
-
-    private fun abs(x: T) = if (x < ring.zero()) -x else x
+    private fun abs(x: T) = if (x < ring.zero()) ring.negate(x) else x
     private fun max(a: T, b: T) = if (a > b) a else b
+    private operator fun T.times(b: T) = ring.multiply(this, b)
+    private operator fun T.div(b: T) = ring.divide(this, b)
+    private operator fun T.minus(b: T) = ring.subtract(this, b)
 
     private fun computeGreatest(iteration: Int, greatest: MutableList<T>) {
         for (row in iteration until matrix.nbRows) {
@@ -102,7 +42,7 @@ class GaussianElimination<T>(
     fun determinant(): T {
         var result = when (gaussianElimination()) {
             PivotResult.SINGULAR -> return ring.zero()
-            PivotResult.SWAP -> ring.zero() - ring.one()
+            PivotResult.SWAP -> ring.negate(ring.one())
             else -> ring.one()
         }
         for (i in 0 until matrix.nbRows) {
@@ -129,7 +69,7 @@ class GaussianElimination<T>(
         for (row in matrix.nbRows - 1 downTo 0) {
             val pivot = matrix[row, row]
             for (row1 in 0 until row) {
-                val factor = matrix[row1, row] / pivot
+                val factor = ring.divide(matrix[row1, row], pivot)
                 for (col in row until matrix.nbColumns) {
                     matrix[row1, col] -= factor * matrix[row, col]
                 }
