@@ -2,18 +2,22 @@ package org.alc.math.vector
 
 import kotlin.math.sqrt
 
+fun requireSameSize(a: DoubleArray, b: DoubleArray) {
+    require(a.size == b.size) { "Arrays must be of same size" }
+}
+
 operator fun DoubleArray.plus(other: DoubleArray): DoubleArray {
-    require(size == other.size) { "Arrays must be of the same size" }
+    requireSameSize(this, other)
     return DoubleArray(size) { i -> this[i] + other[i] }
 }
 
 operator fun DoubleArray.minus(other: DoubleArray): DoubleArray {
-    require(size == other.size) { "Arrays must be of the same size" }
+    requireSameSize(this, other)
     return DoubleArray(size) { i -> this[i] - other[i] }
 }
 
 operator fun DoubleArray.times(other: DoubleArray): Double {
-    require(size == other.size) { "Arrays must be of the same size" }
+    requireSameSize(this, other)
     var sum = 0.0
     for (i in indices) sum += this[i] * other[i]
     return sum
@@ -46,9 +50,11 @@ infix fun DoubleArray.cross(other: DoubleArray): DoubleArray {
 }
 
 fun DoubleArray.transform(f: (Double) -> Double): DoubleArray {
-    for (i in indices) {
-        this[i] = f(this[i])
-    }
+    forEachIndexed { index, item -> this[index] = f(item)}
+    return this
+}
+fun DoubleArray.transformIndexed(f: (Int, Double) -> Double): DoubleArray {
+    forEachIndexed { index, item -> this[index] = f(index, item)}
     return this
 }
 

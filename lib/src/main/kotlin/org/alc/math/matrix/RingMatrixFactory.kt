@@ -6,7 +6,7 @@ import org.alc.math.ring.RingElement
 import org.alc.util.matrix.Matrix
 
 
-abstract class RingMatrix<T : Any>(protected val ring: Ring<T>) {
+abstract class RingMatrixFactory<T : Any>(protected val ring: Ring<T>) {
 
     open operator fun invoke(nbRows: Int, nbColumns: Int, value: T) =
         Matrix(nbRows, nbColumns) { _, _ -> value }
@@ -64,7 +64,7 @@ abstract class RingMatrix<T : Any>(protected val ring: Ring<T>) {
         }
 }
 
-abstract class InvertibleMatrix<T: Comparable<T>>(ring: DivisionRing<T>): RingMatrix<T>(ring) {
+abstract class InvertibleMatrixFactory<T: Comparable<T>>(ring: DivisionRing<T>): RingMatrixFactory<T>(ring) {
     fun invert(m: Matrix<T>): Matrix<T> {
         val work = invertBase(m)
         return Matrix(m.nbRows, m.nbColumns) { i, j -> work[i, j + m.nbColumns] }

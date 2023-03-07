@@ -1,7 +1,7 @@
 package org.alc.math.vector
 
-import org.alc.math.polynomial.Polynomial
 import org.alc.math.rational.Rational
+import org.alc.math.rational.RationalRing
 import org.alc.math.rational.toRational
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -19,11 +19,14 @@ operator fun Number.times(other: Array<Rational>) = other * this.toRational()
 
 fun Array<Rational>.norm() = sqrt(normSquare().toDouble())
 
-object RationalVector {
+infix fun Array<Rational>.project(base: Array<Rational>) =
+    ((this * base) / base.normSquare()) * base
+
+object RationalVector: DivisionRingVectorFactory<Rational>(RationalRing, Rational::class.java) {
     fun of(vararg values: Number) =
         Array(values.size) { i -> values[i].toRational() }
 
-    operator fun invoke(size: Int, f: (Int) -> Rational) = Array(size, f)
-    operator fun invoke(size: Int, value: Rational) = Array(size) { value }
-    operator fun invoke(size: Int) = Array(size) { Rational.ZERO }
+    override operator fun invoke(size: Int, f: (Int) -> Rational) = Array(size, f)
+    override operator fun invoke(size: Int, value: Rational) = Array(size) { value }
+    override operator fun invoke(size: Int) = Array(size) { Rational.ZERO }
 }

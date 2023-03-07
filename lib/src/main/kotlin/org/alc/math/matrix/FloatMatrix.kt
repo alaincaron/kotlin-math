@@ -4,7 +4,7 @@ import org.alc.math.ring.FloatRing
 import org.alc.util.matrix.Matrix
 
 
-object FloatMatrix: InvertibleMatrix<Float>(FloatRing)
+object FloatMatrix: InvertibleMatrixFactory<Float>(FloatRing)
 
 fun Matrix<Float>.determinant() = FloatMatrix.determinant(this)
 

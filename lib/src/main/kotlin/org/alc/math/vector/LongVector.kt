@@ -2,8 +2,13 @@ package org.alc.math.vector
 
 import kotlin.math.sqrt
 
+
+fun requireSameSize(a: LongArray, b: LongArray) {
+    require(a.size == b.size) { "Arrays must be of same size" }
+}
+
 operator fun LongArray.times(other: LongArray): Long {
-    require(size == other.size) { "Arrays must be of the same size" }
+    requireSameSize(this, other)
     var sum = 0L
     for (i in indices) sum += this[i] * other[i]
     return sum
@@ -15,12 +20,12 @@ operator fun Long.times(other: LongArray) = other * this
 operator fun Int.times(other: LongArray) = other * this
 
 operator fun LongArray.minus(other: LongArray): LongArray {
-    require(size == other.size) { "Arrays must be of the same size" }
+    requireSameSize(this, other)
     return LongArray(size) { i -> this[i] - other[i] }
 }
 
 operator fun LongArray.plus(other: LongArray): LongArray {
-    require(size == other.size) { "Arrays must be of the same size" }
+    requireSameSize(this, other)
     return LongArray(size) { i -> this[i] + other[i] }
 }
 

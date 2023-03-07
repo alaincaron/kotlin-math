@@ -55,7 +55,7 @@ class RationalVectorTest {
     @Test
     fun unaryPlus() {
         val x = RationalVector.of(1.0, 2.0, -3.0)
-        assertSame(x, +x)
+        assertContentEquals(x, +x)
     }
 
     @Test

@@ -3,19 +3,21 @@ package org.alc.math.vector
 import kotlin.math.sqrt
 
 
+fun requireSameSize(a: IntArray, b: IntArray) {
+    require(a.size == b.size) { "Arrays must be of same size" }
+}
 
 operator fun IntArray.plus(other: IntArray): IntArray {
-    require(size == other.size) { "Arrays must be of the same size" }
     return IntArray(size) { i -> this[i] + other[i] }
 }
 
 operator fun IntArray.minus(other: IntArray): IntArray {
-    require(size == other.size) { "Vectors must be of the same size" }
+    requireSameSize(this, other)
     return IntArray(size) { i -> this[i] - other[i] }
 }
 
 operator fun IntArray.times(other: IntArray): Int {
-    require(size == other.size) { "Vectors must be of the same size" }
+    requireSameSize(this, other)
     var sum = 0
     for (i in indices) sum += this[i] * other[i]
     return sum
