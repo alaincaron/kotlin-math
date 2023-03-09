@@ -137,3 +137,24 @@ operator fun <T : RingElement<T>> Matrix<T>.unaryPlus() = Matrix(this)
 
 
 
+operator fun <T: RingElement<T>> Matrix<T>.times(v: Array<T>): Matrix<T> {
+    require(nbColumns == v.size) { "Matrix and vector are not compatible for multiplication"}
+    return Matrix(nbRows, nbColumns) { i, _ ->
+        var sum = this[i,0] * v[0]
+        for (k in 1 until v.size) {
+            sum += this[i, k] * v[k]
+        }
+        sum
+    }
+}
+
+operator fun <T: RingElement<T>> Array<T>.times(m: Matrix<T>): Matrix<T> {
+    require(size == m.nbRows) { "Matrix and vector are not compatible for multiplication"}
+    return Matrix(m.nbRows, m.nbColumns) { i, j ->
+        var sum = this[0] * m[0,i]
+        for (k in 1 until size) {
+            sum += this[k] * m[k,j]
+        }
+        sum
+    }
+}

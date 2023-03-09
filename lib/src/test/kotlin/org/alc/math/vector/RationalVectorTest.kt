@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import kotlin.math.sqrt
 import kotlin.test.assertEquals
-import kotlin.test.assertSame
 import org.alc.math.rational.*
 import kotlin.test.assertContentEquals
 

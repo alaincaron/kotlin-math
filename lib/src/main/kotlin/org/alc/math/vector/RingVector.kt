@@ -1,29 +1,26 @@
 package org.alc.math.vector
 
-import org.alc.math.rational.Rational
 import org.alc.math.ring.DivisionRing
 import org.alc.math.ring.DivisionRingElement
 import org.alc.math.ring.Ring
 import org.alc.math.ring.RingElement
-import java.util.Collection as JavaCollection
+import org.alc.util.matrix.Matrix
 
 
 fun requireSameSize(a: Array<*>, b: Array<*>) {
     require(a.size == b.size) { "Arrays must be of same size" }
 }
 
-abstract class RingVectorFactory<T : Any>(protected val ring: Ring<T>, protected val klass: Class<T>) {
+abstract class RingVectorFactory<T : Any>(
+    protected val ring: Ring<T>) {
 
-    open operator fun invoke(size: Int, f: (Int) -> T) = convert(List(size,f))
-    open operator fun invoke(size: Int, value: T) = convert(List(size){value})
-    open operator fun invoke(size: Int) = invoke(size, ring.zero())
+    open operator fun invoke(size: Int, f: (Int) -> T) = create(size, f)
+    open operator fun invoke(size: Int, value: T) = create(size){ value }
+    open operator fun invoke(size: Int) = create(size) {ring.zero()}
 
-    protected fun convert(list: List<T>) =
-        (list as JavaCollection<T>).toArray(
-            java.lang.reflect.Array.newInstance(klass, 0) as Array<T>
-        ) as Array<T>
+    abstract fun create(size: Int, f: (Int) -> T): Array<T>
 
-    fun zero(size: Int) = convert(List(size) { ring.zero() })
+    fun zero(size: Int) = create(size) { ring.zero() }
 
     fun negate(a: Array<T>) = a.clone().transform { ring.negate(it) }
 
@@ -41,38 +38,70 @@ abstract class RingVectorFactory<T : Any>(protected val ring: Ring<T>, protected
 
     fun subtract(a: Array<T>, b: Array<T>): Array<T> {
         requireSameSize(a, b)
-        return convert(List(a.size) { i -> ring.subtract(a[i], b[i]) })
+        return a.clone().transformIndexed { index, item -> ring.subtract(item, b[index]) }
     }
 
     fun add(a: Array<T>, b: Array<T>): Array<T> {
         requireSameSize(a, b)
-        return convert(List(a.size) { i -> ring.add(a[i], b[i]) })
+        return a.clone().transformIndexed { index, item -> ring.add(item, b[index]) }
     }
-
 
     fun normSquare(a: Array<T>) = multiply(a, a)
     fun dot(a: Array<T>, b: Array<T>): T = multiply(a, b)
 
     fun cross(a: Array<T>, b: Array<T>): Array<T> {
         require(a.size == b.size && a.size == 3) { "Arrays must be of size 3" }
-        return convert(List(3) {
+        return create(3) {
             when (it) {
                 0 -> ring.subtract(ring.multiply(a[1], b[2]), ring.multiply(a[2], b[1]))
-                1 -> ring.subtract(ring.multiply(a[0], b[2]), ring.multiply(a[0], b[2]))
+                1 -> ring.subtract(ring.multiply(a[2], b[0]), ring.multiply(a[0], b[2]))
                 else -> ring.subtract(ring.multiply(a[0], b[1]), ring.multiply(a[1], b[0]))
             }
-        })
+        }
     }
-}
+
+    fun matrixMultiply(m: Matrix<T>, v: Array<T>): Array<T> {
+        require(m.nbColumns == v.size) { "Matrix and vector are not compatible for multiplication" }
+        return create(m.nbRows) {
+            var sum = ring.multiply(m[it, 0], v[it])
+            for (k in 1 until v.size) {
+                sum = ring.add(sum, ring.multiply(m[it, k], v[k]))
+            }
+            sum
+        }
+    }
+
+    fun matrixMultiply(v: Array<T>, m: Matrix<T>): Array<T> {
+        require(v.size == m.nbRows) { "Matrix and vector are not compatible for multiplication" }
+        return create(m.nbColumns) {
+            var sum = ring.multiply(v[it], m[0, it])
+            for (k in 1 until v.size) {
+                sum = ring.add(sum, ring.multiply(v[k], m[k, it]))
+            }
+            sum
+        }
+    }
+
+    fun unaryMinus(v: Array<T>): Array<T> {
+        return v.clone().transform { ring.subtract(ring.zero(), it) }
+    }
+
+    fun unaryPlus(v: Array<T>) = v.clone()
+ }
+
 
 abstract class DivisionRingVectorFactory<T : Any>
-    (ring: DivisionRing<T>, klass: Class<T>) : RingVectorFactory<T>(ring, klass) {
+    (ring: DivisionRing<T>) : RingVectorFactory<T>(ring) {
+
+    protected fun ring() = ring as DivisionRing<T>
 
     fun projection(a: Array<T>, base: Array<T>) =
         multiply(
-            (ring as DivisionRing<T>).divide(multiply(a, base), normSquare(base)),
+            ring().divide(multiply(a, base), normSquare(base)),
             base
         )
+
+    fun divide(a: Array<T>, b: T) = a.clone().transform { ring().divide(it, b) }
 }
 
 
@@ -122,3 +151,26 @@ inline infix fun <reified T : RingElement<T>> Array<T>.cross(other: Array<T>): A
 
 inline infix fun <reified T : DivisionRingElement<T>> Array<T>.project(base: Array<T>) =
     ((this * base) / base.normSquare()) * base
+
+
+inline operator fun <reified T : DivisionRingElement<T>> Matrix<T>.times(v: Array<T>): Array<T> {
+    require(nbColumns == v.size) { "Matrix and vector are not compatible for multiplication" }
+    return Array(nbRows) {
+        var sum = this[it, 0] * v[0]//ring.multiply(m[it, 0], v[it])
+        for (k in 1 until v.size) {
+            sum += this[it, k] * v[k]
+        }
+        sum
+    }
+}
+
+inline operator fun <reified T : DivisionRingElement<T>> Array<T>.times(m: Matrix<T>): Array<T> {
+    require(size == m.nbRows) { "Matrix and vector are not compatible for multiplication" }
+    return Array(m.nbColumns) {
+        var sum = this[it] * m[0, it]
+        for (k in 1 until size) {
+            sum += this[k] * m[k, it]
+        }
+        sum
+    }
+}

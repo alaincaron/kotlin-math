@@ -19,10 +19,10 @@ operator fun Number.times(other: Array<Rational>) = other * this.toRational()
 
 fun Array<Rational>.norm() = sqrt(normSquare().toDouble())
 
-infix fun Array<Rational>.project(base: Array<Rational>) =
-    ((this * base) / base.normSquare()) * base
+object RationalVector: DivisionRingVectorFactory<Rational>(RationalRing) {
 
-object RationalVector: DivisionRingVectorFactory<Rational>(RationalRing, Rational::class.java) {
+    override fun create(size: Int, f: (Int) -> Rational) = Array(size, f)
+
     fun of(vararg values: Number) =
         Array(values.size) { i -> values[i].toRational() }
 

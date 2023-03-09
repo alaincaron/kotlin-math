@@ -1,5 +1,7 @@
 package org.alc.math.vector
 
+import org.alc.math.ring.DoubleRing
+import org.alc.util.matrix.Matrix
 import kotlin.math.sqrt
 
 fun requireSameSize(a: DoubleArray, b: DoubleArray) {
@@ -26,12 +28,26 @@ operator fun DoubleArray.times(other: DoubleArray): Double {
 operator fun Double.times(other: DoubleArray) = other * this
 operator fun DoubleArray.times(other: Double) = DoubleArray(size) { i -> this[i] * other }
 operator fun DoubleArray.times(other: Number) = this * other.toDouble()
+
+operator fun DoubleArray.timesAssign(other: Double) {
+    transform { it * other }
+}
+operator fun DoubleArray.timesAssign(other: Number) {
+     timesAssign(other.toDouble())
+}
 operator fun DoubleArray.div(other: Double) = DoubleArray(size) { i -> this[i] / other }
 operator fun DoubleArray.div(other: Number) = this / other.toDouble()
 
-operator fun DoubleArray.unaryPlus() = this
-operator fun DoubleArray.unaryMinus() = DoubleArray(size) { i -> -this[i] }
+operator fun DoubleArray.divAssign(other: Double) {
+    transform { it / other }
+}
 
+operator fun DoubleArray.divAssign(other: Number) {
+    divAssign(other.toDouble())
+}
+
+operator fun DoubleArray.unaryPlus() = clone()
+operator fun DoubleArray.unaryMinus() = DoubleArray(size) { i -> -this[i] }
 
 fun DoubleArray.normSquare() = this * this
 fun DoubleArray.norm() = sqrt(normSquare())
@@ -61,3 +77,24 @@ fun DoubleArray.transformIndexed(f: (Int, Double) -> Double): DoubleArray {
 infix fun DoubleArray.project(base: DoubleArray) =
     ((this * base) / base.normSquare()) * base
 
+private object DoubleArrayFactory: DivisionRingVectorFactory<Double>(DoubleRing) {
+    override fun create(size: Int, f: (Int) -> Double) = Array(size, f)
+}
+
+operator fun Array<Double>.times(other: Array<Double>) = DoubleArrayFactory.multiply(this, other)
+operator fun Array<Double>.times(other: Double) = DoubleArrayFactory.multiply(this, other)
+operator fun Array<Double>.times(other: Number) = this * other.toDouble()
+operator fun Double.times(other: Array<Double>) = DoubleArrayFactory.multiply(this, other)
+operator fun Number.times(other: Array<Double>) = toDouble() * other
+operator fun Array<Double>.times(other: Matrix<Double>) = DoubleArrayFactory.matrixMultiply(this, other)
+operator fun Matrix<Double>.times(other: Array<Double>) = DoubleArrayFactory.matrixMultiply(this, other)
+operator fun Array<Double>.plus(other: Array<Double>) = DoubleArrayFactory.add(this, other)
+operator fun Array<Double>.minus(other: Array<Double>) = DoubleArrayFactory.subtract(this, other)
+operator fun Array<Double>.unaryMinus() = DoubleArrayFactory.unaryMinus(this)
+operator fun Array<Double>.unaryPlus() = DoubleArrayFactory.unaryPlus(this)
+fun Array<Double>.normSquare() = DoubleArrayFactory.normSquare(this)
+fun Array<Double>.norm() = sqrt(normSquare())
+infix fun Array<Double>.dot(other: Array<Double>) = DoubleArrayFactory.dot(this, other)
+infix fun Array<Double>.cross(other: Array<Double>) = DoubleArrayFactory.cross(this, other)
+infix fun Array<Double>.project(other: Array<Double>) = DoubleArrayFactory.projection(this, other)
+operator fun Array<Double>.div(other: Double) = DoubleArrayFactory.divide(this, other)
