@@ -3,6 +3,7 @@ package org.alc.math.rational
 import org.alc.math.Point2d
 import org.alc.math.matrix.GaussianElimination
 import org.alc.math.matrix.RationalMatrix
+import org.alc.math.polynomial.Polynomial
 import java.lang.Integer.max
 import java.util.function.Function
 import kotlin.math.abs
@@ -111,6 +112,14 @@ class RationalPolynomial private constructor(val coefficients: List<Rational>) :
         }
         return invoke(d)
     }
+
+    fun integrate(): RationalPolynomial {
+        val n = degree() + 1
+        val d = MutableList(n) { i -> coefficients[i] / (n - i) }
+        d.add(Rational.ZERO)
+        return invoke(d)
+    }
+
 
     fun rationalRoot(
         initial_guess: Rational = Rational.ONE,
@@ -236,7 +245,7 @@ class RationalPolynomial private constructor(val coefficients: List<Rational>) :
                 else -> canonicalValue(coefficients.asSequence())
             }
 
-            else -> nonTrivialList(coefficients)
+            else -> canonicalValue(coefficients.asSequence())
         }
 
         fun interpolate(vararg points: Point2d<Rational>) = interpolate(points.asList())
@@ -267,11 +276,6 @@ class RationalPolynomial private constructor(val coefficients: List<Rational>) :
         }
 
 
-        private fun nonTrivialList(coefficients: List<Rational>): RationalPolynomial {
-            val c = coefficients.asSequence().dropWhile { x -> x == Rational.ZERO }
-            return canonicalValue(c)
-        }
-
         private val instanceCache = mutableMapOf<List<Rational>, RationalPolynomial>()
 
         private fun store(p: RationalPolynomial): RationalPolynomial {
@@ -280,7 +284,7 @@ class RationalPolynomial private constructor(val coefficients: List<Rational>) :
         }
 
         private fun canonicalValue(coefficients: Sequence<Rational>): RationalPolynomial {
-            val c = coefficients.toList()
+            val c = coefficients.dropWhile { it.isZero() }.toList()
             val cachedValue = instanceCache[c]
             if (cachedValue != null) return cachedValue
             return when (c.size) {

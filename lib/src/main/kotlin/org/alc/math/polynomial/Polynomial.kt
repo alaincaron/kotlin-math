@@ -107,7 +107,7 @@ class Polynomial private constructor(val coefficients: List<Double>) :
     fun negate() = unaryMinus()
 
     fun derivative(): Polynomial {
-        val n = this.degree()
+        val n = degree()
         if (n == 0) return ZERO
         val d = mutableListOf<Double>()
         var i = 0
@@ -115,6 +115,13 @@ class Polynomial private constructor(val coefficients: List<Double>) :
             d.add((n - i) * coefficients[i])
             ++i
         }
+        return invoke(d)
+    }
+
+    fun integrate(): Polynomial {
+        val n = degree() + 1
+        val d = MutableList(n) { i -> coefficients[i] / (n - i) }
+        d.add(0.0)
         return invoke(d)
     }
 
@@ -219,7 +226,7 @@ class Polynomial private constructor(val coefficients: List<Double>) :
                 else -> canonicalValue(coefficients.asSequence())
             }
 
-            else -> nonTrivialList(coefficients)
+            else -> canonicalValue(coefficients.asSequence())
         }
 
         fun interpolate(vararg points: Point2d<Double>) = interpolate(points.asList())
@@ -249,11 +256,6 @@ class Polynomial private constructor(val coefficients: List<Double>) :
             return invoke(listOf(slope, b))
         }
 
-        private fun nonTrivialList(coefficients: List<Double>): Polynomial {
-            val c = coefficients.asSequence().dropWhile { x -> x == 0.0 }
-            return canonicalValue(c)
-        }
-
         private val instanceCache = mutableMapOf<List<Double>, Polynomial>()
 
         private fun store(p: Polynomial): Polynomial {
@@ -262,7 +264,7 @@ class Polynomial private constructor(val coefficients: List<Double>) :
         }
 
         private fun canonicalValue(coefficients: Sequence<Double>): Polynomial {
-            val c = coefficients.map(::fix0).toList()
+            val c = coefficients.map(::fix0).dropWhile { x -> x == 0.0 }.toList()
             val cachedValue = instanceCache[c]
             if (cachedValue != null) return cachedValue
             return when (c.size) {

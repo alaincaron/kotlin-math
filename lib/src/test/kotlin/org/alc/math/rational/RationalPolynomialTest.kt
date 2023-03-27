@@ -38,6 +38,17 @@ class RationalPolynomialTest {
     }
 
     @Test
+    fun integrate() {
+        val p = RationalPolynomial(4,3,2,1)
+        val q = p.integrate()
+        val q1 = RationalPolynomial(1,1,1,1,0)
+        assertEquals(q,q1)
+        assertEquals(p,q.derivative())
+        assertSame(RationalPolynomial.ZERO, RationalPolynomial.ZERO.integrate())
+
+    }
+
+    @Test
     fun root2() {
         val p = RationalPolynomial(1, 0, -2)
         val expected = sqrt(2.0)
