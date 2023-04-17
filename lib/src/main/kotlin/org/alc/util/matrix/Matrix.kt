@@ -102,8 +102,8 @@ class Matrix<T> {
 
     fun transpose() = Matrix(nbColumns, nbRows) { i: Int, j: Int -> this[j, i] }
 
-    fun addRow(row: Int, f: (Int) -> T): Matrix<T> {
-        require (row in 0..nbRows) { "row must be within bounds"}
+    fun <U : T> addRow(row: Int, f: (Int) -> U): Matrix<T> {
+        require(row in 0..nbRows) { "row must be within bounds" }
         return Matrix(nbRows + 1, nbColumns) { i, j ->
             when {
                 i < row -> this[i, j]
@@ -112,8 +112,9 @@ class Matrix<T> {
             }
         }
     }
+
     fun deleteRow(row: Int): Matrix<T> {
-        require (row in 0 until nbRows) { "row must be within bounds"}
+        require(row in 0 until nbRows) { "row must be within bounds" }
         return Matrix(nbRows - 1, nbColumns) { i, j ->
             when {
                 i < row -> this[i, j]
@@ -122,8 +123,8 @@ class Matrix<T> {
         }
     }
 
-    fun addColumn(col: Int, f: (Int) -> T): Matrix<T> {
-        require (col in 0..nbColumns) { "column must be within bounds"}
+    fun <U : T> addColumn(col: Int, f: (Int) -> U): Matrix<T> {
+        require(col in 0..nbColumns) { "column must be within bounds" }
         return Matrix(nbRows, nbColumns + 1) { i, j ->
             when {
                 j < col -> this[i, j]
@@ -134,7 +135,7 @@ class Matrix<T> {
     }
 
     fun deleteColumn(col: Int): Matrix<T> {
-        require (col in 0 until nbColumns) { "column must be within bounds"}
+        require(col in 0 until nbColumns) { "column must be within bounds" }
         return Matrix(nbRows, nbColumns - 1) { i, j ->
             when {
                 j < col -> this[i, j]
@@ -149,14 +150,14 @@ class Matrix<T> {
             this[if (i < row) i else i + 1, if (j < col) j else j + 1]
         }
 
-    fun augment(m: Matrix<T>): Matrix<T> {
+    fun <U: T> augment(m: Matrix<U>): Matrix<T> {
         require(nbRows == m.nbRows) { "Matrices must have the same number of rows" }
         return Matrix(nbRows, nbColumns + m.nbColumns) { i, j ->
             if (j >= nbColumns) m[i, j - nbColumns] else this[i, j]
         }
     }
 
-    fun augment(values: Array<T>) = augment(values.asList())
+    fun <U : T> augment(values: Array<U>) = augment(values.asList())
     fun augment(values: List<T>): Matrix<T> {
         require(nbRows == values.size) { "Vector size must be same as number of rows in Matrix" }
         return addColumn(nbColumns) { i -> values[i] }
@@ -167,11 +168,11 @@ class Matrix<T> {
     fun <R> mapIndexed(f: (Int, Int, T) -> R) =
         Matrix(nbRows, nbColumns) { i: Int, j: Int -> f(i, j, this[i, j]) }
 
-    fun rowMap(row: Int, f: (T) -> T) = Matrix(this).rowTransform(row, f)
-    fun rowMapIndexed(row: Int, f: (Int, Int, T) -> T) = Matrix(this).rowTransformIndexed(row, f)
+    fun <U : T> rowMap(row: Int, f: (T) -> U) = Matrix(this).rowTransform(row, f)
+    fun <U : T> rowMapIndexed(row: Int, f: (Int, Int, T) -> U) = Matrix(this).rowTransformIndexed(row, f)
 
-    fun columnMap(col: Int, f: (T) -> T) = Matrix(this).columnTransform(col, f)
-    fun columnMapIndexed(col: Int, f: (Int, Int, T) -> T) = Matrix(this).columnTransformIndexed(col, f)
+    fun <U : T> columnMap(col: Int, f: (T) -> U) = Matrix(this).columnTransform(col, f)
+    fun <U : T> columnMapIndexed(col: Int, f: (Int, Int, T) -> U) = Matrix(this).columnTransformIndexed(col, f)
 
     fun <U : T> transform(f: (T) -> U): Matrix<T> {
         for (i in data.indices) {
@@ -191,22 +192,22 @@ class Matrix<T> {
         return this
     }
 
-    fun rowTransform(row: Int, f: (T) -> T): Matrix<T> {
+    fun <U : T> rowTransform(row: Int, f: (T) -> U): Matrix<T> {
         for (col in 0 until nbColumns) this[row, col] = f(this[row, col])
         return this
     }
 
-    fun rowTransformIndexed(row: Int, f: (Int, Int, T) -> T): Matrix<T> {
+    fun <U : T> rowTransformIndexed(row: Int, f: (Int, Int, T) -> U): Matrix<T> {
         for (col in 0 until nbColumns) this[row, col] = f(row, col, this[row, col])
         return this
     }
 
-    fun columnTransform(col: Int, f: (T) -> T): Matrix<T> {
+    fun <U : T> columnTransform(col: Int, f: (T) -> U): Matrix<T> {
         for (row in 0 until nbRows) this[row, col] = f(this[row, col])
         return this
     }
 
-    fun columnTransformIndexed(col: Int, f: (Int, Int, T) -> T): Matrix<T> {
+    fun <U : T> columnTransformIndexed(col: Int, f: (Int, Int, T) -> U): Matrix<T> {
         for (row in 0 until nbColumns) this[row, col] = f(row, col, this[row, col])
         return this
     }

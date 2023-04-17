@@ -17,7 +17,16 @@ fun <T1,T2,T3,T4,R>((T1,T2,T3,T4) ->R).bind(t1: T1) =
 fun <T1,T2,T3,T4,T5,R>((T1,T2,T3,T4,T5) ->R).bind(t1: T1) =
     { t2: T2, t3: T3, t4: T4, t5: T5 -> this(t1,t2,t3,t4,t5)}
 
-fun <T1,T2,R> ((T1,T2) -> R).bind2nd(t2: T2) = { t1: T1 -> this(t1, t2)}
+fun <T1,T2,R> ((T1,T2) -> R).bindLast(t2: T2) = { t1: T1 -> this(t1, t2)}
+
+fun <T1,T2,T3,R>((T1,T2,T3) ->R).bindLast(t3: T3) =
+    { t1: T1, t2: T2 -> this(t1,t2,t3)}
+
+fun <T1,T2,T3,T4,R>((T1,T2,T3,T4) ->R).bindLast(t4: T4) =
+    { t1: T1, t2: T2, t3: T3 -> this(t1,t2,t3,t4)}
+
+fun <T1,T2,T3,T4,T5,R>((T1,T2,T3,T4,T5) ->R).bindLast(t5: T5) =
+    { t1: T1, t2: T2, t3: T3, t4: T4 -> this(t1,t2,t3,t4,t5)}
 
 infix fun <T> ((T) -> Boolean).or(f: (T) -> Boolean) = { t: T -> this(t) || f(t)}
 infix fun <T> ((T) -> Boolean).nor(f: (T) -> Boolean) = { t: T -> !(this(t) || f(t))}
@@ -35,5 +44,4 @@ fun <T: Comparable<T>> lessThan(t: T) = { x: T -> x < t}
 fun <T: Comparable<T>> lessThanOrEqual(t: T) = { x: T -> x <= t}
 fun <T: Comparable<T>> isEqual(t: T) = { x: T -> x == t }
 fun <T: Comparable<T>> isNotEqual(t: T) = { x: T -> x != t }
-
 
