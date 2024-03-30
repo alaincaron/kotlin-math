@@ -125,11 +125,11 @@ class Polynomial private constructor(val coefficients: List<Double>) :
         return invoke(d)
     }
 
-    fun root(initial_guess: Double = 1.0, epsilon: Double = 1e-6, max_iterations: Int = 20) = when (degree()) {
+    fun root(initialGuess: Double = 1.0, epsilon: Double = 1e-6, maxIterations: Int = 20) = when (degree()) {
         0 -> Double.NaN
         1 -> -coefficients[1] / coefficients[0]
         2 -> root2()
-        else -> newtonRoot(initial_guess, epsilon, max_iterations)
+        else -> newtonRoot(initialGuess, epsilon, maxIterations)
     }
 
     private fun root2(): Double {
@@ -141,16 +141,16 @@ class Polynomial private constructor(val coefficients: List<Double>) :
         return (-b + sqrt(x)) / (2.0 * a)
     }
 
-    private fun newtonRoot(initial_guess: Double, epsilon: Double, max_iterations: Int): Double {
-        var x0 = initial_guess
-        for (iter in 1..max_iterations) {
+    private fun newtonRoot(initialGuess: Double, epsilon: Double, maxIterations: Int): Double {
+        var x0 = initialGuess
+        for (iter in 1..maxIterations) {
             var f = coefficients[0]
-            var f_prime = 0.0
+            var fPrime = 0.0
             for (i in 1..degree()) {
-                f_prime = f + (x0 * f_prime)
+                fPrime = f + (x0 * fPrime)
                 f = coefficients[i] + (x0 * f)
             }
-            val ratio = f / f_prime
+            val ratio = f / fPrime
             x0 -= ratio
             if (abs(ratio) <= epsilon) return x0
         }
@@ -163,9 +163,7 @@ class Polynomial private constructor(val coefficients: List<Double>) :
 
         other as Polynomial
 
-        if (coefficients != other.coefficients) return false
-
-        return true
+        return coefficients == other.coefficients
     }
 
     override fun hashCode(): Int {
@@ -249,9 +247,9 @@ class Polynomial private constructor(val coefficients: List<Double>) :
         }
 
         private fun linearInterpolation(p1: Point2d<Double>, p2: Point2d<Double>): Polynomial {
-            val delta_x = p1.x - p2.x
-            if (delta_x == 0.0) throw ArithmeticException("Infinite slope")
-            val slope = (p1.y - p2.y) / delta_x
+            val deltaX = p1.x - p2.x
+            if (deltaX == 0.0) throw ArithmeticException("Infinite slope")
+            val slope = (p1.y - p2.y) / deltaX
             val b = p1.y - p1.x * slope
             return invoke(listOf(slope, b))
         }

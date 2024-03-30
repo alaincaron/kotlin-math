@@ -339,7 +339,7 @@ class Rational private constructor(
     override fun hashCode() = num.hashCode() * 31 + den.hashCode()
 
     override fun toByte() = toBigInteger().toByte()
-    override fun toChar() = toBigInteger().toChar()
+
     override fun toDouble() = if (isNaN()) Double.NaN else num.toDouble() / den.toDouble()
     override fun toFloat() = toDouble().toFloat()
     override fun toInt() = toBigInteger().toInt()
