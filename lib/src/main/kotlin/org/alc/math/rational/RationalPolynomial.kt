@@ -3,7 +3,6 @@ package org.alc.math.rational
 import org.alc.math.Point2d
 import org.alc.math.matrix.GaussianElimination
 import org.alc.math.matrix.RationalMatrix
-import org.alc.math.polynomial.Polynomial
 import java.lang.Integer.max
 import java.util.function.Function
 import kotlin.math.abs
@@ -122,34 +121,34 @@ class RationalPolynomial private constructor(val coefficients: List<Rational>) :
 
 
     fun rationalRoot(
-        initial_guess: Rational = Rational.ONE,
-        epsilon: Rational = 1 over 1000000, max_iterations: Int = 100
+        initialGuess: Rational = Rational.ONE,
+        epsilon: Rational = 1 over 1000000, maxIterations: Int = 100
     ) = when (degree()) {
         0 -> Rational.NaN
         1 -> -coefficients[1] / coefficients[0]
-        else -> newtonRationalRoot(initial_guess, epsilon, max_iterations)
+        else -> newtonRationalRoot(initialGuess, epsilon, maxIterations)
     }
 
-    fun root(initial_guess: Double = 1.0, epsilon: Double = 1e-6, max_iterations: Int = 1000) = when (degree()) {
+    fun root(initialGuess: Double = 1.0, epsilon: Double = 1e-6, maxIterations: Int = 1000) = when (degree()) {
         0 -> Double.NaN
         1 -> (-coefficients[1] / coefficients[0]).toDouble()
         2 -> root2()
-        else -> newtonRoot(initial_guess, epsilon, max_iterations)
+        else -> newtonRoot(initialGuess, epsilon, maxIterations)
     }
 
     private fun newtonRationalRoot(
-        initial_guess: Rational,
-        epsilon: Rational, max_iterations: Int
+        initialGuess: Rational,
+        epsilon: Rational, maxIterations: Int
     ): Rational {
-        var x0 = initial_guess
-        for (iter in 1..max_iterations) {
+        var x0 = initialGuess
+        for (iter in 1..maxIterations) {
             var f = coefficients[0]
-            var f_prime = Rational.ZERO
+            var fPrime: Rational = Rational.ZERO
             for (i in 1..degree()) {
-                f_prime = f + (x0 * f_prime)
+                fPrime = f + (x0 * fPrime)
                 f = coefficients[i] + (x0 * f)
             }
-            val ratio = f / f_prime
+            val ratio = f / fPrime
             x0 -= ratio
             if (ratio.abs() <= epsilon) break
         }
@@ -157,17 +156,17 @@ class RationalPolynomial private constructor(val coefficients: List<Rational>) :
     }
 
 
-    private fun newtonRoot(initial_guess: Double, epsilon: Double, max_iterations: Int): Double {
-        var x0 = initial_guess
+    private fun newtonRoot(initialGuess: Double, epsilon: Double, maxIterations: Int): Double {
+        var x0 = initialGuess
         val c = coefficients.map { it.toDouble() }
-        for (iter in 1..max_iterations) {
+        for (iter in 1..maxIterations) {
             var f = c[0]
-            var f_prime = 0.0
+            var fPrime = 0.0
             for (i in 1..degree()) {
-                f_prime = f + (x0 * f_prime)
+                fPrime = f + (x0 * fPrime)
                 f = c[i] + (x0 * f)
             }
-            val ratio = f / f_prime
+            val ratio = f / fPrime
             x0 -= ratio
             if (abs(ratio) <= epsilon) break
         }
@@ -190,9 +189,7 @@ class RationalPolynomial private constructor(val coefficients: List<Rational>) :
 
         other as RationalPolynomial
 
-        if (coefficients != other.coefficients) return false
-
-        return true
+        return coefficients == other.coefficients
     }
 
     override fun hashCode(): Int {
@@ -268,9 +265,9 @@ class RationalPolynomial private constructor(val coefficients: List<Rational>) :
         }
 
         private fun linearInterpolation(p1: Point2d<Rational>, p2: Point2d<Rational>): RationalPolynomial {
-            val delta_x = p1.x - p2.x
-            if (delta_x == Rational.ZERO) throw ArithmeticException("Infinite slope")
-            val slope = (p1.y - p2.y) / delta_x
+            val deltaX = p1.x - p2.x
+            if (deltaX == Rational.ZERO) throw ArithmeticException("Infinite slope")
+            val slope = (p1.y - p2.y) / deltaX
             val b = p1.y - p1.x * slope
             return invoke(listOf(slope, b))
         }

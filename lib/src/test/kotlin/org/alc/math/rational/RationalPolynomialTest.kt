@@ -67,7 +67,7 @@ class RationalPolynomialTest {
     fun golden() {
         val p = RationalPolynomial(1, -1, -1)
         val expected = (1.0 + sqrt(5.0)) / 2.0
-        assertEquals(expected, p.root(initial_guess = 1.0, epsilon = 1e-10))
+        assertEquals(expected, p.root(initialGuess = 1.0, epsilon = 1e-10))
     }
 
     @Test
@@ -260,7 +260,7 @@ class RationalPolynomialTest {
         val expected = RationalPolynomial(1, -1, -1)
         assertEquals(expected, p)
         val root = (1.0 + sqrt(5.0)) / 2.0
-        assertEquals(root, p.root(initial_guess = 1.0, epsilon = 1e-10))
+        assertEquals(root, p.root(initialGuess = 1.0, epsilon = 1e-10))
         assertEquals(0.0, p.apply(root.toRational()).toDouble(), 1e-15)
     }
 

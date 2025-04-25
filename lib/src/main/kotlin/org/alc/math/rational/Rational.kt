@@ -55,15 +55,15 @@ class Rational private constructor(
 
     sealed interface Format
 
-    sealed class Radix(val precision: Int = 10, _radix: Int = 10) : Format {
+    sealed class Radix(val precision: Int = 10, base: Int = 10) : Format {
         init {
-            if (_radix < 2 || _radix > 36) throw IllegalArgumentException("Invalid base must be between 2 and 36")
+            if (base < 2 || base > 36) throw IllegalArgumentException("Invalid base must be between 2 and 36")
         }
 
-        val radix: BigInteger = when (_radix) {
+        val radix: BigInteger = when (base) {
             10 -> BigInteger.TEN
             2 -> BigInteger.TWO
-            else -> BigInteger.valueOf(_radix.toLong())
+            else -> BigInteger.valueOf(base.toLong())
         }
     }
 
@@ -74,8 +74,8 @@ class Rational private constructor(
     class Octal(precision: Int = 20) : Precision(precision, 8)
 
     class Hexadecimal(precision: Int = 10) : Precision(precision, 16)
-    object Fraction : Format
-    object MixedFraction : Format
+    data object Fraction : Format
+    data object MixedFraction : Format
 
     operator fun plus(other: Long) = when {
         isNaN() || isInfinite() -> this
@@ -558,6 +558,8 @@ class Rational private constructor(
             if (scale > 0) return invoke(unscaledValue, BigInteger.TEN.pow(scale))
             return invoke(unscaledValue * BigInteger.TEN.pow(-scale))
         }
+
+        operator fun invoke(value: Double)= value.toRational()
 
         private fun canonicalValue(num: BigInteger, den: BigInteger = BigInteger.ONE): Rational {
             val r = Rational(num, den)
