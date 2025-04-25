@@ -22,7 +22,7 @@ class GaussianElimination<T : Comparable<T>>(
         }
     }
 
-    fun gaussianElimination(): PivotResult {
+    private fun gaussianElimination(): PivotResult {
         if (matrix.nbRows == 0 || matrix.nbColumns == 0) return PivotResult.SINGULAR
 
         //find the largest absolute value for each row to use in scale ratios

@@ -10,6 +10,7 @@ import kotlin.math.sqrt
 
 class RationalPolynomial private constructor(val coefficients: List<Rational>) : Function<Rational, Rational> {
 
+    operator fun invoke(x: Number) = apply(x.toRational())
     override fun apply(x: Rational) = coefficients.fold(Rational.ZERO) { sum, v -> sum * x + v }
     fun degree() = coefficients.size - 1
 

@@ -16,7 +16,9 @@ class Polynomial private constructor(val coefficients: List<Double>) :
     Function<Double, Double>,
     DivisionRingElement<Polynomial> {
 
+    operator fun invoke(x: Number) = apply(x.toDouble())
     override fun apply(x: Double) = coefficients.fold(0.0) { sum, v -> sum * x + v }
+
     fun degree() = coefficients.size - 1
 
     override operator fun plus(other: Polynomial): Polynomial {
