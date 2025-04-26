@@ -16,7 +16,7 @@ sealed class Token {
     data object LessThanOrEqual : Token()
     data object GreaterThanOrEqual : Token()
     data object Min : Token()
-    data object Max: Token()
+    data object Max : Token()
 }
 
 class Tokenizer(private val input: String) {
@@ -30,17 +30,17 @@ class Tokenizer(private val input: String) {
                 input[i].isDigit() -> { // Parse a number (including decimals)
                     val start = i
                     var sawDelimiter = false
-                    while (i < input.length && (input[i].isDigit() || input[i] == '.' || input[i]=='/')) {
+                    while (i < input.length && (input[i].isDigit() || input[i] == '.' || input[i] == '/')) {
                         if (!input[i].isDigit()) {
                             if (sawDelimiter) {
                                 throw IllegalArgumentException("Unexpected decimal delimiter: ${input[i]}")
                             }
                             sawDelimiter = true
                         }
-                         i++
+                        i++
                     }
 
-                    return Token.Constant(input.substring(start,i).toRational())
+                    return Token.Constant(input.substring(start, i).toRational())
                 }
 
                 input[i].isLetter() -> { // Parse a variable (e.g., x, y, varName)

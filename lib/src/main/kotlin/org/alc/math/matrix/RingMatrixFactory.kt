@@ -21,12 +21,12 @@ abstract class RingMatrixFactory<T : Any>(protected val ring: Ring<T>) {
         Matrix(size, size) { i, j -> if (i == j) ring.one() else ring.zero() }
 
     fun negate(a: Matrix<T>) =
-        Matrix(a.nbRows, a.nbColumns) { i, j -> ring.negate(a[i,j])}
+        Matrix(a.nbRows, a.nbColumns) { i, j -> ring.negate(a[i, j]) }
 
     fun multiply(a: Matrix<T>, b: Matrix<T>): Matrix<T> {
         require(a.compatibleForMultiplication(b))
         return Matrix(a.nbRows, b.nbColumns) { i, j ->
-            var sum = ring.multiply(a[i,0], b[0,j])
+            var sum = ring.multiply(a[i, 0], b[0, j])
             for (k in 1 until b.nbColumns) {
                 sum = ring.add(sum, ring.multiply(a[i, k], b[k, j]))
             }
@@ -34,13 +34,13 @@ abstract class RingMatrixFactory<T : Any>(protected val ring: Ring<T>) {
         }
     }
 
-     fun subtract(a: Matrix<T>, b: Matrix<T>): Matrix<T> {
-         a.requireSameDimensions(b)
-         return Matrix(a.nbRows, b.nbColumns) { i, j -> ring.subtract(a[i, j], b[i, j]) }
-     }
+    fun subtract(a: Matrix<T>, b: Matrix<T>): Matrix<T> {
+        a.requireSameDimensions(b)
+        return Matrix(a.nbRows, b.nbColumns) { i, j -> ring.subtract(a[i, j], b[i, j]) }
+    }
 
-     fun add(a: Matrix<T>, b: Matrix<T>): Matrix<T> {
-         a.requireSameDimensions(b)
+    fun add(a: Matrix<T>, b: Matrix<T>): Matrix<T> {
+        a.requireSameDimensions(b)
         return Matrix(a.nbRows, b.nbColumns) { i, j -> ring.add(a[i, j], b[i, j]) }
     }
 
@@ -64,7 +64,7 @@ abstract class RingMatrixFactory<T : Any>(protected val ring: Ring<T>) {
         }
 }
 
-abstract class InvertibleMatrixFactory<T: Comparable<T>>(ring: DivisionRing<T>): RingMatrixFactory<T>(ring) {
+abstract class InvertibleMatrixFactory<T : Comparable<T>>(ring: DivisionRing<T>) : RingMatrixFactory<T>(ring) {
     fun invert(m: Matrix<T>): Matrix<T> {
         val work = invertBase(m)
         return Matrix(m.nbRows, m.nbColumns) { i, j -> work[i, j + m.nbColumns] }
@@ -112,7 +112,7 @@ operator fun <T : RingElement<T>> Matrix<T>.minus(other: Matrix<T>): Matrix<T> {
 operator fun <T : RingElement<T>> Matrix<T>.times(other: Matrix<T>): Matrix<T> {
     require(compatibleForMultiplication(other))
     return Matrix(nbRows, other.nbColumns) { i, j ->
-        var sum = this[i, 0] * other[0,j]
+        var sum = this[i, 0] * other[0, j]
         for (k in 1 until this.nbColumns) {
             sum += this[i, k] * other[k, j]
         }
@@ -136,11 +136,10 @@ operator fun <T : RingElement<T>> Matrix<T>.unaryMinus() =
 operator fun <T : RingElement<T>> Matrix<T>.unaryPlus() = Matrix(this)
 
 
-
-operator fun <T: RingElement<T>> Matrix<T>.times(v: Array<T>): Matrix<T> {
-    require(nbColumns == v.size) { "Matrix and vector are not compatible for multiplication"}
+operator fun <T : RingElement<T>> Matrix<T>.times(v: Array<T>): Matrix<T> {
+    require(nbColumns == v.size) { "Matrix and vector are not compatible for multiplication" }
     return Matrix(nbRows, nbColumns) { i, _ ->
-        var sum = this[i,0] * v[0]
+        var sum = this[i, 0] * v[0]
         for (k in 1 until v.size) {
             sum += this[i, k] * v[k]
         }
@@ -148,12 +147,12 @@ operator fun <T: RingElement<T>> Matrix<T>.times(v: Array<T>): Matrix<T> {
     }
 }
 
-operator fun <T: RingElement<T>> Array<T>.times(m: Matrix<T>): Matrix<T> {
-    require(size == m.nbRows) { "Matrix and vector are not compatible for multiplication"}
+operator fun <T : RingElement<T>> Array<T>.times(m: Matrix<T>): Matrix<T> {
+    require(size == m.nbRows) { "Matrix and vector are not compatible for multiplication" }
     return Matrix(m.nbRows, m.nbColumns) { i, j ->
-        var sum = this[0] * m[0,i]
+        var sum = this[0] * m[0, i]
         for (k in 1 until size) {
-            sum += this[k] * m[k,j]
+            sum += this[k] * m[k, j]
         }
         sum
     }

@@ -1,11 +1,12 @@
 package org.alc.math.vector
 
+import org.alc.math.rational.Rational
+import org.alc.math.rational.over
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import kotlin.math.sqrt
-import kotlin.test.assertEquals
-import org.alc.math.rational.*
 import kotlin.test.assertContentEquals
+import kotlin.test.assertEquals
 
 class RationalVectorTest {
 
@@ -42,7 +43,7 @@ class RationalVectorTest {
 
     @Test
     fun normSquare() {
-     assertEquals(5 over 1, RationalVector.of(1, 2).normSquare())
+        assertEquals(5 over 1, RationalVector.of(1, 2).normSquare())
     }
 
     @Test
@@ -82,7 +83,8 @@ class RationalVectorTest {
         assertContentEquals(-x, z cross y)
     }
 
-    @Test fun projection() {
+    @Test
+    fun projection() {
         val v1 = RationalVector.of(1, 2)
         val v2 = RationalVector.of(2, -1)
         assertContentEquals(RationalVector(2), (v1 project v2))

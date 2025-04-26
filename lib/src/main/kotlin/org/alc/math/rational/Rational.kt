@@ -559,7 +559,7 @@ class Rational private constructor(
             return invoke(unscaledValue * BigInteger.TEN.pow(-scale))
         }
 
-        operator fun invoke(value: Double)= value.toRational()
+        operator fun invoke(value: Double) = value.toRational()
 
         private fun canonicalValue(num: BigInteger, den: BigInteger = BigInteger.ONE): Rational {
             val r = Rational(num, den)
@@ -614,7 +614,7 @@ fun Float.toRational() = toDouble().toRational()
 
 fun Double.toRational() =
     when (this) {
-        Double.NEGATIVE_INFINITY-> Rational.NEGATIVE_INFINITY
+        Double.NEGATIVE_INFINITY -> Rational.NEGATIVE_INFINITY
         Double.POSITIVE_INFINITY -> Rational.POSITIVE_INFINITY
         0.0 -> Rational.ZERO
         -1.0 -> Rational.MINUS_ONE

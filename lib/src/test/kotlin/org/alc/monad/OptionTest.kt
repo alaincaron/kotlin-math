@@ -1,7 +1,6 @@
 package org.alc.monad
 
 import org.junit.jupiter.api.assertThrows
-import java.lang.RuntimeException
 import kotlin.test.*
 
 class OptionTest {
@@ -69,7 +68,7 @@ class OptionTest {
     @Test
     fun fold() {
         val ifNone = { 2 }
-        val ifSome = { i: Int -> i + 1}
+        val ifSome = { i: Int -> i + 1 }
 
         assertEquals(2, None.fold(ifNone, ifSome))
         assertEquals(3, Some(2).fold(ifNone, ifSome))
@@ -77,7 +76,7 @@ class OptionTest {
 
     @Test
     fun map() {
-        val f = { i: Int ->  i + 1 }
+        val f = { i: Int -> i + 1 }
         assertEquals(Some(3), Some(2).map(f))
     }
 
@@ -92,29 +91,29 @@ class OptionTest {
     @Test
     fun all() {
         assertTrue(None.all { false })
-        assertTrue(Some(2).all { it == 2})
-        assertFalse(Some(2).all {it != 2 })
+        assertTrue(Some(2).all { it == 2 })
+        assertFalse(Some(2).all { it != 2 })
     }
 
     @Test
     fun filter() {
         assertEquals(None, None.filter { true })
-        assertEquals(Some(2), Some(2).filter { it == 2})
-        assertEquals(None, Some(2).filter {it != 2 })
+        assertEquals(Some(2), Some(2).filter { it == 2 })
+        assertEquals(None, Some(2).filter { it != 2 })
     }
 
     @Test
     fun filterNot() {
         assertEquals(None, None.filterNot { true })
-        assertEquals(None, Some(2).filterNot { it == 2})
-        assertEquals(Some(2), Some(2).filterNot {it != 2 })
+        assertEquals(None, Some(2).filterNot { it == 2 })
+        assertEquals(Some(2), Some(2).filterNot { it != 2 })
     }
 
     @Test
     fun exists() {
         assertFalse(None.exists { true })
-        assertTrue(Some(2).exists { it == 2})
-        assertFalse(Some(2).exists {it != 2 })
+        assertTrue(Some(2).exists { it == 2 })
+        assertFalse(Some(2).exists { it != 2 })
     }
 
     @Test

@@ -239,16 +239,17 @@ class EitherTest {
     @Test
     fun flatMap() {
         val left = Left("foobar")
-        val f =  { i:Int -> Right(2 * i) }
+        val f = { i: Int -> Right(2 * i) }
         assertSame(left, left.flatMap(f))
 
         val right = Right(2)
         assertEquals(Right(4), right.flatMap(f))
     }
+
     @Test
     fun flatMapLeft() {
         val right = Right("foobar")
-        val f =  { i:Int -> Left(2 * i) }
+        val f = { i: Int -> Left(2 * i) }
         assertSame(right, right.flatMapLeft(f))
 
         val left = Left(2)

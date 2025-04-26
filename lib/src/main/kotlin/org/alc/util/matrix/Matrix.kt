@@ -64,15 +64,15 @@ class Matrix<T> {
         }
     }
 
-    fun <U> reduce(initial: U, f: (U,T) -> U): U {
+    fun <U> reduce(initial: U, f: (U, T) -> U): U {
         var acc = initial
-        forEach { acc = f(acc,it) }
+        forEach { acc = f(acc, it) }
         return acc
     }
 
-    fun <U> reduceIndexed(initial: U, f: (U,T,Int,Int) -> U): U {
+    fun <U> reduceIndexed(initial: U, f: (U, T, Int, Int) -> U): U {
         var acc = initial
-        forEachIndexed { row,col,v -> acc = f(acc,v,row,col) }
+        forEachIndexed { row, col, v -> acc = f(acc, v, row, col) }
         return acc
     }
 
@@ -85,10 +85,10 @@ class Matrix<T> {
         return acc
     }
 
-    fun <U> rowReduceIndexed(row: Int, initial: U, f: (U,T,Int,Int) -> U): U {
+    fun <U> rowReduceIndexed(row: Int, initial: U, f: (U, T, Int, Int) -> U): U {
         var acc = initial
         for (column in 0 until nbColumns) {
-            acc = f(acc, get(row,column), row, column)
+            acc = f(acc, get(row, column), row, column)
         }
         return acc
     }
@@ -101,10 +101,10 @@ class Matrix<T> {
         return acc
     }
 
-    fun <U> columnnReduceIndexed(column: Int, initial: U, f: (U,T,Int,Int) -> U): U {
+    fun <U> columnnReduceIndexed(column: Int, initial: U, f: (U, T, Int, Int) -> U): U {
         var acc = initial
         for (row in 0 until nbRows) {
-            acc = f(acc, get(row,column), row, column)
+            acc = f(acc, get(row, column), row, column)
         }
         return acc
     }
@@ -179,7 +179,7 @@ class Matrix<T> {
             this[if (i < row) i else i + 1, if (j < col) j else j + 1]
         }
 
-    fun <U: T> augment(m: Matrix<U>): Matrix<T> {
+    fun <U : T> augment(m: Matrix<U>): Matrix<T> {
         require(nbRows == m.nbRows) { "Matrices must have the same number of rows" }
         return Matrix(nbRows, nbColumns + m.nbColumns) { i, j ->
             if (j >= nbColumns) m[i, j - nbColumns] else this[i, j]

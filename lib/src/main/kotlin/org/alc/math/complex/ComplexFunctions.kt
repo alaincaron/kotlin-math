@@ -78,16 +78,16 @@ fun cos(z: Number) = cos(z.R)
  * Main branch of the Square Root function
  */
 fun sqrt(z: Complex) = when (z) {
-        Complex.ZERO, Complex.INFINITY, Complex.NaN -> z
-        else -> {
-            val t: Double = kotlin.math.sqrt((kotlin.math.abs(z.re) + z.mod) / 2)
-            if (z.re >= 0) {
-                Complex(t, z.im / (2 * t))
-            } else {
-                Complex(kotlin.math.abs(z.im) / (2 * t), 1.0.withSign(z.im) * t)
-            }
+    Complex.ZERO, Complex.INFINITY, Complex.NaN -> z
+    else -> {
+        val t: Double = kotlin.math.sqrt((kotlin.math.abs(z.re) + z.mod) / 2)
+        if (z.re >= 0) {
+            Complex(t, z.im / (2 * t))
+        } else {
+            Complex(kotlin.math.abs(z.im) / (2 * t), 1.0.withSign(z.im) * t)
         }
     }
+}
 
 /**
  * Square Root function

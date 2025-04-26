@@ -42,12 +42,13 @@ class IntVectorTest {
 
     @Test
     fun unaryMinus() {
-        val x = intArrayOf(1,2,-3)
-        assertContentEquals(intArrayOf(-1,-2,3), -x)
+        val x = intArrayOf(1, 2, -3)
+        assertContentEquals(intArrayOf(-1, -2, 3), -x)
     }
 
-    @Test fun unaryPlus() {
-        val x = intArrayOf(1,2,-3)
+    @Test
+    fun unaryPlus() {
+        val x = intArrayOf(1, 2, -3)
         assertSame(x, +x)
     }
 
@@ -60,11 +61,11 @@ class IntVectorTest {
 
         assertContentEquals(IntArray(3), x1 cross x1)
         assertContentEquals(intArrayOf(-1, -1, 1), x1 cross x2)
-        assertContentEquals(intArrayOf(1,1,-1), x2 cross x1)
+        assertContentEquals(intArrayOf(1, 1, -1), x2 cross x1)
 
-        val x = intArrayOf(1,0,0)
-        val y = intArrayOf(0,1,0)
-        val z = intArrayOf(0,0,1)
+        val x = intArrayOf(1, 0, 0)
+        val y = intArrayOf(0, 1, 0)
+        val z = intArrayOf(0, 0, 1)
 
         assertContentEquals(z, x cross y)
         assertContentEquals(-z, y cross x)

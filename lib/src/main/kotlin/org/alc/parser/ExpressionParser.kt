@@ -2,7 +2,7 @@ package org.alc.parser
 
 import org.alc.math.rational.Rational
 
-data class ObjectiveFunction(val op: Token, val variables: Map<String,Rational>)
+data class ObjectiveFunction(val op: Token, val variables: Map<String, Rational>)
 data class ConstraintFunction(val op: Token, val variables: Map<String, Rational>, val value: Rational)
 
 data class Factor(val value: Rational, val name: String?)
@@ -22,11 +22,11 @@ class Parser(private val tokenizer: Tokenizer) {
     }
 
     private fun error(expected: String, received: Token?, context: String): Nothing {
-      if (received == null) {
-          throw IllegalArgumentException("Unexpected end of stream in $context")
-      } else {
-          throw IllegalArgumentException("Unexpected token in $context: received: $received, expected: $expected")
-      }
+        if (received == null) {
+            throw IllegalArgumentException("Unexpected end of stream in $context")
+        } else {
+            throw IllegalArgumentException("Unexpected token in $context: received: $received, expected: $expected")
+        }
     }
 
     fun parseObjective(): ObjectiveFunction {
@@ -48,12 +48,13 @@ class Parser(private val tokenizer: Tokenizer) {
                 }
                 ConstraintFunction(token, left, right.value)
             }
+
             else -> error("comparison operator", token, "parseConstraint")
         }
     }
 
-    private fun parseTerm(): Map<String,Rational> {
-        val map: MutableMap<String,Rational> = sortedMapOf()
+    private fun parseTerm(): Map<String, Rational> {
+        val map: MutableMap<String, Rational> = sortedMapOf()
         var factor = parseFactor()
         if (factor.name == null) throw IllegalArgumentException("Unexpected constant while parsing term")
         map[factor.name!!] = factor.value
@@ -63,7 +64,7 @@ class Parser(private val tokenizer: Tokenizer) {
             if (factor.name == null) throw IllegalArgumentException("Unexpected constant while parsing term")
             var v = map.getOrDefault(factor.name!!, Rational.ZERO)
             if (op == Token.Minus) {
-               v -= factor.value
+                v -= factor.value
             } else {
                 v += factor.value
             }
@@ -82,6 +83,7 @@ class Parser(private val tokenizer: Tokenizer) {
                 val next = parseFactor()
                 Factor(next.value * Rational.MINUS_ONE, next.name)
             }
+
             is Token.Constant -> {
                 when (currentToken) {
                     is Token.Variable -> {
@@ -89,6 +91,7 @@ class Parser(private val tokenizer: Tokenizer) {
                         val variable = advance() as Token.Variable
                         Factor(token.value, variable.name)
                     }
+
                     is Token.Times -> {
                         // Handle case like 3 * x
                         advance()
@@ -97,9 +100,11 @@ class Parser(private val tokenizer: Tokenizer) {
                             else -> throw IllegalArgumentException("Expected variable but got $next")
                         }
                     }
-                else -> Factor(token.value, null)
+
+                    else -> Factor(token.value, null)
                 }
             }
+
             is Token.Variable -> Factor(Rational.ONE, token.name)
             else -> error("Expecting minus or constant", token, "parseFactor")
         }

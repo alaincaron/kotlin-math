@@ -39,11 +39,11 @@ class RationalPolynomialTest {
 
     @Test
     fun integrate() {
-        val p = RationalPolynomial(4,3,2,1)
+        val p = RationalPolynomial(4, 3, 2, 1)
         val q = p.integrate()
-        val q1 = RationalPolynomial(1,1,1,1,0)
-        assertEquals(q,q1)
-        assertEquals(p,q.derivative())
+        val q1 = RationalPolynomial(1, 1, 1, 1, 0)
+        assertEquals(q, q1)
+        assertEquals(p, q.derivative())
         assertSame(RationalPolynomial.ZERO, RationalPolynomial.ZERO.integrate())
 
     }

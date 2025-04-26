@@ -18,7 +18,7 @@ class RationalMatrixTest {
         m[1, 0] = 4 over 1
         m[1, 1] = -1 over 1
         val v = arrayOf(5 over 1, 3 over 1)
-       assertEquals(listOf(Rational.ONE, Rational.ONE), m.solve(v).toList())
+        assertEquals(listOf(Rational.ONE, Rational.ONE), m.solve(v).toList())
     }
 
     @Test
@@ -83,15 +83,15 @@ class RationalMatrixTest {
         m[1, 3] = 1 over 1
 
         GaussianElimination(RationalRing, m).invert()
-        assertSame(Rational.ONE, m[0,0])
-        assertSame(Rational.ZERO, m[0,1])
-        assertSame(Rational.ZERO, m[1,0])
-        assertSame(Rational.ONE, m[1,1])
+        assertSame(Rational.ONE, m[0, 0])
+        assertSame(Rational.ZERO, m[0, 1])
+        assertSame(Rational.ZERO, m[1, 0])
+        assertSame(Rational.ONE, m[1, 1])
 
-        assertEquals(3 over 1, m[0,2])
-        assertEquals(-4 over 1, m[0,3])
-        assertEquals(-2 over 1, m[1,2])
-        assertEquals(3 over 1, m[1,3])
+        assertEquals(3 over 1, m[0, 2])
+        assertEquals(-4 over 1, m[0, 3])
+        assertEquals(-2 over 1, m[1, 2])
+        assertEquals(3 over 1, m[1, 3])
     }
 
     @Test
@@ -103,10 +103,10 @@ class RationalMatrixTest {
         m[1, 1] = 3 over 1
 
         val m2 = m.invert()
-        assertEquals(3 over 1, m2[0,0])
-        assertEquals(-4 over 1, m2[0,1])
-        assertEquals(-2 over 1, m2[1,0])
-        assertEquals(3 over 1, m2[1,1])
+        assertEquals(3 over 1, m2[0, 0])
+        assertEquals(-4 over 1, m2[0, 1])
+        assertEquals(-2 over 1, m2[1, 0])
+        assertEquals(3 over 1, m2[1, 1])
     }
 
     @Test
@@ -132,37 +132,38 @@ class RationalMatrixTest {
 
     @Test
     fun addition() {
-        val m1 = Matrix(2,2) { i, j -> (i + j).toRational()}
-        val m2 =  Matrix(2,2) { i, j -> Rational.TWO * (i + j)}
+        val m1 = Matrix(2, 2) { i, j -> (i + j).toRational() }
+        val m2 = Matrix(2, 2) { i, j -> Rational.TWO * (i + j) }
         val m3 = m1 + m2
-        val m4 = Matrix(2,2) { i,j -> (3 over 1) * (i + j)}
+        val m4 = Matrix(2, 2) { i, j -> (3 over 1) * (i + j) }
         assertEquals(m3, m4)
     }
 
     @Test
     fun subtraction() {
-        val m1 = Matrix(2,2) { i, j -> (i + j).toRational()}
-        val m2 =  Matrix(2,2) { i, j -> Rational.TWO * (i + j)}
+        val m1 = Matrix(2, 2) { i, j -> (i + j).toRational() }
+        val m2 = Matrix(2, 2) { i, j -> Rational.TWO * (i + j) }
         val m3 = m2 - m1
         assertEquals(m3, m1)
     }
 
-    @Test fun test123() {
+    @Test
+    fun test123() {
         val m = RationalMatrix(3, 3)
         m[0, 0] = 1 over 1
         m[0, 1] = 2 over 1
         m[0, 2] = 3 over 1
 
-        m[1,0] = 3 over 1
-        m[1,1] = 4 over 1
-        m[1,2] = 6 over 1
+        m[1, 0] = 3 over 1
+        m[1, 1] = 4 over 1
+        m[1, 2] = 6 over 1
 
-        m[2,0] = 6 over 1
-        m[2,1] = 7 over 1
-        m[2,2] = 8 over 1
+        m[2, 0] = 6 over 1
+        m[2, 1] = 7 over 1
+        m[2, 2] = 8 over 1
         assertEquals(5 over 1, m.determinant())
 
-        val m1 = Matrix(m).swapColumns(2,0)
+        val m1 = Matrix(m).swapColumns(2, 0)
         assertEquals(-5 over 1, m1.determinant())
     }
 }

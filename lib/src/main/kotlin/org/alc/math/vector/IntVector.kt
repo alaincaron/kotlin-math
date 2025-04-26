@@ -23,7 +23,7 @@ operator fun IntArray.times(other: IntArray): Int {
     return sum
 }
 
-operator fun IntArray.times(other: Int) = IntArray(size) { i -> this[i] * other}
+operator fun IntArray.times(other: Int) = IntArray(size) { i -> this[i] * other }
 operator fun Int.times(other: IntArray) = other * this
 
 operator fun IntArray.unaryPlus() = this

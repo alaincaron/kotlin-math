@@ -12,11 +12,12 @@ fun requireSameSize(a: Array<*>, b: Array<*>) {
 }
 
 abstract class RingVectorFactory<T : Any>(
-    protected val ring: Ring<T>) {
+    protected val ring: Ring<T>
+) {
 
     open operator fun invoke(size: Int, f: (Int) -> T) = create(size, f)
-    open operator fun invoke(size: Int, value: T) = create(size){ value }
-    open operator fun invoke(size: Int) = create(size) {ring.zero()}
+    open operator fun invoke(size: Int, value: T) = create(size) { value }
+    open operator fun invoke(size: Int) = create(size) { ring.zero() }
 
     abstract fun create(size: Int, f: (Int) -> T): Array<T>
 
@@ -87,7 +88,7 @@ abstract class RingVectorFactory<T : Any>(
     }
 
     fun unaryPlus(v: Array<T>) = v.clone()
- }
+}
 
 
 abstract class DivisionRingVectorFactory<T : Any>

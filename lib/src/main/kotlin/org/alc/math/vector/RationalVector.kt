@@ -19,7 +19,7 @@ operator fun Number.times(other: Array<Rational>) = other * this.toRational()
 
 fun Array<Rational>.norm() = sqrt(normSquare().toDouble())
 
-object RationalVector: DivisionRingVectorFactory<Rational>(RationalRing) {
+object RationalVector : DivisionRingVectorFactory<Rational>(RationalRing) {
 
     override fun create(size: Int, f: (Int) -> Rational) = Array(size, f)
 

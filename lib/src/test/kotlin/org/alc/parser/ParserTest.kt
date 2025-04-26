@@ -1,8 +1,9 @@
 package org.alc.parser
 
 import org.alc.math.rational.Rational
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.Assertions.*
 
 class ParserTest {
 
@@ -11,7 +12,10 @@ class ParserTest {
         val p = Parser("min 2x + 3*y - 5z + 4*foo")
         val obj = p.parseObjective()
         assertSame(Token.Min, obj.op)
-        assertEquals(mapOf("x" to Rational(2), "y" to Rational(3), "z" to Rational(-5), "foo" to Rational(4)), obj.variables)
+        assertEquals(
+            mapOf("x" to Rational(2), "y" to Rational(3), "z" to Rational(-5), "foo" to Rational(4)),
+            obj.variables
+        )
     }
 
     @Test

@@ -41,7 +41,7 @@ fun DataInput.readComplex(): Complex {
     return Complex(re, im)
 }
 
-fun DataOutput.writeComplex(c: Complex)  {
+fun DataOutput.writeComplex(c: Complex) {
     this.writeDouble(c.re)
     this.writeDouble(c.im)
 }

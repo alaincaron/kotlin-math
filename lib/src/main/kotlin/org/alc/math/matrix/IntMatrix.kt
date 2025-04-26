@@ -3,7 +3,7 @@ package org.alc.math.matrix
 import org.alc.math.ring.IntRing
 import org.alc.util.matrix.Matrix
 
-object IntMatrix: RingMatrixFactory<Int>(IntRing)
+object IntMatrix : RingMatrixFactory<Int>(IntRing)
 
 operator fun Matrix<Int>.plus(other: Matrix<Int>) = IntMatrix.add(this, other)
 operator fun Matrix<Int>.minus(other: Matrix<Int>) = IntMatrix.subtract(this, other)

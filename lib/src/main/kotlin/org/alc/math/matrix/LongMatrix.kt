@@ -3,7 +3,7 @@ package org.alc.math.matrix
 import org.alc.math.ring.LongRing
 import org.alc.util.matrix.Matrix
 
-object LongMatrix: RingMatrixFactory<Long>(LongRing)
+object LongMatrix : RingMatrixFactory<Long>(LongRing)
 
 operator fun Matrix<Long>.plus(other: Matrix<Long>) = LongMatrix.add(this, other)
 operator fun Matrix<Long>.minus(other: Matrix<Long>) = LongMatrix.subtract(this, other)

@@ -40,11 +40,11 @@ class PolynomialTest {
 
     @Test
     fun integrate() {
-        val p = Polynomial(4,3,2,1)
+        val p = Polynomial(4, 3, 2, 1)
         val q = p.integrate()
-        val q1 = Polynomial(1,1,1,1,0)
-        assertEquals(q,q1)
-        assertEquals(p,q.derivative())
+        val q1 = Polynomial(1, 1, 1, 1, 0)
+        assertEquals(q, q1)
+        assertEquals(p, q.derivative())
         assertSame(Polynomial.ZERO, Polynomial.ZERO.integrate())
     }
 

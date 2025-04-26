@@ -42,12 +42,13 @@ class LongVectorTest {
 
     @Test
     fun unaryMinus() {
-        val x = longArrayOf(1,2,-3)
-        assertContentEquals(longArrayOf(-1,-2,3), -x)
+        val x = longArrayOf(1, 2, -3)
+        assertContentEquals(longArrayOf(-1, -2, 3), -x)
     }
 
-    @Test fun unaryPlus() {
-        val x = longArrayOf(1,2,-3)
+    @Test
+    fun unaryPlus() {
+        val x = longArrayOf(1, 2, -3)
         assertSame(x, +x)
     }
 
@@ -60,11 +61,11 @@ class LongVectorTest {
 
         assertContentEquals(LongArray(3), x1 cross x1)
         assertContentEquals(longArrayOf(-1, -1, 1), x1 cross x2)
-        assertContentEquals(longArrayOf(1,1,-1), x2 cross x1)
+        assertContentEquals(longArrayOf(1, 1, -1), x2 cross x1)
 
-        val x = longArrayOf(1,0,0)
-        val y = longArrayOf(0,1,0)
-        val z = longArrayOf(0,0,1)
+        val x = longArrayOf(1, 0, 0)
+        val y = longArrayOf(0, 1, 0)
+        val z = longArrayOf(0, 0, 1)
 
         assertContentEquals(z, x cross y)
         assertContentEquals(-z, y cross x)

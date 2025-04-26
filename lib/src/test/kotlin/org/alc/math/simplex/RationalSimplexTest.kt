@@ -1,10 +1,11 @@
 package org.alc.math.simplex
-import kotlin.test.*
 
 import org.alc.math.matrix.RationalMatrix
 import org.alc.math.rational.Rational
 import org.alc.math.rational.over
 import org.junit.jupiter.api.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertSame
 
 class RationalSimplexTest {
 
@@ -55,7 +56,7 @@ class RationalSimplexTest {
 
         assertEquals(
             Pair(
-                listOf(2 over 5,0 over 1, 6 over 5, 0 over 1, 0 over 1, 6 over 1, 32 over 5),
+                listOf(2 over 5, 0 over 1, 6 over 5, 0 over 1, 0 over 1, 6 over 1, 32 over 5),
                 32 over 5
             ),
             soln
@@ -64,7 +65,7 @@ class RationalSimplexTest {
 
     @Test
     fun test3() {
-        val z = arrayOf(5 over 2 , 1 over 1)
+        val z = arrayOf(5 over 2, 1 over 1)
         val m = RationalMatrix(2, 2)
         m[0, 0] = 2 over 1
         m[0, 1] = 1 over 1
@@ -128,11 +129,11 @@ class RationalSimplexTest {
     @Test
     fun multipleSolutions() {
         val z = arrayOf(4 over 1, 14 over 1)
-        val m = RationalMatrix(2,2)
-        m[0,0] = 2 over 1
-        m[0,1] = 7 over 1
-        m[1,0] = 7 over 1
-        m[1,1] = 2 over 1
+        val m = RationalMatrix(2, 2)
+        m[0, 0] = 2 over 1
+        m[0, 1] = 7 over 1
+        m[1, 0] = 7 over 1
+        m[1, 1] = 2 over 1
 
         val c = arrayOf(21 over 1, 21 over 1)
 

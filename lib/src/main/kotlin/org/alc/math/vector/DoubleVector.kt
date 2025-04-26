@@ -32,9 +32,11 @@ operator fun DoubleArray.times(other: Number) = this * other.toDouble()
 operator fun DoubleArray.timesAssign(other: Double) {
     transform { it * other }
 }
+
 operator fun DoubleArray.timesAssign(other: Number) {
-     timesAssign(other.toDouble())
+    timesAssign(other.toDouble())
 }
+
 operator fun DoubleArray.div(other: Double) = DoubleArray(size) { i -> this[i] / other }
 operator fun DoubleArray.div(other: Number) = this / other.toDouble()
 
@@ -66,18 +68,19 @@ infix fun DoubleArray.cross(other: DoubleArray): DoubleArray {
 }
 
 fun DoubleArray.transform(f: (Double) -> Double): DoubleArray {
-    forEachIndexed { index, item -> this[index] = f(item)}
+    forEachIndexed { index, item -> this[index] = f(item) }
     return this
 }
+
 fun DoubleArray.transformIndexed(f: (Int, Double) -> Double): DoubleArray {
-    forEachIndexed { index, item -> this[index] = f(index, item)}
+    forEachIndexed { index, item -> this[index] = f(index, item) }
     return this
 }
 
 infix fun DoubleArray.project(base: DoubleArray) =
     ((this * base) / base.normSquare()) * base
 
-private object DoubleArrayFactory: DivisionRingVectorFactory<Double>(DoubleRing) {
+private object DoubleArrayFactory : DivisionRingVectorFactory<Double>(DoubleRing) {
     override fun create(size: Int, f: (Int) -> Double) = Array(size, f)
 }
 

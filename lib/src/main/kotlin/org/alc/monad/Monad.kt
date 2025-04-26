@@ -1,6 +1,6 @@
 package org.alc.monad
 
- interface Monad<out A: Any, out B: Any> {
+interface Monad<out A : Any, out B : Any> {
     fun exists(predicate: (B) -> Boolean): Boolean
     fun <U> forEach(f: (B) -> U)
     fun all(predicate: (B) -> Boolean): Boolean

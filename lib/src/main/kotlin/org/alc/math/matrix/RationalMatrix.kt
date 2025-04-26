@@ -4,7 +4,7 @@ import org.alc.math.rational.Rational
 import org.alc.math.rational.RationalRing
 import org.alc.util.matrix.Matrix
 
-object RationalMatrix: InvertibleMatrixFactory<Rational>(RationalRing)
+object RationalMatrix : InvertibleMatrixFactory<Rational>(RationalRing)
 
 fun Matrix<Rational>.determinant() = RationalMatrix.determinant(this)
 fun Matrix<Rational>.invert() = RationalMatrix.invert(this)

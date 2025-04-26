@@ -2,12 +2,15 @@ package org.alc.math.complex
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.io.*
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.DataInputStream
+import java.io.DataOutputStream
 import java.util.*
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 import kotlin.test.assertFalse
 import kotlin.test.assertSame
+import kotlin.test.assertTrue
 
 class ComplexIOTest {
     @Test

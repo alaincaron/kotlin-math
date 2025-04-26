@@ -7,8 +7,8 @@ object SimplexSolver {
     fun solve(z: DoubleArray, a: Matrix<Double>, c: DoubleArray): Pair<List<Double>, Double> {
         require(z.size == a.nbColumns)
         { "objective function must have same number of variables than constraint matrix" }
-        require( a.nbRows == c.size)
-        { "constraint matrix must have same number of rows as constraint array"}
+        require(a.nbRows == c.size)
+        { "constraint matrix must have same number of rows as constraint array" }
 
         val m = initMatrix(z, a, c)
         println("m = \n$m")
@@ -16,17 +16,17 @@ object SimplexSolver {
     }
 
     private fun findValues(m: Matrix<Double>) =
-         DoubleArray(m.nbColumns -1) {solveVariable(it, m) }
+        DoubleArray(m.nbColumns - 1) { solveVariable(it, m) }
 
     private fun solveVariable(col: Int, m: Matrix<Double>): Double {
         var rowFound = -1
         for (row in 0 until m.nbRows) {
-            if (m[row,col] != 0.0) {
-                if (rowFound >= 0 || m[row,col] != 1.0) return 0.0
+            if (m[row, col] != 0.0) {
+                if (rowFound >= 0 || m[row, col] != 1.0) return 0.0
                 rowFound = row
             }
         }
-        return m[rowFound, m.nbColumns -1]
+        return m[rowFound, m.nbColumns - 1]
     }
 
     private fun initMatrix(z: DoubleArray, a: Matrix<Double>, c: DoubleArray): Matrix<Double> {
@@ -39,12 +39,12 @@ object SimplexSolver {
         for (i in 0 until a.nbRows) {
             val i1 = i + 1
             for (j in 0 until a.nbColumns) {
-                m[i1,j] = a[i,j]
+                m[i1, j] = a[i, j]
             }
             for (j in a.nbColumns until a.nbColumns + nbSlacks) {
-                m[i1,j] = if (j == a.nbColumns + i) 1.0 else 0.0
+                m[i1, j] = if (j == a.nbColumns + i) 1.0 else 0.0
             }
-            m[i1,a.nbColumns + nbSlacks] = c[i]
+            m[i1, a.nbColumns + nbSlacks] = c[i]
         }
         return m
     }
@@ -63,7 +63,7 @@ object SimplexSolver {
             iteration++
         }
         //return m
-        return Pair(findValues(m).asList(), m[0, m.nbColumns-1])
+        return Pair(findValues(m).asList(), m[0, m.nbColumns - 1])
 
     }
 
@@ -91,12 +91,12 @@ object SimplexSolver {
     }
 
     private fun pivot(m: Matrix<Double>, pivotRow: Int, minCol: Int) {
-        var factor = m[pivotRow,minCol]
-        for (j in 0 until m.nbColumns) m[pivotRow,j] /= factor
+        var factor = m[pivotRow, minCol]
+        for (j in 0 until m.nbColumns) m[pivotRow, j] /= factor
         for (row in 0 until m.nbRows) {
             if (row == pivotRow) continue
             factor = m[row, minCol]
-            for (j in 0 until m.nbColumns) m[row,j] -= m[pivotRow, j] * factor
+            for (j in 0 until m.nbColumns) m[row, j] -= m[pivotRow, j] * factor
         }
     }
 }
