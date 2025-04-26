@@ -101,7 +101,7 @@ class Matrix<T> {
         return acc
     }
 
-    fun <U> columnnReduceIndexed(column: Int, initial: U, f: (U, T, Int, Int) -> U): U {
+    fun <U> columnReduceIndexed(column: Int, initial: U, f: (U, T, Int, Int) -> U): U {
         var acc = initial
         for (row in 0 until nbRows) {
             acc = f(acc, get(row, column), row, column)

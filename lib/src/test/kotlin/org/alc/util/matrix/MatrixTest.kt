@@ -155,4 +155,18 @@ class MatrixTest {
         assertEquals(7, m.columnReduce(0, 5) { acc, v -> acc + v })
         assertEquals(14, m.columnReduce(1, 10) { acc, v -> acc + v })
     }
+
+    @Test
+    fun rowReduceIndexed() {
+        val m = Matrix(2, 2) { i, j -> 2 * i + j }
+        assertEquals(7, m.rowReduceIndexed(0,5) { acc, v, i, j -> acc + v + i + j })
+        assertEquals(13, m.rowReduceIndexed(1,5) { acc, v, i, j -> acc + v + i + j })
+    }
+
+    @Test
+    fun columnReduceIndexed() {
+        val m = Matrix(2, 2) { i, j -> 2 * i + j }
+        assertEquals(8, m.columnReduceIndexed(0,5) { acc, v, i, j -> acc + v + i + j })
+        assertEquals(12, m.columnReduceIndexed(1,5) { acc, v, i, j -> acc + v + i + j })
+    }
 }
