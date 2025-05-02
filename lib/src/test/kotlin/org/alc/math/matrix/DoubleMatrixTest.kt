@@ -142,6 +142,5 @@ class DoubleMatrixTest {
 
         assertEquals(5.0, m.determinant(), 1e-13)
         assertEquals(-5.0, m2.determinant(), 1e-13)
-        println("m1.determinant = ${m2.determinant()}")
     }
 }

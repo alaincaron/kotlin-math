@@ -187,7 +187,7 @@ class Matrix<T> {
     }
 
     fun <U : T> augment(values: Array<U>) = augment(values.asList())
-    fun augment(values: List<T>): Matrix<T> {
+    fun <U : T> augment(values: List<U>): Matrix<T> {
         require(nbRows == values.size) { "Vector size must be same as number of rows in Matrix" }
         return addColumn(nbColumns) { i -> values[i] }
     }
@@ -267,6 +267,13 @@ class Matrix<T> {
             joiner.add(innerJoiner.toString())
         }
         return joiner.toString()
+    }
+
+    companion object {
+        operator fun <T> invoke(nbRows: Int, nbColumns: Int, vararg items: T): Matrix<T> {
+            require(items.size == nbColumns * nbRows) { "Invalid size for array: ${items.size}, nbColumns = $nbColumns, nbRows = $nbRows" }
+            return Matrix(nbRows, nbColumns) { i, j -> items[nbColumns * i + j] }
+        }
     }
 }
 

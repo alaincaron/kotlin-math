@@ -11,7 +11,6 @@ object SimplexSolver {
         { "constraint matrix must have same number of rows as constraint array" }
 
         val m = initMatrix(z, a, c)
-        println("m = \n$m")
         return solve(m)
     }
 
@@ -53,12 +52,9 @@ object SimplexSolver {
         var iteration = 0
         var minCol = findMinColumn(m)
         while (minCol >= 0 && iteration < 10) {
-            println("minCol = $minCol")
             val pivotRow = findPivotRow(m, minCol)
             if (pivotRow < 0) return Pair(findValues(m).asList(), Double.NaN)
-            println("pivotRow = $pivotRow")
             pivot(m, pivotRow, minCol)
-            println("m = \n$m")
             minCol = findMinColumn(m)
             iteration++
         }

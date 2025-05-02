@@ -11,7 +11,7 @@ class MatrixTest {
 
     @Test
     fun createMatrix() {
-        val a = Matrix(2, 2) { i, j -> 2 * i + j }
+        val a = Matrix(2, 2, 0, 1, 2, 3)
         assertEquals(3, a[1, 1])
         assertThrows<ArrayIndexOutOfBoundsException> { a[0, 5] }
         assertThrows<ArrayIndexOutOfBoundsException> { a[5, 0] }
@@ -159,14 +159,152 @@ class MatrixTest {
     @Test
     fun rowReduceIndexed() {
         val m = Matrix(2, 2) { i, j -> 2 * i + j }
-        assertEquals(7, m.rowReduceIndexed(0,5) { acc, v, i, j -> acc + v + i + j })
-        assertEquals(13, m.rowReduceIndexed(1,5) { acc, v, i, j -> acc + v + i + j })
+        assertEquals(7, m.rowReduceIndexed(0, 5) { acc, v, i, j -> acc + v + i + j })
+        assertEquals(13, m.rowReduceIndexed(1, 5) { acc, v, i, j -> acc + v + i + j })
     }
 
     @Test
     fun columnReduceIndexed() {
         val m = Matrix(2, 2) { i, j -> 2 * i + j }
-        assertEquals(8, m.columnReduceIndexed(0,5) { acc, v, i, j -> acc + v + i + j })
-        assertEquals(12, m.columnReduceIndexed(1,5) { acc, v, i, j -> acc + v + i + j })
+        assertEquals(8, m.columnReduceIndexed(0, 5) { acc, v, i, j -> acc + v + i + j })
+        assertEquals(12, m.columnReduceIndexed(1, 5) { acc, v, i, j -> acc + v + i + j })
+    }
+
+    @Test
+    fun addRow() {
+        val m = Matrix(2, 2) { i, j -> 2 * i + j }
+        val m2 = m.addRow(0) { it }
+        val m3 = Matrix(3, 2) { i, j ->
+            when (i) {
+                0 -> j
+                else -> 2 * (i - 1) + j
+            }
+        }
+        assertEquals(m3, m2)
+    }
+
+    @Test
+    fun deleteRow() {
+        val m = Matrix(3, 2) { i, j ->
+            when (i) {
+                0 -> j
+                else -> 2 * (i - 1) + j
+            }
+        }
+        val m2 = m.deleteRow(0)
+        val m3 = Matrix(2, 2) { i, j -> 2 * i + j }
+
+        assertEquals(m3, m2)
+    }
+
+    @Test
+    fun addColumn() {
+        val m = Matrix(2, 2) { i, j -> 2 * i + j }
+        val m2 = m.addColumn(0) { it }
+        val m3 = Matrix(2, 3) { i, j ->
+            when (j) {
+                0 -> i
+                else -> 2 * i + j - 1
+            }
+        }
+        assertEquals(m3, m2)
+    }
+
+
+    @Test
+    fun deleteColumn() {
+        val m = Matrix(2, 3) { i, j ->
+            when (j) {
+                0 -> i
+                else -> 2 * i + j - 1
+            }
+        }
+        val m2 = m.deleteColumn(0)
+        val m3 = Matrix(2, 2) { i, j -> 2 * i + j }
+        assertEquals(m3, m2)
+
+    }
+
+    @Test
+    fun minor() {
+        val m = Matrix(4, 4) { i, j -> 4 * i + j }
+        for (i in 0 until m.nbRows) {
+            for (j in 0 until 2) {
+                val m1 = m.minor(i, j)
+                assertEquals(m.deleteRow(i).deleteColumn(j), m1)
+            }
+        }
+
+    }
+
+    @Test
+    fun augmentWithMatrix() {
+        val m = Matrix(2, 2) { i, j -> 2 * i + j }
+        val m2 = m.augment(m)
+        val m3 = Matrix(2, 4) { i, j -> 2 * i + j % 2 }
+        assertEquals(m3, m2)
+
+    }
+
+    @Test
+    fun augmentWithVector() {
+        val m = Matrix(2, 2) { i, j -> 2 * i + j }
+        val m2 = m.augment(arrayOf(0, 1))
+        val m3 = Matrix(2, 3) { i, j ->
+            when (j) {
+                0, 1 -> 2 * i + j
+                else -> i
+            }
+        }
+        assertEquals(m3, m2)
+    }
+
+    @Test
+    fun rowMap() {
+        val m = Matrix(2, 2) { i, j -> 2 * i + j }
+        val m2 = m.rowMap(0) { v -> v * 2 }
+        val m3 = Matrix(
+            2, 2,
+            0, 2, //
+            2, 3  //
+        )
+        assertEquals(m3, m2)
+    }
+
+    @Test
+    fun rowMapIndexed() {
+        val m = Matrix(2, 2) { i, j -> 2 * i + j }
+        val m2 = m.rowMapIndexed(0) { row, col, v -> v + row + col }
+        val m3 = Matrix(
+            2, 2,
+            0, 2, //
+            2, 3  //
+        )
+        assertEquals(m3, m2)
+    }
+
+    @Test
+    fun columnMap() {
+        val m = Matrix(2, 2) { i, j -> 2 * i + j }
+        val m2 = m.columnMap(0) { v -> v * 2 }
+        val m3 = Matrix(
+            2, 2,
+            0, 1, //
+            4, 3  //
+        )
+        assertEquals(m3, m2)
+    }
+
+    @Test
+    fun columnMapIndexed() {
+        val m = Matrix(2, 2) { i, j -> 2 * i + j }
+        val m2 = m.columnMapIndexed(0) { row, col, v -> v + row + col }
+        val m3 = Matrix(
+            2, 2,
+            0, 1, //
+            3, 3  //
+        )
+        assertEquals(m3, m2)
+
     }
 }
