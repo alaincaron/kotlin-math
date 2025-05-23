@@ -10,16 +10,16 @@ class TokenizerTest {
     @Test
     fun advance() {
         val input = "max 2.5 * foo - 4/3 * bar <= 10"
-        val t = Tokenizer(input)
+        val t = RationalTokenizer(input)
         assertSame(Objective.Max, t.advance())
         assertEquals(Operand.Constant(Rational(2.5)), t.advance())
-        assertSame(Operator.Times, t.advance())
+        assertSame(BinOp.Times, t.advance())
         assertEquals(Operand.Variable("foo"), t.advance())
-        assertSame(Operator.Minus, t.advance())
+        assertSame(BinOp.Minus, t.advance())
         assertEquals(Operand.Constant(4 over 3), t.advance())
-        assertSame(Operator.Times, t.advance())
+        assertSame(BinOp.Times, t.advance())
         assertEquals(Operand.Variable("bar"), t.advance())
-        assertSame(Comparator.LessThanOrEqual, t.advance())
+        assertSame(CompOp.LessThanOrEqual, t.advance())
         assertEquals(Operand.Constant(Rational.TEN), t.advance())
         assertNull(t.advance())
     }

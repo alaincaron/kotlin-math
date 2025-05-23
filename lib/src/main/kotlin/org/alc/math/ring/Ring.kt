@@ -12,7 +12,10 @@ interface Ring<T> {
 
 interface DivisionRing<T> : Ring<T> {
     fun divide(a: T, b: T): T
+    fun nan(): T
 }
+
+interface OrderedDivisionRing<T> : DivisionRing<T>, Comparator<T>
 
 interface DefaultRing<T : RingElement<T>> : Ring<T> {
     override fun negate(a: T) = -a
@@ -25,4 +28,5 @@ interface DefaultDivisionRing<T : DivisionRingElement<T>> : DefaultRing<T>, Divi
     override fun divide(a: T, b: T) = a / b
 }
 
+interface DefaultOrderedDivisionRing<T : DivisionRingElement<T>> :DefaultDivisionRing<T>, OrderedDivisionRing<T>
 

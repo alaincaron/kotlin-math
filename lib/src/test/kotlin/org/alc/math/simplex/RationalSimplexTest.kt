@@ -3,7 +3,7 @@ package org.alc.math.simplex
 import org.alc.math.matrix.RationalMatrix
 import org.alc.math.rational.Rational
 import org.alc.math.rational.over
-import org.alc.parser.Comparator
+import org.alc.parser.CompOp
 import org.alc.parser.ConstraintFunction
 import org.alc.parser.Objective
 import org.alc.parser.ObjectiveFunction
@@ -66,17 +66,17 @@ class RationalSimplexTest {
                 mapOf("x" to Rational(4), "y" to Rational.ONE, "z" to Rational(4))
             ),
             ConstraintFunction(
-                Comparator.LessThanOrEqual,
+                CompOp.LessThanOrEqual,
                 mapOf("x" to Rational(2), "y" to Rational.ONE, "z" to Rational.ONE),
                 Rational(2)
             ),
             ConstraintFunction(
-                Comparator.LessThanOrEqual,
+                CompOp.LessThanOrEqual,
                 mapOf("x" to Rational.ONE, "y" to Rational.TWO, "z" to Rational(3)),
                 Rational(4)
             ),
             ConstraintFunction(
-                Comparator.LessThanOrEqual,
+                CompOp.LessThanOrEqual,
                 mapOf("x" to Rational.TWO, "y" to Rational.TWO, "z" to Rational.ONE),
                 Rational.TWO
 

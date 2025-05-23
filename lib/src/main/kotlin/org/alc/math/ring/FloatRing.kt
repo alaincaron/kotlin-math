@@ -8,5 +8,6 @@ object FloatRing : DivisionRing<Float>, Comparator<Float> {
     override fun subtract(a: Float, b: Float) = a - b
     override fun add(a: Float, b: Float) = a + b
     override fun divide(a: Float, b: Float) = a / b
+    override fun nan() = Float.NaN
     override fun compare(o1: Float, o2: Float) = o1.compareTo(o2)
 }

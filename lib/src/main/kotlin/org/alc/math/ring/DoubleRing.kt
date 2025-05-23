@@ -1,6 +1,6 @@
 package org.alc.math.ring
 
-object DoubleRing : DivisionRing<Double>, Comparator<Double> {
+object DoubleRing : OrderedDivisionRing<Double> {
     override fun divide(a: Double, b: Double) = a / b
     override fun zero() = 0.0
     override fun one() = 1.0
@@ -8,6 +8,6 @@ object DoubleRing : DivisionRing<Double>, Comparator<Double> {
     override fun multiply(a: Double, b: Double) = a * b
     override fun subtract(a: Double, b: Double) = a - b
     override fun add(a: Double, b: Double) = a + b
-
+    override fun nan() = Double.NaN
     override fun compare(o1: Double, o2: Double) = o1.compareTo(o2)
 }
