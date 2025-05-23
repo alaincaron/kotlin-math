@@ -4,19 +4,30 @@ import org.alc.math.rational.Rational
 import org.alc.math.rational.toRational
 
 // Token Types
-sealed class Token {
-    data class Constant(val value: Rational) : Token()
-    data class Variable(val name: String) : Token()
-    data object Plus : Token()
-    data object Minus : Token()
-    data object Times : Token()
-    data object Equals : Token()
-    data object LessThan : Token()
-    data object GreaterThan : Token()
-    data object LessThanOrEqual : Token()
-    data object GreaterThanOrEqual : Token()
-    data object Min : Token()
-    data object Max : Token()
+sealed class Token
+
+sealed class Operand: Token() {
+    data class Constant(val value: Rational) : Operand()
+    data class Variable(val name: String) : Operand()
+}
+
+sealed class Operator: Token() {
+    data object Plus : Operator()
+    data object Minus : Operator()
+    data object Times : Operator()
+
+}
+sealed class Comparator: Token() {
+    data object Equals : Comparator()
+    data object LessThan : Comparator()
+    data object GreaterThan : Comparator()
+    data object LessThanOrEqual : Comparator()
+    data object GreaterThanOrEqual : Comparator()
+}
+
+sealed class Objective: Token() {
+    data object Min : Objective()
+    data object Max : Objective()
 }
 
 class Tokenizer(private val input: String) {
@@ -40,7 +51,7 @@ class Tokenizer(private val input: String) {
                         i++
                     }
 
-                    return Token.Constant(input.substring(start, i).toRational())
+                    return Operand.Constant(input.substring(start, i).toRational())
                 }
 
                 input[i].isLetter() -> { // Parse a variable (e.g., x, y, varName)
@@ -50,50 +61,50 @@ class Tokenizer(private val input: String) {
                     }
                     val name = input.substring(start, i)
                     return when (name) {
-                        "min" -> Token.Min
-                        "max" -> Token.Max
-                        else -> Token.Variable(input.substring(start, i))
+                        "min" -> Objective.Min
+                        "max" -> Objective.Max
+                        else -> Operand.Variable(input.substring(start, i))
                     }
                 }
 
                 input.startsWith(">=", i) -> {
                     i += 2
-                    return Token.GreaterThanOrEqual
+                    return Comparator.GreaterThanOrEqual
                 }
 
                 input.startsWith("<=", i) -> {
                     i += 2
-                    return Token.LessThanOrEqual
+                    return Comparator.LessThanOrEqual
                 }
 
                 input[i] == '>' -> {
                     i++
-                    return Token.GreaterThan
+                    return Comparator.GreaterThan
                 }
 
                 input[i] == '<' -> {
                     i++
-                    return Token.LessThan
+                    return Comparator.LessThan
                 }
 
                 input[i] == '=' -> {
                     i++
-                    return Token.Equals
+                    return Comparator.Equals
                 }
 
                 input[i] == '+' -> {
                     i++
-                    return Token.Plus
+                    return Operator.Plus
                 }
 
                 input[i] == '-' -> {
                     i++
-                    return Token.Minus
+                    return Operator.Minus
                 }
 
                 input[i] == '*' -> {
                     i++
-                    return Token.Times
+                    return Operator.Times
                 }
 
                 else -> throw IllegalArgumentException("Unknown character: ${input[i]}")

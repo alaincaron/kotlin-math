@@ -3,6 +3,10 @@ package org.alc.math.simplex
 import org.alc.math.matrix.RationalMatrix
 import org.alc.math.rational.Rational
 import org.alc.math.rational.over
+import org.alc.parser.Comparator
+import org.alc.parser.ConstraintFunction
+import org.alc.parser.Objective
+import org.alc.parser.ObjectiveFunction
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
@@ -10,7 +14,7 @@ import kotlin.test.assertSame
 class RationalSimplexTest {
 
     @Test
-    fun test1() {
+    fun testSolve1() {
         val z = arrayOf(4 over 1, 1 over 1, 4 over 1)
         val m = RationalMatrix(3, 3)
         m[0, 0] = 2 over 1
@@ -29,6 +33,58 @@ class RationalSimplexTest {
         assertEquals(
             Pair(
                 listOf(2 over 5, 0 over 1, 6 over 5, 0 over 1, 0 over 1, 0 over 1, 32 over 5),
+                32 over 5
+            ),
+            soln
+        )
+    }
+
+    @Test
+    fun testSolveString1() {
+        val soln = RationalSimplexSolver.solve(
+            "max 4x + y + 4z",
+            "2x + y + z <= 2",
+            "x + 2y + 3z <= 4",
+            "2x + 2y + z <= 2"
+        )
+
+        assertEquals(
+            Pair(
+                mapOf("x" to (2 over 5), "y" to Rational.ZERO, "z" to (6 over 5)),
+                32 over 5
+            ),
+            soln
+        )
+
+    }
+
+    @Test
+    fun testSolveParsed1() {
+        val soln = RationalSimplexSolver.solve(
+            ObjectiveFunction(
+                Objective.Max,
+                mapOf("x" to Rational(4), "y" to Rational.ONE, "z" to Rational(4))
+            ),
+            ConstraintFunction(
+                Comparator.LessThanOrEqual,
+                mapOf("x" to Rational(2), "y" to Rational.ONE, "z" to Rational.ONE),
+                Rational(2)
+            ),
+            ConstraintFunction(
+                Comparator.LessThanOrEqual,
+                mapOf("x" to Rational.ONE, "y" to Rational.TWO, "z" to Rational(3)),
+                Rational(4)
+            ),
+            ConstraintFunction(
+                Comparator.LessThanOrEqual,
+                mapOf("x" to Rational.TWO, "y" to Rational.TWO, "z" to Rational.ONE),
+                Rational.TWO
+
+            )
+        )
+        assertEquals(
+            Pair(
+                mapOf("x" to (2 over 5), "y" to Rational.ZERO, "z" to (6 over 5)),
                 32 over 5
             ),
             soln

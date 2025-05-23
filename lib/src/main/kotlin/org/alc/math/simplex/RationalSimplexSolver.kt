@@ -1,9 +1,44 @@
 package org.alc.math.simplex
 
 import org.alc.math.rational.Rational
+import org.alc.parser.*
 import org.alc.util.matrix.Matrix
 
 object RationalSimplexSolver {
+
+    fun solve(z: String, vararg constraints: String): Pair<Map<String, Rational>, Rational> {
+        return solve(
+            Parser(z).parseObjective(),
+            *constraints.map { Parser(it).parseConstraint()}.toTypedArray()
+        )
+    }
+
+    fun solve(z: ObjectiveFunction, vararg constraints: ConstraintFunction): Pair<Map<String, Rational>, Rational> {
+        require(z.obj == Objective.Max) { "Only Max is supported for objective function" }
+        require(z.variables.isNotEmpty()) { "The objective function must have variables" }
+        require(constraints.isNotEmpty()) { "At least one constraint is required" }
+        require(constraints.all { it.variables.isNotEmpty() }) { "All constraint variables must be non empty" }
+        require(constraints.all { it.comp == Comparator.LessThanOrEqual })
+
+        // crate name - idx mapping
+        val names = buildSet {
+            addAll(z.variables.keys)
+            constraints.forEach { constraint -> addAll(constraint.variables.keys) }
+        }.toList()
+
+        val zArr = Array(names.size) { i -> z.variables[names[i]] ?: Rational.ZERO }
+        val m = Matrix(constraints.size, names.size) { i, j ->
+            constraints[i].variables[names[j]] ?: Rational.ZERO
+        }
+        val c = constraints.map { it.value }.toTypedArray()
+        val result = solve(zArr, m, c)
+
+        return Pair(
+            buildMap { names.forEachIndexed() { i, v -> set(v, result.first[i]) } },
+            result.second
+        )
+    }
+
     fun solve(z: Array<Rational>, a: Matrix<Rational>, c: Array<Rational>): Pair<List<Rational>, Rational> {
         require(z.size == a.nbColumns)
         { "objective function must have same number of variables than constraint matrix" }
