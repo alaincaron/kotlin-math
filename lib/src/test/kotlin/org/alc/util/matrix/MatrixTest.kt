@@ -11,7 +11,7 @@ class MatrixTest {
 
     @Test
     fun createMatrix() {
-        val a = Matrix(2, 2, 0, 1, 2, 3)
+        val a = Matrix(2, 2) { i, j -> 2 * i + j }
         assertEquals(3, a[1, 1])
         assertThrows<ArrayIndexOutOfBoundsException> { a[0, 5] }
         assertThrows<ArrayIndexOutOfBoundsException> { a[5, 0] }
@@ -264,10 +264,13 @@ class MatrixTest {
         val m = Matrix(2, 2) { i, j -> 2 * i + j }
         val m2 = m.rowMap(0) { v -> v * 2 }
         val m3 = Matrix(
-            2, 2,
-            0, 2, //
-            2, 3  //
-        )
+            2, 2
+        ) { i, j ->
+            when (i) {
+                0 -> 2 * j
+                else -> 2 + j
+            }
+        }
         assertEquals(m3, m2)
     }
 
@@ -276,10 +279,13 @@ class MatrixTest {
         val m = Matrix(2, 2) { i, j -> 2 * i + j }
         val m2 = m.rowMapIndexed(0) { row, col, v -> v + row + col }
         val m3 = Matrix(
-            2, 2,
-            0, 2, //
-            2, 3  //
-        )
+            2, 2
+        ) { i, j ->
+            when (i) {
+                0 -> 2 * j
+                else -> 2 + j
+            }
+        }
         assertEquals(m3, m2)
     }
 
@@ -287,11 +293,12 @@ class MatrixTest {
     fun columnMap() {
         val m = Matrix(2, 2) { i, j -> 2 * i + j }
         val m2 = m.columnMap(0) { v -> v * 2 }
-        val m3 = Matrix(
-            2, 2,
-            0, 1, //
-            4, 3  //
-        )
+        val m3 = Matrix(2, 2) { i, j ->
+            when (i) {
+                0 -> j
+                else -> 4 - j
+            }
+        }
         assertEquals(m3, m2)
     }
 
@@ -300,11 +307,14 @@ class MatrixTest {
         val m = Matrix(2, 2) { i, j -> 2 * i + j }
         val m2 = m.columnMapIndexed(0) { row, col, v -> v + row + col }
         val m3 = Matrix(
-            2, 2,
-            0, 1, //
-            3, 3  //
-        )
-        assertEquals(m3, m2)
+            2, 2
+        ) { i, j ->
+            when (i) {
+                0 -> j
+                else -> 3
+            }
+        }
 
+        assertEquals(m3, m2)
     }
 }

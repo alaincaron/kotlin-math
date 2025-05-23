@@ -268,12 +268,6 @@ class Matrix<T> {
         }
         return joiner.toString()
     }
-
-    companion object {
-        operator fun <T> invoke(nbRows: Int, nbColumns: Int, vararg items: T): Matrix<T> {
-            require(items.size == nbColumns * nbRows) { "Invalid size for array: ${items.size}, nbColumns = $nbColumns, nbRows = $nbRows" }
-            return Matrix(nbRows, nbColumns) { i, j -> items[nbColumns * i + j] }
-        }
-    }
 }
+
 

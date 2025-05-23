@@ -145,7 +145,7 @@ class Polynomial private constructor(val coefficients: List<Double>) :
 
     private fun newtonRoot(initialGuess: Double, epsilon: Double, maxIterations: Int): Double {
         var x0 = initialGuess
-        for (iter in 1..maxIterations) {
+        (1..maxIterations).forEach { iter ->
             var f = coefficients[0]
             var fPrime = 0.0
             for (i in 1..degree()) {
