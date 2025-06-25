@@ -3,7 +3,6 @@ package org.alc.math.complex
 import org.alc.math.fix0
 import org.alc.math.ring.DivisionRingElement
 import java.util.*
-import kotlin.math.PI
 import kotlin.math.atan
 
 class Complex private constructor(val re: Double, val im: Double = 0.0) : DivisionRingElement<Complex> {
@@ -23,6 +22,8 @@ class Complex private constructor(val re: Double, val im: Double = 0.0) : Divisi
 
         /** Infinity represents the North Pole of the complex sphere. */
         val INFINITY = Complex(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY)
+
+        val PI = Complex(Math.PI)
 
         operator fun invoke(re: Int, im: Int = 0) = invoke(re.toDouble(), im.toDouble())
 
@@ -49,10 +50,10 @@ class Complex private constructor(val re: Double, val im: Double = 0.0) : Divisi
                 isInfinite() -> Double.NaN
                 isNaN() -> Double.NaN
                 re > 0.0 -> atan(im / re)
-                re < 0.0 && im >= 0.0 -> atan(im / re) + PI
-                re < 0.0 && im < 0.0 -> atan(im / re) - PI
-                re == 0.0 && im > 0.0 -> PI / 2
-                re == 0.0 && im < 0.0 -> -PI / 2
+                re < 0.0 && im >= 0.0 -> atan(im / re) + Math.PI
+                re < 0.0 && im < 0.0 -> atan(im / re) - Math.PI
+                re == 0.0 && im > 0.0 -> Math.PI / 2
+                re == 0.0 && im < 0.0 -> - Math.PI / 2
                 else -> 0.0
             }
         }
@@ -287,6 +288,11 @@ class Complex private constructor(val re: Double, val im: Double = 0.0) : Divisi
         }
     }
 
+    fun sqrt() = sqrt(this)
+    fun sin() = sin(this)
+    fun pow(exponent: Complex) = pow(this, exponent)
+    fun pow(exponent: Number) = pow(this, exponent.R)
+    fun exp() = exp(this)
 
     /**
      * A string representation of a complex number (this) in the Form "2.5+3.1i" for example.

@@ -1,3 +1,4 @@
+
 package org.alc.math.complex
 
 import kotlin.math.withSign
@@ -33,7 +34,7 @@ fun ln(z: Complex) = when (z) {
  * @param z input
  * @return ln(z)
  */
-fun ln(z: Number) = ln(z.R)
+fun ln(z: Number) = kotlin.math.ln(z.toDouble()).R
 
 /**
  * Sinus function
@@ -52,7 +53,7 @@ fun sin(z: Complex) =
  * @param z input
  * @return sin(z)
  */
-fun sin(z: Number) = sin(z.R)
+fun sin(z: Number) = kotlin.math.sin(z.toDouble()).R
 
 /**
  * Cosine function
@@ -71,21 +72,19 @@ fun cos(z: Complex) = when (z) {
  * @param z input
  * @return cos(z)
  */
-fun cos(z: Number) = cos(z.R)
+fun cos(z: Number) = kotlin.math.cos(z.toDouble()).R
 
 
 /**
  * Main branch of the Square Root function
  */
 fun sqrt(z: Complex) = when (z) {
-    Complex.ZERO, Complex.INFINITY, Complex.NaN -> z
+    Complex.ZERO, Complex.INFINITY, Complex.NaN, Complex.ONE ->  z
     else -> {
-        val t: Double = kotlin.math.sqrt((kotlin.math.abs(z.re) + z.mod) / 2)
-        if (z.re >= 0) {
-            Complex(t, z.im / (2 * t))
-        } else {
-            Complex(kotlin.math.abs(z.im) / (2 * t), 1.0.withSign(z.im) * t)
-        }
+        val r = z.mod
+        val x = kotlin.math.sqrt((z.re + r) / 2.0)
+        val y = kotlin.math.sign(z.im) * kotlin.math.sqrt((r -z.re) / 2.0)
+        Complex(x,y)
     }
 }
 
@@ -94,33 +93,72 @@ fun sqrt(z: Complex) = when (z) {
  * @param z input
  * @return sqrt(z)
  */
-fun sqrt(z: Number) = sqrt(z.R)
+fun sqrt(z: Number) = kotlin.math.sqrt(z.toDouble()).R
 
 /**
  * Calculates the complex power. Please note, that similar to ln and sqrt the default
  * value is returned here.
- * @param z basis
- * @param w exponent
- * @return the power z^w
+ * @param base
+ * @param exponent
+ * @return the power base ^ exponent
  */
-fun pow(z: Complex, w: Complex) = pow(z.mod, w) * exp(z.arg.I * w)
-
+fun pow(base: Complex, exponent: Complex) = pow(base.mod, exponent) * exp(base.arg.I * exponent)
+fun pow(base: Complex, exponent: Number) = pow(base, exponent.R)
 /**
  * The power function
- * @param x base
- * @param w exponent
- * @return x^w
+ * @param base
+ * @param exponent
+ * @return base ^ exponent
  */
-fun pow(x: Number, w: Complex): Complex {
-    val d = x.toDouble()
+fun pow(base: Number, exponent: Complex): Complex {
+    val d = base.toDouble()
     return when {
         d < 0.0 -> Complex.NaN
         d.isInfinite() -> Complex.NaN
         d.isNaN() -> Complex.NaN
-        w.isInfinite() -> Complex.NaN
-        w.isNaN() -> Complex.NaN
-        w.isZero() -> Complex.ONE
+        exponent.isInfinite() -> Complex.NaN
+        exponent.isNaN() -> Complex.NaN
+        exponent.isZero() -> Complex.ONE
         d == 0.0 -> Complex.ZERO
-        else -> exp(kotlin.math.ln(d) * w)
+        else -> exp(kotlin.math.ln(d) * exponent)
+    }
+}
+
+
+@Suppress("ClassName", "FloatingPointLiteralPrecision")
+object gamma {
+    private val lanczosCoefficients = listOf(
+        676.5203681218851,
+        -1259.1392167224028,
+        771.32342877765313,
+        -176.61502916214059,
+        12.507343278686905,
+        -0.13857109526572012,
+        9.9843695780195716e-6,
+        1.5056327351493116e-7
+    ).map { Complex(it, 0.0) }
+
+    private val sqrtTwoPi = Complex(2 * Math.PI, 0.0).sqrt()
+
+    operator fun invoke(z: Complex): Complex {
+        return if (z.re < 0.5) {
+            // Reflection formula: Γ(z) = π / (sin(πz) * Γ(1 - z))
+            val piZ = Complex(Math.PI) * z
+            val sinPiZ = piZ.sin()
+            val oneMinusZ = Complex(1.0, 0.0) - z
+            Complex.PI / (sinPiZ * gamma(oneMinusZ))
+        } else {
+            var x = Complex(0.99999999999980993, 0.0)
+            val zMinus1 = z - Complex(1.0, 0.0)
+
+            for (i in lanczosCoefficients.indices) {
+                val num = lanczosCoefficients[i]
+                val den = zMinus1 + Complex((i + 1).toDouble(), 0.0)
+                x += num / den
+            }
+
+            val t = zMinus1 + Complex( 7.5, 0.0)
+            sqrtTwoPi * (t.pow(zMinus1 + Complex(0.5, 0.0))) * (-t).exp().unaryMinus() * x
+        }
     }
 }
