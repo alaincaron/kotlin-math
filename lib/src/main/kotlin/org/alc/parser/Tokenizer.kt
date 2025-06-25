@@ -4,25 +4,44 @@ import org.alc.math.rational.Rational
 import org.alc.math.rational.toRational
 
 // Token Types
-sealed class Token {
-    data class Constant(val value: Rational) : Token()
-    data class Variable(val name: String) : Token()
-    data object Plus : Token()
-    data object Minus : Token()
-    data object Times : Token()
-    data object Equals : Token()
-    data object LessThan : Token()
-    data object GreaterThan : Token()
-    data object LessThanOrEqual : Token()
-    data object GreaterThanOrEqual : Token()
-    data object Min : Token()
-    data object Max : Token()
+sealed class Token
+
+sealed class Operand: Token() {
+    data class Constant<T:Number>(val value: T) : Operand()
+    data class Variable(val name: String) : Operand()
 }
 
-class Tokenizer(private val input: String) {
+sealed class BinOp: Token() {
+    data object Plus : BinOp()
+    data object Minus : BinOp()
+    data object Times : BinOp()
+
+}
+sealed class CompOp: Token() {
+    data object Equals : CompOp()
+    data object LessThan : CompOp()
+    data object GreaterThan : CompOp()
+    data object LessThanOrEqual : CompOp()
+    data object GreaterThanOrEqual : CompOp()
+}
+
+sealed class Objective: Token() {
+    data object Min : Objective()
+    data object Max : Objective()
+}
+
+interface Tokenizer<T> {
+    fun advance(): Token?
+}
+
+
+abstract class AbstractTokenizer<T:Number>(private val input: String):Tokenizer<T> {
     var i = 0
 
-    fun advance(): Token? {
+    abstract fun isDelimiter(ch: Char): Boolean
+    abstract fun parseConstant(str: String): T
+
+   override fun advance(): Token? {
         while (i < input.length)
             when {
                 input[i].isWhitespace() -> i++  // Ignore spaces
@@ -30,7 +49,7 @@ class Tokenizer(private val input: String) {
                 input[i].isDigit() -> { // Parse a number (including decimals)
                     val start = i
                     var sawDelimiter = false
-                    while (i < input.length && (input[i].isDigit() || input[i] == '.' || input[i] == '/')) {
+                    while (i < input.length && (input[i].isDigit() || isDelimiter(input[i]))) {
                         if (!input[i].isDigit()) {
                             if (sawDelimiter) {
                                 throw IllegalArgumentException("Unexpected decimal delimiter: ${input[i]}")
@@ -40,7 +59,7 @@ class Tokenizer(private val input: String) {
                         i++
                     }
 
-                    return Token.Constant(input.substring(start, i).toRational())
+                    return Operand.Constant(parseConstant(input.substring(start, i)))
                 }
 
                 input[i].isLetter() -> { // Parse a variable (e.g., x, y, varName)
@@ -50,54 +69,63 @@ class Tokenizer(private val input: String) {
                     }
                     val name = input.substring(start, i)
                     return when (name) {
-                        "min" -> Token.Min
-                        "max" -> Token.Max
-                        else -> Token.Variable(input.substring(start, i))
+                        "min" -> Objective.Min
+                        "max" -> Objective.Max
+                        else -> Operand.Variable(input.substring(start, i))
                     }
                 }
 
                 input.startsWith(">=", i) -> {
                     i += 2
-                    return Token.GreaterThanOrEqual
+                    return CompOp.GreaterThanOrEqual
                 }
 
                 input.startsWith("<=", i) -> {
                     i += 2
-                    return Token.LessThanOrEqual
+                    return CompOp.LessThanOrEqual
                 }
 
                 input[i] == '>' -> {
                     i++
-                    return Token.GreaterThan
+                    return CompOp.GreaterThan
                 }
 
                 input[i] == '<' -> {
                     i++
-                    return Token.LessThan
+                    return CompOp.LessThan
                 }
 
                 input[i] == '=' -> {
                     i++
-                    return Token.Equals
+                    return CompOp.Equals
                 }
 
                 input[i] == '+' -> {
                     i++
-                    return Token.Plus
+                    return BinOp.Plus
                 }
 
                 input[i] == '-' -> {
                     i++
-                    return Token.Minus
+                    return BinOp.Minus
                 }
 
                 input[i] == '*' -> {
                     i++
-                    return Token.Times
+                    return BinOp.Times
                 }
 
                 else -> throw IllegalArgumentException("Unknown character: ${input[i]}")
             }
         return null
     }
+}
+
+class RationalTokenizer(input: String): AbstractTokenizer<Rational>(input) {
+    override fun isDelimiter(ch: Char) = ch == '.' || ch == '/'
+    override fun parseConstant(str: String) = str.toRational()
+}
+class DoubleTokenizer(input: String): AbstractTokenizer<Double>(input) {
+    override fun isDelimiter(ch: Char) = ch == '.' || ch == '/'
+    override fun parseConstant(str: String) = str.toDouble()
 }
