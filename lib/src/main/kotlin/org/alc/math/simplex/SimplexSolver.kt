@@ -3,6 +3,7 @@ package org.alc.math.simplex
 import org.alc.math.rational.Rational
 import org.alc.math.rational.RationalRing
 import org.alc.math.ring.OrderedDivisionRing
+import org.alc.math.vector.transform
 import org.alc.parser.*
 import org.alc.util.matrix.Matrix
 
@@ -36,7 +37,6 @@ open class SimplexSolver<T : Number, R : OrderedDivisionRing<T>>(
     }
 
     fun solve(z: ObjectiveFunction<T>, vararg constraints: ConstraintFunction<T>): Pair<Map<String, T>, T> {
-        require(z.obj == Objective.Max) { "Only Max is supported for objective function" }
         require(z.variables.isNotEmpty()) { "The objective function must have variables" }
         require(constraints.isNotEmpty()) { "At least one constraint is required" }
         require(constraints.all { it.variables.isNotEmpty() }) { "All constraint variables must be non empty" }
@@ -49,6 +49,8 @@ open class SimplexSolver<T : Number, R : OrderedDivisionRing<T>>(
         }.toList()
 
         val zArr = createArray(names.size) { i -> z.variables[names[i]] ?: ring.zero() }
+        if (z.obj == Objective.Min) zArr.transform(ring::negate)
+
         val m = Matrix(constraints.size, names.size) { i, j ->
             constraints[i].variables[names[j]] ?: ring.zero()
         }
