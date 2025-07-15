@@ -1,8 +1,6 @@
 
 package org.alc.math.complex
 
-import kotlin.math.withSign
-
 /**
  * Exponential function
  */
@@ -34,7 +32,14 @@ fun ln(z: Complex) = when (z) {
  * @param z input
  * @return ln(z)
  */
-fun ln(z: Number) = kotlin.math.ln(z.toDouble()).R
+fun ln(z: Number): Complex {
+    val x = z.toDouble()
+    return when {
+        x == 0.0 || x.isNaN() || x.isInfinite() -> Complex.NaN
+        x > 0 -> kotlin.math.ln(x).R
+        else -> Complex(kotlin.math.ln(-x), Math.PI)
+    }
+}
 
 /**
  * Sinus function
@@ -93,7 +98,13 @@ fun sqrt(z: Complex) = when (z) {
  * @param z input
  * @return sqrt(z)
  */
-fun sqrt(z: Number) = kotlin.math.sqrt(z.toDouble()).R
+fun sqrt(z: Number): Complex {
+    val r = z.toDouble()
+    return when {
+        r >= 0 -> kotlin.math.sqrt(r).R
+        else -> kotlin.math.sqrt(-r).I
+    }
+}
 
 /**
  * Calculates the complex power. Please note, that similar to ln and sqrt the default
