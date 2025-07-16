@@ -53,7 +53,7 @@ class ComplexTest {
         assertEquals(PI / 2, 3.I.arg)
         assertQuasiEquals(3.0, exp(3.I).arg)
         assertEquals(PI, ((-2).R).arg)
-        assertEquals(4 - 2 * PI, exp(4.I).arg)
+        assertQuasiEquals(4 - 2 * PI, exp(4.I).arg)
         assertEquals(-PI / 2, -3.I.arg)
         assertQuasiEquals(6 - 2 * PI, exp(6.I).arg)
     }

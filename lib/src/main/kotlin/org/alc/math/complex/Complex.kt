@@ -4,6 +4,8 @@ import org.alc.math.fix0
 import org.alc.math.ring.DivisionRingElement
 import java.util.*
 import kotlin.math.atan
+import kotlin.math.atan2
+import kotlin.math.hypot
 
 class Complex private constructor(val re: Double, val im: Double = 0.0) : DivisionRingElement<Complex> {
 
@@ -49,19 +51,14 @@ class Complex private constructor(val re: Double, val im: Double = 0.0) : Divisi
             return when {
                 isInfinite() -> Double.NaN
                 isNaN() -> Double.NaN
-                re > 0.0 -> atan(im / re)
-                re < 0.0 && im >= 0.0 -> atan(im / re) + Math.PI
-                re < 0.0 && im < 0.0 -> atan(im / re) - Math.PI
-                re == 0.0 && im > 0.0 -> Math.PI / 2
-                re == 0.0 && im < 0.0 -> - Math.PI / 2
-                else -> 0.0
+                else -> atan2(im, re)
             }
         }
 
     /** The modulus (absolute value) of this complex number (radius of the polar coordinate representation)  */
     val mod: Double
         get() {
-            return kotlin.math.sqrt(re * re + im * im)
+            return hypot(re, im)
         }
 
     /**
@@ -293,6 +290,7 @@ class Complex private constructor(val re: Double, val im: Double = 0.0) : Divisi
     fun pow(exponent: Complex) = pow(this, exponent)
     fun pow(exponent: Number) = pow(this, exponent.R)
     fun exp() = exp(this)
+    fun ln() = ln(this)
 
     /**
      * A string representation of a complex number (this) in the Form "2.5+3.1i" for example.

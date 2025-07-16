@@ -1,14 +1,21 @@
 
 package org.alc.math.complex
 
+import org.alc.math.complex.Complex.Companion.INFINITY
+import org.alc.math.complex.Complex.Companion.NaN
+import kotlin.math.cos
+import kotlin.math.pow
+import kotlin.math.sign
+import kotlin.math.sin
+
 /**
  * Exponential function
  */
 fun exp(z: Complex) = when (z) {
-    Complex.NaN, Complex.INFINITY -> Complex.NaN
+    NaN, INFINITY -> NaN
     else -> {
         val r: Double = kotlin.math.exp(z.re)
-        Complex(r * kotlin.math.cos(z.im), r * kotlin.math.sin(z.im))
+        Complex(r * cos(z.im), r * sin(z.im))
     }
 }
 
@@ -23,7 +30,7 @@ fun exp(z: Number) = exp(z.R)
  * Main branch of the Logarithmic function
  */
 fun ln(z: Complex) = when (z) {
-    Complex.ZERO, Complex.INFINITY, Complex.NaN -> Complex.NaN
+    Complex.ZERO, INFINITY, NaN -> NaN
     else -> Complex(kotlin.math.ln(z.mod), kotlin.math.atan2(z.im, z.re))
 }
 
@@ -35,7 +42,7 @@ fun ln(z: Complex) = when (z) {
 fun ln(z: Number): Complex {
     val x = z.toDouble()
     return when {
-        x == 0.0 || x.isNaN() || x.isInfinite() -> Complex.NaN
+        x == 0.0 || x.isNaN() || x.isInfinite() -> NaN
         x > 0 -> kotlin.math.ln(x).R
         else -> Complex(kotlin.math.ln(-x), Math.PI)
     }
@@ -46,10 +53,10 @@ fun ln(z: Number): Complex {
  */
 fun sin(z: Complex) =
     when (z) {
-        Complex.NaN, Complex.INFINITY -> Complex.NaN
+        NaN, INFINITY -> NaN
         else -> Complex(
-            kotlin.math.sin(z.re) * kotlin.math.cosh(z.im),
-            kotlin.math.cos(z.re) * kotlin.math.sinh(z.im)
+            sin(z.re) * kotlin.math.cosh(z.im),
+            cos(z.re) * kotlin.math.sinh(z.im)
         )
     }
 
@@ -58,17 +65,17 @@ fun sin(z: Complex) =
  * @param z input
  * @return sin(z)
  */
-fun sin(z: Number) = kotlin.math.sin(z.toDouble()).R
+fun sin(z: Number) = sin(z.toDouble()).R
 
 /**
  * Cosine function
  */
 fun cos(z: Complex) = when (z) {
-    Complex.NaN, Complex.INFINITY -> Complex.NaN
+    NaN, INFINITY -> NaN
     else ->
         Complex(
-            kotlin.math.cos(z.re) * kotlin.math.cosh(z.im),
-            -kotlin.math.sin(z.re) * kotlin.math.sinh(z.im)
+            cos(z.re) * kotlin.math.cosh(z.im),
+            -sin(z.re) * kotlin.math.sinh(z.im)
         )
 }
 
@@ -77,14 +84,14 @@ fun cos(z: Complex) = when (z) {
  * @param z input
  * @return cos(z)
  */
-fun cos(z: Number) = kotlin.math.cos(z.toDouble()).R
+fun cos(z: Number) = cos(z.toDouble()).R
 
 
 /**
  * Main branch of the Square Root function
  */
 fun sqrt(z: Complex) = when (z) {
-    Complex.ZERO, Complex.INFINITY, Complex.NaN, Complex.ONE ->  z
+    Complex.ZERO, INFINITY, NaN, Complex.ONE ->  z
     else -> {
         val r = z.mod
         val x = kotlin.math.sqrt((z.re + r) / 2.0)
@@ -107,14 +114,74 @@ fun sqrt(z: Number): Complex {
 }
 
 /**
- * Calculates the complex power. Please note, that similar to ln and sqrt the default
+ * Calculates the complex power. 
  * value is returned here.
  * @param base
  * @param exponent
  * @return the power base ^ exponent
  */
-fun pow(base: Complex, exponent: Complex) = pow(base.mod, exponent) * exp(base.arg.I * exponent)
-fun pow(base: Complex, exponent: Number) = pow(base, exponent.R)
+fun pow(base: Complex, exponent: Complex) = when {
+    base.isInfinite() -> infinitePow(exponent.re.sign, exponent.im.sign)
+    exponent.im == 0.0 -> pow(base, exponent.re)
+    else -> pow(base.mod, exponent) * exp(base.arg.I * exponent)
+}
+
+fun pow(base: Complex, exponent: Number): Complex {
+    when (exponent) {
+        is Int -> return pow(base, exponent)
+        is Short -> return pow(base, exponent.toInt())
+        is Byte -> return pow(base, exponent.toInt())
+        is Double -> return pow(base, exponent)
+        is Float -> return pow(base, exponent.toDouble())
+    }
+    return pow(base, exponent.R)
+}
+
+private fun pow(base: Complex, exponent: Double): Complex {
+    if (base.isInfinite()) return infinitePow(exponent.sign)
+    if (exponent.compareTo(exponent.toInt()) == 0) return pow(base, exponent.toInt())
+    when {
+        base.isZero() -> return Complex.ZERO
+        base == Complex.ONE -> return Complex.ONE
+        exponent.isNaN() -> return Complex.NaN
+    }
+    if (base.im == 0.0) return base.re.pow(exponent).R
+    val r = base.mod.pow(exponent)
+    val theta = base.arg * exponent
+    return Complex(r * cos(theta), r * sin(theta))
+//    val logBase = ln(base)
+//    val scaledLog = Complex(logBase.re * exponent, logBase.im * exponent)
+//    return exp(scaledLog)
+}
+
+private fun infinitePow(reSign: Double, imgSign: Double = 0.0) = when {
+    reSign.isNaN() -> NaN
+    reSign > 0 -> INFINITY
+    reSign < 0 -> Complex.ZERO
+    imgSign != 0.0 -> NaN
+    else -> Complex.ONE
+}
+private fun pow(base: Complex, exponent: Int): Complex {
+    when {
+        exponent == 0 -> return Complex.ONE
+        exponent == 1 -> return base
+        base.isNaN() -> return NaN
+        base.isZero() -> return if (exponent > 0) Complex.ZERO else INFINITY
+        base.isInfinite() -> return infinitePow(sign(exponent.toDouble()))
+    }
+    //
+    var result = Complex.ONE
+    var b = base
+    var e = if (exponent >= 0) exponent else -exponent
+
+    while (e > 0) {
+        if (e % 2 == 1) result *= b
+        b *= b
+        e /=2
+    }
+    return if (exponent >= 0) result else result.invert()
+}
+    
 /**
  * The power function
  * @param base
@@ -124,12 +191,12 @@ fun pow(base: Complex, exponent: Number) = pow(base, exponent.R)
 fun pow(base: Number, exponent: Complex): Complex {
     val d = base.toDouble()
     return when {
-        d < 0.0 -> Complex.NaN
-        d.isInfinite() -> Complex.NaN
-        d.isNaN() -> Complex.NaN
-        exponent.isInfinite() -> Complex.NaN
-        exponent.isNaN() -> Complex.NaN
+        exponent.isInfinite() -> NaN
+        exponent.isNaN() -> NaN
         exponent.isZero() -> Complex.ONE
+        d < 0.0 -> NaN
+        d.isInfinite() -> NaN
+        d.isNaN() -> NaN
         d == 0.0 -> Complex.ZERO
         else -> exp(kotlin.math.ln(d) * exponent)
     }

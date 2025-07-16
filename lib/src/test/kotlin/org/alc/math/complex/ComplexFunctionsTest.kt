@@ -107,11 +107,16 @@ class ComplexFunctionsTest {
         assertQuasiEquals(-1.6241462732233494 - 1.536928392338012.I, pow(5, w3))
         assertQuasiEquals(-6.366647462900551 + 7.711407140278745.I, pow(100, w3))
 
-        for (w in listOf(0.I, 1.R, 1.I, 3.R, w1, w0, Complex.INFINITY, Complex.NaN)) {
-            assertEquals(Complex.NaN, pow(-1, w))
-            assertEquals(Complex.NaN, pow(Double.POSITIVE_INFINITY, w))
-            assertEquals(Complex.NaN, pow(Double.NEGATIVE_INFINITY, w))
-            assertEquals(Complex.NaN, pow(Double.NaN, w))
+        assertEquals(Complex.ONE, pow(-1,0.I))
+        assertEquals(Complex.ONE, pow(Double.POSITIVE_INFINITY, 0.I))
+        assertEquals(Complex.ONE, pow(Double.NEGATIVE_INFINITY, 0.I))
+        assertEquals(Complex.ONE, pow(Double.NaN, 0.I))
+
+        for (w in listOf(1.R, 1.I, 3.R, w1, w0, Complex.INFINITY, Complex.NaN)) {
+            assertEquals(Complex.NaN, pow(-1, w),"exponent = $w")
+            assertEquals(Complex.NaN, pow(Double.POSITIVE_INFINITY,w), "exponent = $w")
+            assertEquals(Complex.NaN, pow(Double.NEGATIVE_INFINITY, w), "exponent = $w")
+            assertEquals(Complex.NaN, pow(Double.NaN, w), "exponent = $w")
         }
     }
 
@@ -155,10 +160,53 @@ class ComplexFunctionsTest {
         assertQuasiEquals(9.918799222181348E-5 + 1.764518526767741E-4.I, pow(w0, w1))
         assertQuasiEquals(-9.389151387171156 + 4.355172180607202.I, pow(w0, w2))
 
-        for (w in listOf(Complex.ZERO, Complex.ONE, 1.I, 3.R, w1, w0, Complex.INFINITY, Complex.NaN)) {
-            assertEquals(Complex.NaN, pow(Complex.INFINITY, w))
-            assertEquals(Complex.NaN, pow(Complex.NaN, w))
+        assertEquals(Complex.ONE, pow(Complex.INFINITY, Complex.ZERO))
+        assertEquals(Complex.ONE, pow(Complex.NaN, Complex.ZERO))
+
+        for (w in listOf(Complex.I, w1, Complex.NaN)) {
+            assertEquals(Complex.NaN, pow(Complex.INFINITY, w), "exponent = $w")
+            assertEquals(Complex.NaN, pow(Complex.NaN, w), "exponend = $w")
+
         }
+        for (w in listOf(3.R, Complex.ONE, w0, w2, Complex.INFINITY)) {
+            assertEquals(Complex.INFINITY, pow(Complex.INFINITY, w),"exponent = $w")
+            assertEquals(Complex.NaN, pow(Complex.NaN, w), "exponent = $w")
+        }
+    }
+
+    @Test
+    fun testPowComplexNumber() {
+        assertEquals(Complex.ONE, pow(Complex.ZERO, 0.0))
+        assertEquals(Complex.ZERO, pow(Complex.ZERO, 1.0))
+        assertEquals(Complex.ZERO, pow(Complex.ZERO, 1))
+        assertEquals(Complex.ZERO, pow(Complex.ZERO, 2.5))
+        assertEquals(Complex.ZERO, pow(Complex.ZERO, Math.PI * 1000))
+        assertEquals(Complex.ZERO, pow(Complex.ZERO, Double.POSITIVE_INFINITY))
+        assertEquals(Complex.ZERO, pow(Complex.ZERO, Double.NaN))
+
+        assertEquals(Complex.ONE, pow(Complex.ONE, 0))
+        assertEquals(Complex.ONE, pow(Complex.ONE, 1))
+        assertEquals(Complex.ONE, pow(Complex.ONE, 1000))
+        assertEquals(Complex.ONE, pow(Complex.ONE, Double.POSITIVE_INFINITY))
+        assertEquals(Complex.ONE, pow(Complex.ONE, Double.NaN))
+
+        assertEquals(Complex.INFINITY, pow(E.R, Double.POSITIVE_INFINITY))
+        assertEquals(Complex.NaN, pow(E.R, Double.NaN))
+
+        assertEquals(Complex.ONE, pow(Complex.INFINITY, 0.0))
+        assertEquals(Complex.ONE, pow(Complex.NaN, 0))
+        assertEquals(Complex.INFINITY, pow(Complex.INFINITY, 1.0))
+        assertEquals(Complex.NaN, pow(Complex.NaN, 1.0))
+        assertEquals(Complex.INFINITY, pow(Complex.INFINITY, 1))
+        assertEquals(Complex.NaN, pow(Complex.NaN, 1))
+
+        for (w in listOf(3, Double.POSITIVE_INFINITY)) {
+            assertEquals(Complex.INFINITY, pow(Complex.INFINITY, w),"exponent = $w")
+            assertEquals(Complex.NaN, pow(Complex.NaN, w), "exponent = $w")
+        }
+
+        assertEquals(Complex.NaN, pow(Complex.INFINITY, Double.NaN))
+        assertEquals(Complex.NaN, pow(Complex.NaN, Double.NaN))
     }
 
     @Test
