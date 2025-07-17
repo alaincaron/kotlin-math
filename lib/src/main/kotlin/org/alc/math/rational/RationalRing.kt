@@ -1,6 +1,5 @@
 package org.alc.math.rational
 
-import org.alc.math.ring.DefaultDivisionRing
 import org.alc.math.ring.DefaultOrderedDivisionRing
 
 object RationalRing : DefaultOrderedDivisionRing<Rational>, Comparator<Rational> {

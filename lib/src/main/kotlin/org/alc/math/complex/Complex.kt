@@ -3,7 +3,6 @@ package org.alc.math.complex
 import org.alc.math.fix0
 import org.alc.math.ring.DivisionRingElement
 import java.util.*
-import kotlin.math.atan
 import kotlin.math.atan2
 import kotlin.math.hypot
 

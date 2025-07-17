@@ -57,12 +57,12 @@ open class Parser<T:Number>(private val tokenizer: Tokenizer<T>, private val rin
         val map: MutableMap<String, T> = sortedMapOf()
         var factor = parseFactor()
         if (factor.name == null) throw IllegalArgumentException("Unexpected constant while parsing term")
-        map[factor.name!!] = factor.value
+        map[factor.name] = factor.value
         while (currentToken is BinOp.Plus || currentToken is BinOp.Minus) {
             val op = advance()!!
             factor = parseFactor()
             if (factor.name == null) throw IllegalArgumentException("Unexpected constant while parsing term")
-            var v = map.getOrDefault(factor.name!!, ring.zero())
+            var v = map.getOrDefault(factor.name, ring.zero())
             v = if (op == BinOp.Minus) {
                 ring.subtract(v,factor.value)
             } else {
@@ -71,7 +71,7 @@ open class Parser<T:Number>(private val tokenizer: Tokenizer<T>, private val rin
             if (v == Rational.ZERO) {
                 map.remove(factor.name)
             } else {
-                map[factor.name!!] = v
+                map[factor.name] = v
             }
         }
         return map
