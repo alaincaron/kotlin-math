@@ -52,6 +52,18 @@ class ComplexFunctionsTest {
         assertEquals(Complex.NaN, ln(0))
         assertEquals(Complex.NaN, ln(Complex.INFINITY))
         assertEquals(Complex.NaN, ln(Complex.NaN))
+
+        assertEquals(Complex.NaN, Complex.ZERO.ln())
+        assertEquals(Complex.ZERO, Complex.ONE.ln())
+        assertEquals(Complex.ONE, E.R.ln())
+        assertEquals(2.R, (E*E).R.ln())
+        assertQuasiEquals(PI.I, (-Complex.ONE).ln())
+        assertQuasiEquals(PI.I / 2, Complex.I.ln())
+        assertQuasiEquals(-PI.I / 2,-Complex.I.ln())
+        assertEquals(Complex.NaN, Complex.ZERO.ln())
+        assertEquals(Complex.NaN, Complex.INFINITY.ln())
+        assertEquals(Complex.NaN, Complex.NaN.ln())
+
     }
 
     @Test
@@ -207,6 +219,9 @@ class ComplexFunctionsTest {
 
         assertEquals(Complex.NaN, pow(Complex.INFINITY, Double.NaN))
         assertEquals(Complex.NaN, pow(Complex.NaN, Double.NaN))
+
+        assertEquals(E.R, E.R.pow(1))
+        assertEquals((-1).R, 1.I.pow(2.0))
     }
 
     @Test

@@ -287,7 +287,7 @@ class Complex private constructor(val re: Double, val im: Double = 0.0) : Divisi
     fun sqrt() = sqrt(this)
     fun sin() = sin(this)
     fun pow(exponent: Complex) = pow(this, exponent)
-    fun pow(exponent: Number) = pow(this, exponent.R)
+    fun pow(exponent: Number) = pow(this, exponent)
     fun exp() = exp(this)
     fun ln() = ln(this)
 
