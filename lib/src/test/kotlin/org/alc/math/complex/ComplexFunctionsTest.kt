@@ -165,7 +165,7 @@ class ComplexFunctionsTest {
 
         for (w in listOf(Complex.I, w1, Complex.NaN)) {
             assertEquals(Complex.NaN, pow(Complex.INFINITY, w), "exponent = $w")
-            assertEquals(Complex.NaN, pow(Complex.NaN, w), "exponend = $w")
+            assertEquals(Complex.NaN, pow(Complex.NaN, w), "exponent = $w")
 
         }
         for (w in listOf(3.R, Complex.ONE, w0, w2, Complex.INFINITY)) {
@@ -180,7 +180,7 @@ class ComplexFunctionsTest {
         assertEquals(Complex.ZERO, pow(Complex.ZERO, 1.0))
         assertEquals(Complex.ZERO, pow(Complex.ZERO, 1))
         assertEquals(Complex.ZERO, pow(Complex.ZERO, 2.5))
-        assertEquals(Complex.ZERO, pow(Complex.ZERO, Math.PI * 1000))
+        assertEquals(Complex.ZERO, pow(Complex.ZERO, 1000.25))
         assertEquals(Complex.ZERO, pow(Complex.ZERO, Double.POSITIVE_INFINITY))
         assertEquals(Complex.ZERO, pow(Complex.ZERO, Double.NaN))
 
