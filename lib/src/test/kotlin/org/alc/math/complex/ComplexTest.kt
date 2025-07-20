@@ -315,6 +315,25 @@ class ComplexTest {
     }
 
     @Test
+    fun testToStringWithFormat() {
+        val format = "%.2f"
+        assertEquals("0.00", Complex.ZERO.toString(format))
+        assertEquals("0.00", Complex(-0.0, -0.0).toString(format))
+        assertEquals("1.00", Complex.ONE.toString(format))
+        assertEquals("-1.00", (-1.0).R.toString(format))
+        assertEquals("i", Complex.I.toString(format))
+        assertEquals("-i", (-1.0).I.toString(format))
+        assertEquals("1.00+i", (1 + 1.I).toString(format))
+        assertEquals("1.00-i", (1 - 1.I).toString(format))
+        assertEquals("3.00+2.00i", (3.0 + 2.I).toString(format))
+        assertEquals("3.00-2.00i", (3.0 - 2.I).toString(format))
+        assertEquals("-3.00+2.00i", (-3.0 + 2.I).toString(format))
+        assertEquals("-3.00-2.00i", (-3.0 - 2.I).toString(format))
+    }
+
+
+
+    @Test
     fun testEquals() {
         val z0 = Complex(4, 5)
         val z1 = 4 + 5.I

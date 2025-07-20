@@ -313,7 +313,7 @@ class Complex private constructor(val re: Double, val im: Double = 0.0) : Divisi
                 }
                 b.append(
                     when {
-                        re == 0.0 -> if (im == 0.0) "0.0" else imFormatted
+                        re == 0.0 -> if (im == 0.0) reFormatted else imFormatted
                         im > 0.0 -> "$reFormatted+$imFormatted"
                         im < 0.0 -> "$reFormatted$imFormatted"
                         else -> reFormatted
